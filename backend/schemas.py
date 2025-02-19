@@ -14,3 +14,8 @@ class AdvertisementResponse(AdvertisementBase):
     created_at: datetime
     class Config:
         from_attributes = True
+
+class UserBase(BaseModel):
+    username: str
+    hashed_password: str
+

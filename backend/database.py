@@ -24,7 +24,8 @@ def db_connect():
     PORT = os.getenv("port")
     DBNAME = os.getenv("dbname")
 
-    DATABASE_URL = f"postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}?sslmode=require"
+    #DATABASE_URL = f"postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}?sslmode=require"
+    DATABASE_URL = os.getenv("SQLALCHEMY_DATABASE_URL")
     engine = create_engine(DATABASE_URL)
     connection = engine.connect()
 
