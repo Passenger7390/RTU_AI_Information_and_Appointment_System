@@ -22,7 +22,7 @@ class Image(Base):
     __tablename__ = "images"
     id = Column(Integer, primary_key=True, index=True)
     created_at = Column(DateTime(timezone=True),nullable=False, server_default=func.now())
-    filepath = Column(String, nullable=False)
+    filename = Column(String, nullable=False)
     duration = Column(Integer,nullable=False)
     expires_in = Column(DateTime(timezone=True),nullable=False)
     

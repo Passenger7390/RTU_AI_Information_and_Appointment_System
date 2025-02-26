@@ -46,12 +46,16 @@ def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depen
     return Token(access_token=access_token, token_type="bearer")
 
 @router.get("/users/me", response_model=UserBase)
-def read_users_me(token: str = Depends(oauth2_scheme)):
+def read_users_me(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     try:
         payload = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=os.getenv('ALGORITHM'))
         username: str = payload.get("sub")
         if username is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication")
     except jwt.PyJWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
+    user = db.query(User).filter(User.username == username).first()
+    if user is None:    
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     return UserBase(username=username)

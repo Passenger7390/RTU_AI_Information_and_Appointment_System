@@ -19,7 +19,7 @@ const LoginForm = () => {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [token, setToken] = useState(localStorage.getItem('token'))
+  const token = localStorage.getItem('token')
 
   useEffect(() => {
     if (token) {

@@ -3,17 +3,44 @@ import {
     Carousel,
     CarouselContent,
     CarouselItem,
+    type CarouselApi,
 } from "@/components/ui/carousel"
-import { fetchAds, getImage } from '@/api';
-const AdCarousel = () => {
-  const hasFetchedAds = useRef(false)
+import { fetchImageFilename, getImage } from '@/api';
 
+const AdCarousel = () => {
+  const [api, setApi] = useState<CarouselApi>()
+  const [current, setCurrent] = useState(0)
+  const hasFetchedAds = useRef(false)
   const [images, setImages] = useState<string[]>([])
+
+  useEffect(() => {
+    if (!api) {
+      return
+    }
+
+    setCurrent(api.selectedScrollSnap())
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap())
+    })
+  }, [api])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (api) {
+        const nextIndex = (current + 1) % images.length
+        api.scrollTo(nextIndex)
+      }
+    }, 15000) // 15 seconds
+
+    return () => clearInterval(interval)
+  }, [api, current, images.length])
+
   useEffect(() => {
     if (hasFetchedAds.current) return;
 
     const loadImage = async () => {
-      const imageUrl = await fetchAds()
+      const imageUrl = await fetchImageFilename()
       setImages(imageUrl)
     }
     loadImage()
@@ -29,11 +56,8 @@ const AdCarousel = () => {
     };
   }, []);
 
-  // TODO: Add loading spinner
-  // TODO: Add API to automatically scroll through images
-
   return (
-    <Carousel className="w-full h-full">
+    <Carousel className="w-full h-full" setApi={setApi}>
       <CarouselContent>
         {images.map((image, index) => (
           <CarouselItem key={index}>

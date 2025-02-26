@@ -23,7 +23,7 @@ const UploadComponent = () => {
 
     } catch(error) {
 
-      alert("Failed to upload file")
+      console.error(error)
 
     } finally {
       setLoading(false)

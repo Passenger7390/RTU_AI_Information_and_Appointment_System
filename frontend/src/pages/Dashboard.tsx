@@ -6,7 +6,7 @@ import UploadComponent from "@/my_components/UploadComponent"
 const Dashboard = () => {
   const navigate = useNavigate()
   const [user, setUser] = useState('')
-  const [token, setToken] = useState(localStorage.getItem('token'))
+  const token = localStorage.getItem('token')
 
   useEffect(() => {
     if (!token) {
