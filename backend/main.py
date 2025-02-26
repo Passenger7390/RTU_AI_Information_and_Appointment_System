@@ -50,6 +50,7 @@ async def periodic_cleanup():
 @app.on_event("startup")
 async def startup_event():
     asyncio.create_task(periodic_cleanup())
+
     
 @app.get("/dashboard", status_code=status.HTTP_200_OK)
 async def getLogin(user: user_dependency, db: Annotated[Session, Depends(get_db)]):
@@ -61,7 +62,7 @@ async def getLogin(user: user_dependency, db: Annotated[Session, Depends(get_db)
 
 # Upload Images and store the filename and filepath in the database
 @app.post("/upload/")
-async def upload_file(file: UploadFile = File(...), current_user: UserBase = Depends(read_users_me) ,db: Session = Depends(get_db)):
+async def upload_file(file: UploadFile = File(...), duration: int = Form(...), title: str = Form(...), current_user: UserBase = Depends(read_users_me) ,db: Session = Depends(get_db)):
     if not file:
         raise HTTPException(status_code=400, detail="No file uploaded")
     
@@ -76,7 +77,7 @@ async def upload_file(file: UploadFile = File(...), current_user: UserBase = Dep
     
     expiration_time = datetime.now() + timedelta(minutes=1)  # 1-day expiration
 
-    new_image = Image(filename=file.filename, duration=15, expires_in=expiration_time)
+    new_image = Image(filename=file.filename, title=title, duration=duration, expires_in=expiration_time)
     db.add(new_image)
     db.commit()
     db.refresh(new_image)
@@ -86,7 +87,7 @@ async def upload_file(file: UploadFile = File(...), current_user: UserBase = Dep
 async def delete_expired_images(db: Session):   # Delete expired images
     now = datetime.now()
     expired_images = db.query(Image).filter(Image.expires_in < now).all()
-    
+
     for image in expired_images:
         if os.path.exists(os.path.join(UPLOAD_DIR, image.filename)):
             try:
@@ -95,8 +96,7 @@ async def delete_expired_images(db: Session):   # Delete expired images
                 print(f"Error deleting file: {e}")
             finally:
                 os.remove(os.path.join(UPLOAD_DIR, image.filename))
-        
-    
+
     db.commit()
     
     return {"message": f"Deleted {len(expired_images)} expired images."}

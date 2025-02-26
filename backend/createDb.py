@@ -15,11 +15,12 @@
 #     id = Column(Integer, primary_key=True, index=True)
 #     created_at = Column(DateTime(timezone=True),nullable=False, server_default=func.now())
 #     filename = Column(String, nullable=False)
+#     title = Column(String, nullable=False)
 #     duration = Column(Integer,nullable=False)
 #     expires_in = Column(DateTime(timezone=True),nullable=False)
 
 # engine, _ = db_connect()
 # session = create_session(engine)
-# # create_table(engine)
+# create_table(engine)
 # Base.metadata.create_all(engine, checkfirst=True)
 # print("table created")
