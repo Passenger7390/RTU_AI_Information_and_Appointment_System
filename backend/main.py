@@ -62,7 +62,7 @@ async def getLogin(user: user_dependency, db: Annotated[Session, Depends(get_db)
 
 # Upload Images and store the filename and filepath in the database
 @app.post("/upload/")
-async def upload_file(file: UploadFile = File(...), duration: int = Form(...), title: str = Form(...), current_user: UserBase = Depends(read_users_me) ,db: Session = Depends(get_db)):
+async def upload_file(file: UploadFile = File(...), duration: int = Form(...), title: str = Form(...), expires_in: str = Form(...), current_user: UserBase = Depends(read_users_me) ,db: Session = Depends(get_db)):
     if not file:
         raise HTTPException(status_code=400, detail="No file uploaded")
     
@@ -75,7 +75,8 @@ async def upload_file(file: UploadFile = File(...), duration: int = Form(...), t
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     
-    expiration_time = datetime.now() + timedelta(minutes=1)  # 1-day expiration
+    expiration_time = datetime.strptime(expires_in, '%Y-%m-%d')  # 1-day expiration
+    print(expiration_time)
 
     new_image = Image(filename=file.filename, title=title, duration=duration, expires_in=expiration_time)
     db.add(new_image)
@@ -86,7 +87,7 @@ async def upload_file(file: UploadFile = File(...), duration: int = Form(...), t
 
 async def delete_expired_images(db: Session):   # Delete expired images
     now = datetime.now()
-    expired_images = db.query(Image).filter(Image.expires_in < now).all()
+    expired_images = db.query(Image).filter(Image.expires_in <= now).all()
 
     for image in expired_images:
         if os.path.exists(os.path.join(UPLOAD_DIR, image.filename)):
@@ -105,10 +106,10 @@ async def delete_expired_images(db: Session):   # Delete expired images
 # Get all images filename
 @app.get('/')
 async def get_images(db: Session = Depends(get_db)):
-    images = db.query(Image.filename).all()
+    images = db.query(Image).all()
     list_of_images = []
     for image in images:
-        list_of_images.append(image.filename)
+        list_of_images.append({"filename": image.filename, "duration": image.duration})
     return list_of_images
 
 # GET images
@@ -116,3 +117,11 @@ async def get_images(db: Session = Depends(get_db)):
 async def get_file(filename: str):
     file_path = os.path.join(UPLOAD_DIR, filename)
     return FileResponse(file_path)
+
+@app.get('/table-data')
+async def getTableData(db: Session = Depends(get_db)):
+    images = db.query(Image).all()
+    list_of_images = []
+    for image in images:
+        list_of_images.append({'id': image.id, 'created_at': image.created_at,"filename": image.filename, "title": image.title, "duration": image.duration, "expires_in": image.expires_in})
+    return list_of_images

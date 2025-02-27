@@ -1,7 +1,13 @@
 import axios from "axios";
+import { TableData } from "./my_components/table/Columns";
 // const api = "http://192.168.100.76:8000";
 
-const api = "http://localhost:8000";
+export const api = "http://localhost:8000";
+
+export interface ImageData {
+  filename: string;
+  duration: number;
+}
 
 // POST request to /auth/token to get JWT token
 export const login = async (username: string, password: string) => {
@@ -32,7 +38,8 @@ export const getUser = async () => {
 export const uploadFile = async (
   file: File,
   duration: number,
-  title: string
+  title: string,
+  date: string
 ) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -44,6 +51,7 @@ export const uploadFile = async (
   formData.append("file", file);
   formData.append("duration", duration.toString());
   formData.append("title", title);
+  formData.append("expires_in", date);
   const response = await axios.post(`${api}/upload`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
@@ -55,9 +63,9 @@ export const uploadFile = async (
 };
 
 // GET request to / to fetch iamge file name
-export const fetchImageFilename = async (): Promise<string[]> => {
+export const fetchImageFilename = async (): Promise<ImageData[]> => {
   try {
-    const response = await axios.get<string[]>(`${api}`);
+    const response = await axios.get<ImageData[]>(`${api}`);
     return response.data; // returns list of image URLs
   } catch (error) {
     console.error("Error fetching ads:", error);
@@ -68,4 +76,9 @@ export const fetchImageFilename = async (): Promise<string[]> => {
 // GET request to /media/{filename} to get image
 export const getImage = (filename: string) => {
   return `${api}/media/${filename}`;
+};
+
+export const getTableData = async (): Promise<TableData[]> => {
+  const response = await axios.get(`${api}/table-data`);
+  return response.data;
 };
