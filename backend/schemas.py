@@ -43,3 +43,6 @@ class ImageResponse(ImageBase):
     created_at: datetime
     class Config:
         from_attributes = True
+
+class Question(BaseModel):
+    text: str

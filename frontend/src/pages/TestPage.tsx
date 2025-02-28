@@ -1,8 +1,8 @@
-import UploadCard from "@/my_components/UploadCard";
+import Chat from "./Chat";
 const TestPage = () => {
   return (
     <div className="w-[500px] h-[900px]">
-      <UploadCard />
+      <Chat />
     </div>
   );
 };
