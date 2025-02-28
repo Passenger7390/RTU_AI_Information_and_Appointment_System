@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
+from typing import List
 
 class AdvertisementBase(BaseModel):
     title: str
@@ -46,3 +47,6 @@ class ImageResponse(ImageBase):
 
 class Question(BaseModel):
     text: str
+
+class DeleteRequest(BaseModel):
+    ids: List[int]

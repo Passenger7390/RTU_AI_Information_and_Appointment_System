@@ -2,9 +2,10 @@ import { getUser } from "@/api";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { DataTable } from "@/my_components/table/DataTable";
-import { getTableData } from "@/api";
+import { getTableData, deleteRows } from "@/api";
 import { columns } from "@/my_components/table/Columns";
 import { Button } from "@/components/ui/button";
+import UploadCard from "@/my_components/UploadCard";
 
 interface TableData {
   id: number;
@@ -19,6 +20,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState("");
   const [tableData, setTableData] = useState<TableData[]>([]);
+  const [rowSelection, setRowSelection] = useState({});
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -52,6 +54,27 @@ const Dashboard = () => {
     }
   };
 
+  const handleUploadComplete = async () => {
+    console.log("Upload completed, refreshing table...");
+    await fetchTableData();
+  };
+
+  const handleDeleteSelected = async () => {
+    try {
+      const selectedRows = Object.keys(rowSelection);
+      if (selectedRows.length === 0) return;
+
+      const selectedIds = selectedRows.map(
+        (index) => tableData[parseInt(index)].id
+      );
+      await deleteRows(selectedIds);
+      setRowSelection({});
+      await fetchTableData(); // Refresh the table after deletion
+    } catch (error) {
+      console.error("Failed to delete rows:", error);
+    }
+  };
+
   return (
     <div className="flex-col h-full p-8 space-y-8 w-full">
       <h1 className="text-5xl font-extrabold">Hello {user}!</h1>
@@ -60,12 +83,23 @@ const Dashboard = () => {
           <p className="text-3xl font-extrabold">Manage Advertisements</p>
           <div></div>
           <div className="flex space-x-1">
-            <Button>Upload</Button>
-            <Button variant="destructive">Delete</Button>
+            <UploadCard onUploadComplete={handleUploadComplete} />
+            <Button
+              variant="destructive"
+              onClick={handleDeleteSelected}
+              disabled={Object.keys(rowSelection).length === 0}
+            >
+              Delete
+            </Button>
           </div>
         </div>
 
-        <DataTable columns={columns} data={tableData} />
+        <DataTable
+          columns={columns}
+          data={tableData}
+          onRowSelectionChange={setRowSelection}
+          rowSelection={rowSelection}
+        />
       </div>
     </div>
   );

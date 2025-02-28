@@ -82,3 +82,20 @@ export const getTableData = async (): Promise<TableData[]> => {
   const response = await axios.get(`${api}/table-data`);
   return response.data;
 };
+
+export const deleteRows = async (ids: number[]) => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  await axios.post(
+    `${api}/delete`,
+    { ids },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};

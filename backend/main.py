@@ -7,7 +7,7 @@ from fastapi.responses import FileResponse
 from models import Image, User, FAQ
 from database import db_connect, create_session, get_db
 from sqlalchemy.orm import Session
-from schemas import UserBase, Question
+from schemas import UserBase, Question, DeleteRequest
 from auth import read_users_me, router
 import os
 import shutil
@@ -129,50 +129,19 @@ async def getTableData(db: Session = Depends(get_db)):
         list_of_images.append({'id': image.id, 'created_at': image.created_at,"filename": image.filename, "title": image.title, "duration": image.duration, "expires_in": image.expires_in})
     return list_of_images
 
-def get_faq_data(db: Session):
-    return db.query(FAQ).all()
-
-def preprocess_text(text: str):
-    return text.lower().strip()
-
-def find_best_match(db: Session, question: str):
-    faq_data = get_faq_data(db)
-    questions = [q.question for q in faq_data]
+@app.post("/delete")
+async def delete_images(
+    request: DeleteRequest,
+    current_user: UserBase = Depends(read_users_me),
+    db: Session = Depends(get_db)
+):
+    for image_id in request.ids:
+        image = db.query(Image).filter(Image.id == image_id).first()
+        if image:
+            file_path = os.path.join(UPLOAD_DIR, image.filename)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+            db.delete(image)
     
-    # Keyword-based matching
-    keyword_matches = defaultdict(int)
-    question_words = set(preprocess_text(question).split())
-    
-    for faq in faq_data:
-        faq_words = set(preprocess_text(faq.question).split())
-        common_words = question_words & faq_words
-        keyword_matches[faq] = len(common_words)
-    
-    best_keyword_match = max(keyword_matches, key=keyword_matches.get, default=None)
-    if best_keyword_match and keyword_matches[best_keyword_match] > 0:
-        return best_keyword_match.answer
-    
-    # Fuzzy matching
-    best_match, score, index = process.extractOne(question, questions, scorer=fuzz.ratio)
-    return faq_data[index].answer if score > 70 else None
-
-@app.post("/ask")
-def ask_question(q: Question, db: Session = Depends(get_db)):
-    answer = find_best_match(db, q.text)
-    if answer:
-        return {"answer": answer}
-    
-    
-    # # Fallback to OpenAI
-    # response = openai.ChatCompletion.create(
-    #     model="gpt-3.5-turbo",
-    #     messages=[{"role": "user", "content": q.text}]
-    # )
-    # return {"answer": response["choices"][0]["message"]["content"]}
-
-@app.post("/add_faq")
-def add_faq(q: Question, a: Question, db: Session = Depends(get_db)):
-    new_faq = FAQ(question=q.text, answer=a.text)
-    db.add(new_faq)
     db.commit()
-    return {"message": "FAQ added successfully"}
+    return {"message": f"Deleted {len(request.ids)} images"}

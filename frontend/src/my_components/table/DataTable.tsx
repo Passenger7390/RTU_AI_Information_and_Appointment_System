@@ -17,15 +17,25 @@ import {
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  onRowSelectionChange: (value: any) => void;
+  rowSelection: any;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  onRowSelectionChange,
+  rowSelection,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
     columns,
+    state: {
+      rowSelection,
+    },
+    enableRowSelection: true, // Add this
+    enableMultiRowSelection: true, // Add this
+    onRowSelectionChange: onRowSelectionChange,
     getCoreRowModel: getCoreRowModel(),
   });
 
@@ -56,6 +66,7 @@ export function DataTable<TData, TValue>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
+                onClick={row.getToggleSelectedHandler()}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
