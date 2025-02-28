@@ -1,10 +1,5 @@
-import Chat from "./Chat";
 const TestPage = () => {
-  return (
-    <div className="w-[500px] h-[900px]">
-      <Chat />
-    </div>
-  );
+  return <div className="w-[500px] h-[900px]">adf</div>;
 };
 
 export default TestPage;
