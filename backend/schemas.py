@@ -5,16 +5,9 @@ from typing import List, Optional
 class UserBase(BaseModel):
     username: str
 
-
-class UserInDB(UserBase):
-    hashed_password: str
-
 class Token(BaseModel): # Token model
     access_token: str
     token_type: str
-
-class TokenData(BaseModel):
-    username: str | None = None
 
 class ImageBase(BaseModel):
     filepath: str
@@ -29,9 +22,6 @@ class ImageResponse(ImageBase):
     created_at: datetime
     class Config:
         from_attributes = True
-
-class Question(BaseModel):
-    text: str
 
 class DeleteRequest(BaseModel):
     ids: List[int]

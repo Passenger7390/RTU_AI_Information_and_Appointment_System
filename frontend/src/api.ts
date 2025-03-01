@@ -114,6 +114,6 @@ export const deleteRows = async (ids: number[]) => {
 
 export const getChatbotResponse = async (query: string) => {
   const res = await axios.post(`${chatApi}/chat`, { query });
-  console.log(res.data);
+  console.log(res);
   return res.data;
 };

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-
+import ReactMarkdown from "react-markdown";
 // Import shadcn components (adjust paths based on your project structure)
 import {
   Card,
@@ -44,8 +44,24 @@ const Chatbot: React.FC = () => {
     try {
       const res = await getChatbotResponse(query);
       // TODO: Format the response and append the suggestions if not null
-      const botMessage: Message = { sender: "bot", text: res.response };
-      setMessages((prev) => [...prev, botMessage]);
+      if (res.suggestions) {
+        const botMessage: Message = {
+          sender: "bot",
+          text: res.response,
+        };
+        setMessages((prev) => [...prev, botMessage]);
+        const suggestionsMessage: Message = {
+          sender: "bot",
+          text: res.suggestions.join(", "),
+        };
+        setMessages((prev) => [...prev, suggestionsMessage]);
+      } else {
+        const botMessage: Message = {
+          sender: "bot",
+          text: res.response,
+        };
+        setMessages((prev) => [...prev, botMessage]);
+      }
     } catch (error) {
       setMessages((prev) => [
         ...prev,
@@ -56,7 +72,7 @@ const Chatbot: React.FC = () => {
       setLoading(false);
     }
   };
-  // TODO: Format the bot message
+
   return (
     <div className="max-w-6xl mx-auto my-10 p-4">
       <Card className="h-[80vh] flex flex-col">
@@ -98,7 +114,11 @@ const Chatbot: React.FC = () => {
                         : "bg-blue-800 self-start justify-start mr-auto"
                     }`}
                   >
-                    {msg.text}
+                    {/* <ReactMarkdown>{msg.text}</ReactMarkdown> */}
+                    {/* {msg.text} */}
+                    <div className="whitespace-pre-wrap break-words">
+                      <ReactMarkdown>{msg.text}</ReactMarkdown>
+                    </div>
                   </div>
                 )
               )}

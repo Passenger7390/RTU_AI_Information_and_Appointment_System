@@ -29,6 +29,7 @@ async def chat(query_request: QueryRequest, db: Session = Depends(get_db)):
     
     # Otherwise, look for ambiguous suggestions.
     suggestions = get_faq_suggestions_by_words(query, faqs)
+    print(suggestions)
     if suggestions:
         logger.info("Sending suggestions for fallback response.")
         clarification_text = "I couldn't clearly understand your question. Did you mean one of the following?"
