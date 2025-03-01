@@ -1,5 +1,8 @@
 import os
+from typing import Annotated
 from dotenv import load_dotenv
+from fastapi import Depends
+from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import declarative_base, sessionmaker
 
@@ -8,6 +11,7 @@ load_dotenv()
 
 Base = declarative_base()
 metadata = MetaData()
+
 
 def get_db():
     engine, _ = db_connect()
@@ -42,6 +46,7 @@ def create_table(engine):
     Base.metadata.create_all(engine, checkfirst=True)
 
 
+db_dependency = Annotated[Session, Depends(get_db)]
 # insert table here to create
 
 # engine, _ = db_connect()

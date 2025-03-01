@@ -1,21 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import List
-
-class AdvertisementBase(BaseModel):
-    title: str
-    duration: int
-    media_url: str
-    expires_in: datetime
-
-class AdvertisementCreate(AdvertisementBase):
-    pass
-
-class AdvertisementResponse(AdvertisementBase):
-    id: int
-    created_at: datetime
-    class Config:
-        from_attributes = True
+from typing import List, Optional
 
 class UserBase(BaseModel):
     username: str
@@ -53,6 +38,7 @@ class DeleteRequest(BaseModel):
 
 class FAQCreate(BaseModel):
     question: str
+    synonyms: Optional[List[str]] = []
     answer: str
 
 class FAQOut(BaseModel):
@@ -67,4 +53,5 @@ class QueryRequest(BaseModel):
     query: str
 
 class QueryResponse(BaseModel):
-    response: str
+    response: Optional[str] = None
+    suggestions: Optional[List[str]] = None

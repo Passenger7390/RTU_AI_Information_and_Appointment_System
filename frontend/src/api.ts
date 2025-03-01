@@ -3,16 +3,32 @@ import { TableData } from "./my_components/table/Columns";
 // const api = "http://192.168.100.76:8000";
 
 export const api = "http://localhost:8000";
+export const adApi = "http://localhost:8000/ad";
+export const authApi = "http://localhost:8000/auth";
+export const chatApi = "http://localhost:8000/ray";
 
 export interface ImageData {
   filename: string;
   duration: number;
 }
 
+// GET request to / to fetch iamge file name
+export const fetchImageFilename = async (): Promise<ImageData[]> => {
+  try {
+    const response = await axios.get<ImageData[]>(`${api}`);
+    return response.data; // returns list of image URLs
+  } catch (error) {
+    console.error("Error fetching ads:", error);
+    return [];
+  }
+};
+
+// ========================================================= AUTH API =======================================================
+
 // POST request to /auth/token to get JWT token
 export const login = async (username: string, password: string) => {
   const response = await axios.post(
-    `${api}/auth/token`,
+    `${authApi}/token`,
     { username, password },
     {
       headers: {
@@ -26,13 +42,16 @@ export const login = async (username: string, password: string) => {
 // GET request to /auth/users/me to get user info and check for valid token
 export const getUser = async () => {
   const token = localStorage.getItem("token");
-  return await axios.get(`${api}/auth/users/me`, {
+  return await axios.get(`${authApi}/users/me`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 };
 
+// ====================================================== AUTH API END =======================================================
+
+// ========================================================= AD API ==========================================================
 // POST request to /auth/token/refresh to upload file, check the token first,
 // only authenticated users are allowed to upload
 export const uploadFile = async (
@@ -52,7 +71,7 @@ export const uploadFile = async (
   formData.append("duration", duration.toString());
   formData.append("title", title);
   formData.append("expires_in", date);
-  const response = await axios.post(`${api}/upload`, formData, {
+  const response = await axios.post(`${adApi}/upload`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
       Authorization: `Bearer ${token}`,
@@ -62,24 +81,13 @@ export const uploadFile = async (
   return response.data.file_url;
 };
 
-// GET request to / to fetch iamge file name
-export const fetchImageFilename = async (): Promise<ImageData[]> => {
-  try {
-    const response = await axios.get<ImageData[]>(`${api}`);
-    return response.data; // returns list of image URLs
-  } catch (error) {
-    console.error("Error fetching ads:", error);
-    return [];
-  }
-};
-
 // GET request to /media/{filename} to get image
 export const getImage = (filename: string) => {
-  return `${api}/media/${filename}`;
+  return `${adApi}/media/${filename}`;
 };
 
 export const getTableData = async (): Promise<TableData[]> => {
-  const response = await axios.get(`${api}/table-data`);
+  const response = await axios.get(`${adApi}/table-data`);
   return response.data;
 };
 
@@ -90,7 +98,7 @@ export const deleteRows = async (ids: number[]) => {
   }
 
   await axios.post(
-    `${api}/delete`,
+    `${adApi}/delete`,
     { ids },
     {
       headers: {
@@ -98,4 +106,14 @@ export const deleteRows = async (ids: number[]) => {
       },
     }
   );
+};
+
+// ======================================================= AD API END ========================================================
+
+// ========================================================= CHAT API ========================================================
+
+export const getChatbotResponse = async (query: string) => {
+  const res = await axios.post(`${chatApi}/chat`, { query });
+  console.log(res.data);
+  return res.data;
 };

@@ -10,7 +10,7 @@ from database import get_db
 import jwt
 import bcrypt
 import os
-from schemas import Token, TokenData, UserBase, UserInDB
+from schemas import Token, UserBase
 
 load_dotenv()   # Load environment variables
 
@@ -59,3 +59,5 @@ def read_users_me(token: str = Depends(oauth2_scheme), db: Session = Depends(get
     if user is None:    
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     return UserBase(username=username)
+
+user_dependency = Annotated[dict, Depends(read_users_me)]

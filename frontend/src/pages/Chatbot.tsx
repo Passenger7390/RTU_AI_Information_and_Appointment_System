@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import axios from "axios";
+
 // Import shadcn components (adjust paths based on your project structure)
 import {
   Card,
@@ -11,8 +11,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getChatbotResponse } from "@/api";
 
-interface Message {
+export interface Message {
   sender: "user" | "bot";
   text: string;
 }
@@ -41,8 +42,9 @@ const Chatbot: React.FC = () => {
     setLoading(true);
     setQuery("");
     try {
-      const res = await axios.post("http://localhost:8000/chat", { query });
-      const botMessage: Message = { sender: "bot", text: res.data.response };
+      const res = await getChatbotResponse(query);
+      // TODO: Format the response and append the suggestions if not null
+      const botMessage: Message = { sender: "bot", text: res.response };
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       setMessages((prev) => [
@@ -127,3 +129,5 @@ const Chatbot: React.FC = () => {
 };
 
 export default Chatbot;
+
+// TODO: Add animation for the bot messages
