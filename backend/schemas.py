@@ -1,21 +1,47 @@
 from pydantic import BaseModel
 from datetime import datetime
+from typing import List, Optional
 
-class AdvertisementBase(BaseModel):
-    title: str
+class UserBase(BaseModel):
+    username: str
+
+class Token(BaseModel): # Token model
+    access_token: str
+    token_type: str
+
+class ImageBase(BaseModel):
+    filepath: str
     duration: int
-    media_url: str
+    expires_in: datetime
 
-class AdvertisementCreate(AdvertisementBase):
+class ImageCreate(ImageBase):
     pass
 
-class AdvertisementResponse(AdvertisementBase):
+class ImageResponse(ImageBase):
     id: int
     created_at: datetime
     class Config:
         from_attributes = True
 
-class UserBase(BaseModel):
-    username: str
-    hashed_password: str
+class DeleteRequest(BaseModel):
+    ids: List[int]
 
+class FAQCreate(BaseModel):
+    question: str
+    synonyms: Optional[List[str]] = []
+    answer: str
+
+class FAQOut(BaseModel):
+    id: int
+    question: str
+    answer: str
+
+    class Config:
+        from_attributes = True
+
+class QueryRequest(BaseModel):
+    query: str
+
+class QueryResponse(BaseModel):
+    response: Optional[str] = None
+    suggestions: Optional[List[str]] = None
