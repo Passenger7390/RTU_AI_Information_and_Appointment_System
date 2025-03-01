@@ -50,3 +50,21 @@ class Question(BaseModel):
 
 class DeleteRequest(BaseModel):
     ids: List[int]
+
+class FAQCreate(BaseModel):
+    question: str
+    answer: str
+
+class FAQOut(BaseModel):
+    id: int
+    question: str
+    answer: str
+
+    class Config:
+        from_attributes = True
+
+class QueryRequest(BaseModel):
+    query: str
+
+class QueryResponse(BaseModel):
+    response: str

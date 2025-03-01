@@ -1,5 +1,10 @@
+import Chatbot from "./Chatbot";
 const TestPage = () => {
-  return <div className="w-[500px] h-[900px]">adf</div>;
+  return (
+    <div className="w-screen h-screen">
+      <Chatbot></Chatbot>
+    </div>
+  );
 };
 
 export default TestPage;

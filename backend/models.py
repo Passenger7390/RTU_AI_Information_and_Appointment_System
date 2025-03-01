@@ -1,16 +1,7 @@
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, func
+from sqlalchemy.dialects.postgresql import JSONB
 Base = declarative_base()
-
-# class Ad(Base):
-#     __tablename__ = "advertisements"
-
-#     id = Column(Integer, primary_key=True, index=True)
-#     created_at = Column(DateTime(timezone=True),nullable=False, server_default=func.now())
-#     title = Column(String,nullable=False)
-#     media_url = Column(String,nullable=False)
-#     duration = Column(Integer,nullable=False)
-#     expires_in = Column(DateTime(timezone=True),nullable=False)
 
 class User(Base):
     __tablename__ = "users"
@@ -33,5 +24,6 @@ class FAQ(Base):
     __tablename__ = "faq"
 
     id = Column(Integer, primary_key=True, index=True)
-    question = Column(String, unique=True, nullable=False)
+    question = Column(String, unique=True, index=True ,nullable=False)
+    synonyms = Column(JSONB, nullable=True)
     answer = Column(String, nullable=False)

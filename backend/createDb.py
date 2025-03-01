@@ -21,9 +21,11 @@ Base = declarative_base()
 
 class FAQ(Base):
     __tablename__ = "faq"
+
     id = Column(Integer, primary_key=True, index=True)
-    question = Column(String, unique=True, nullable=False)
+    question = Column(String, unique=True, index=True ,nullable=False)
     answer = Column(String, nullable=False)
+    
 engine, _ = db_connect()
 session = create_session(engine)
 create_table(engine)

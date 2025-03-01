@@ -116,7 +116,7 @@ const UploadCard = ({ onUploadComplete }: UploadCardProps) => {
               setDialogOpen(true);
             }}
           >
-            Edit Profile
+            Upload
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
