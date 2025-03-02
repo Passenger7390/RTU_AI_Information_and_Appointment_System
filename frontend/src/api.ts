@@ -5,7 +5,7 @@ import { TableData } from "./my_components/table/Columns";
 export const api = import.meta.env.VITE_DEV_API;
 export const adApi = `${api}/ad`;
 export const authApi = `${api}/auth`;
-export const chatApi = `${api}/chat`;
+export const chatApi = `${api}/ray`;
 
 export interface ImageData {
   filename: string;

@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import toast from "react-hot-toast";
 import axios from "axios";
+import { IoCloudUploadOutline } from "react-icons/io5";
 
 type Status = {
   value: number;
@@ -121,6 +122,7 @@ const UploadCard = ({ onUploadComplete }: UploadCardProps) => {
               setDialogOpen(true);
             }}
           >
+            <IoCloudUploadOutline />
             Upload
           </Button>
         </DialogTrigger>

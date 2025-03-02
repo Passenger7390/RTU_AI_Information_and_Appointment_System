@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import toast from "react-hot-toast";
+import { MdOutlineDeleteForever } from "react-icons/md";
 
 interface DeleteDialogProps {
   onConfirm?: () => void;
@@ -31,6 +32,7 @@ const DeleteDialog = ({ onConfirm, isButtonDisabled }: DeleteDialogProps) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="destructive" disabled={isButtonDisabled}>
+          <MdOutlineDeleteForever />
           Delete
         </Button>
       </DialogTrigger>

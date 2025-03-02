@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getChatbotResponse } from "@/api";
+import MarkdownResponse from "@/my_components/MarkdownResponse";
 
 export interface Message {
   sender: "user" | "bot";
@@ -74,8 +75,8 @@ const Chatbot: React.FC = () => {
   };
 
   return (
-    <div className="w-3/4 h-full mx-auto my-10 p-4">
-      <Card className="h-[80vh] flex flex-col">
+    <div className="w-3/4 h-full mx-auto my-auto p-2">
+      <Card className="h-[95vh] flex flex-col">
         <CardHeader className="border-b">
           <CardTitle className="text-center text-xl font-semibold flex justify-center">
             <div className="w-24">
@@ -89,7 +90,7 @@ const Chatbot: React.FC = () => {
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto p-2 space-y-2 bg-blue-500">
           {messages.length === 0 ? ( // This block is a welcome message, this will disappear when the user asks RAY
-            <div className="flex h-full items-center justify-center">
+            <div className="flex h-[95%] items-center justify-center">
               <div className="text-center space-y-2">
                 <h1 className="text-4xl font-bold text-white">
                   Welcome to RAY Chatbot!
@@ -108,17 +109,13 @@ const Chatbot: React.FC = () => {
                 ) => (
                   <div
                     key={index}
-                    className={`flex p-3 rounded-lg max-w-[75%] w-[fit-content] ${
+                    className={`flex p-3 rounded-lg max-w-[75%] w-[fit-content] my-10 ${
                       msg.sender === "user"
                         ? "bg-yellow-500 text-black self-end justify-end ml-auto"
-                        : "bg-blue-800 self-start justify-start mr-auto"
+                        : "bg-blue-900 self-start justify-center items-center mr-auto"
                     }`}
                   >
-                    {/* <ReactMarkdown>{msg.text}</ReactMarkdown> */}
-                    {/* {msg.text} */}
-                    <div className="whitespace-pre-wrap break-words">
-                      <ReactMarkdown>{msg.text}</ReactMarkdown>
-                    </div>
+                    <MarkdownResponse response={msg.text} />
                   </div>
                 )
               )}
