@@ -28,6 +28,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import toast from "react-hot-toast";
+import axios from "axios";
 
 type Status = {
   value: number;
@@ -59,6 +61,7 @@ const UploadCard = ({ onUploadComplete }: UploadCardProps) => {
   const [duration, setDuration] = useState(15);
   const [title, setTitle] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [openExpiration, setOpenExpiration] = useState(false);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -80,7 +83,6 @@ const UploadCard = ({ onUploadComplete }: UploadCardProps) => {
     if (!title) return;
     if (!date) return;
     const formattedDate = format(date, "yyyy-MM-dd");
-
     try {
       setLoading(true);
       await uploadFile(file, duration, title, formattedDate);
@@ -89,7 +91,11 @@ const UploadCard = ({ onUploadComplete }: UploadCardProps) => {
       resetForm();
       setDialogOpen(false);
     } catch (error) {
-      console.error(error);
+      if (axios.isAxiosError(error)) {
+        toast.error(`${error.response?.data?.detail || "Upload failed"}`);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
     } finally {
       setLoading(false);
     }
@@ -142,7 +148,7 @@ const UploadCard = ({ onUploadComplete }: UploadCardProps) => {
               <Label htmlFor="expiration" className="text-right">
                 Expiration
               </Label>
-              <Popover>
+              <Popover open={openExpiration} onOpenChange={setOpenExpiration}>
                 <PopoverTrigger asChild>
                   <Button
                     variant={"outline"}
@@ -159,7 +165,10 @@ const UploadCard = ({ onUploadComplete }: UploadCardProps) => {
                   <Calendar
                     mode="single"
                     selected={date}
-                    onSelect={setDate}
+                    onSelect={(date) => {
+                      setDate(date);
+                      setOpenExpiration(false);
+                    }}
                     disabled={(date) => date < addDays(new Date(), -1)}
                     initialFocus
                   />

@@ -6,6 +6,7 @@ import { getTableData, deleteRows } from "@/api";
 import { columns } from "@/my_components/table/Columns";
 import { Button } from "@/components/ui/button";
 import UploadCard from "@/my_components/UploadCard";
+import toast from "react-hot-toast";
 
 interface TableData {
   id: number;
@@ -48,15 +49,14 @@ const Dashboard = () => {
     try {
       const data = await getTableData();
       setTableData(data);
-      // console.log(data);
     } catch (error) {
       console.error("Failed to fetch table data:", error);
     }
   };
 
   const handleUploadComplete = async () => {
-    console.log("Upload completed, refreshing table...");
     await fetchTableData();
+    toast.success("File uploaded successfully!");
   };
 
   const handleDeleteSelected = async () => {

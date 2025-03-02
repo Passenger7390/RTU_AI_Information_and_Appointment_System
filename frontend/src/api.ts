@@ -1,11 +1,11 @@
 import axios from "axios";
 import { TableData } from "./my_components/table/Columns";
-// const api = "http://192.168.100.76:8000";
+// const api = import.meta.env.VITE_PROD_API;
 
-export const api = "http://localhost:8000";
-export const adApi = "http://localhost:8000/ad";
-export const authApi = "http://localhost:8000/auth";
-export const chatApi = "http://localhost:8000/ray";
+export const api = import.meta.env.VITE_DEV_API;
+export const adApi = `${api}/ad`;
+export const authApi = `${api}/auth`;
+export const chatApi = `${api}/chat`;
 
 export interface ImageData {
   filename: string;

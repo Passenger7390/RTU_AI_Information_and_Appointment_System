@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime
+from datetime import datetime, time
 import shutil
 from fastapi import Depends, File, Form, HTTPException, APIRouter, UploadFile
 from fastapi.responses import FileResponse
@@ -29,10 +29,13 @@ async def upload_file(file: UploadFile = File(...), duration: int = Form(...), t
     
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
-    
-    expiration_time = datetime.strptime(expires_in, '%Y-%m-%d')  # Set Expiration date
-    print(expiration_time)
 
+    expiration_time = datetime.strptime(expires_in, '%Y-%m-%d')  # Set Expiration date
+
+    today = datetime.now().date()
+    # print(datetime.datetime.time(23,59,59))
+    if expiration_time.date() == today:
+        expiration_time = datetime.combine(today, time(23,59,59))
     new_image = Image(filename=file.filename, title=title, duration=duration, expires_in=expiration_time)
     db.add(new_image)
     db.commit()
@@ -73,7 +76,7 @@ async def delete_images(
 
 async def delete_expired_images(db: Session):   # Delete expired images
     now = datetime.now()
-    expired_images = db.query(Image).filter(Image.expires_in <= now).all()
+    expired_images = db.query(Image).filter(Image.expires_in < now).all()
 
     for image in expired_images:
         if os.path.exists(os.path.join(UPLOAD_DIR, image.filename)):

@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { ThemeProvider } from "./my_components/ThemeProvider";
 import AdPage from "./pages/AdPage";
 import TestPage from "./pages/TestPage";
+import { Toaster } from "react-hot-toast";
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
           {/* <Route path="/upload" element={<UploadComponent />}/> */}
         </Routes>
       </Router>
+      <Toaster position="top-right"></Toaster>
     </ThemeProvider>
   );
 };
