@@ -1,8 +1,8 @@
-import Chatbot from "./Chatbot";
+import DeleteDialog from "@/my_components/DeleteDialog";
 const TestPage = () => {
   return (
     <div className="w-screen h-screen">
-      <Chatbot></Chatbot>
+      <DeleteDialog></DeleteDialog>
     </div>
   );
 };

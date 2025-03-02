@@ -5,6 +5,7 @@ import { ThemeProvider } from "./my_components/ThemeProvider";
 import AdPage from "./pages/AdPage";
 import TestPage from "./pages/TestPage";
 import { Toaster } from "react-hot-toast";
+import Chatbot from "./pages/Chatbot";
 
 const App = () => {
   return (
@@ -15,6 +16,7 @@ const App = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/test" element={<TestPage />} />
+          <Route path="/chat" element={<Chatbot />} />
           {/* <Route path="/upload" element={<UploadComponent />}/> */}
         </Routes>
       </Router>

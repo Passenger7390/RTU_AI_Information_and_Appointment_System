@@ -74,17 +74,17 @@ const Chatbot: React.FC = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto my-10 p-4">
+    <div className="w-3/4 h-full mx-auto my-10 p-4">
       <Card className="h-[80vh] flex flex-col">
         <CardHeader className="border-b">
           <CardTitle className="text-center text-xl font-semibold flex justify-center">
-            <div className="">
+            <div className="w-24">
               <Button>New chat</Button>
             </div>
             <div className="flex-1 justify-between items-center">
               RAY Chatbot
             </div>
-            <div></div>
+            <div className="w-24"></div>
           </CardTitle>
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto p-2 space-y-2 bg-blue-500">
