@@ -46,7 +46,7 @@ const MarkdownResponse: React.FC<MarkdownResponseProps> = ({ response }) => {
     // Unordered list renderer
     ul: ({ ...props }) => (
       <ul
-        className="list-disc pl-6 my-2 text-white marker:text-white text-justify"
+        className="list-disc pl-4 my-2 text-white marker:text-white text-justify"
         {...props}
       />
     ),

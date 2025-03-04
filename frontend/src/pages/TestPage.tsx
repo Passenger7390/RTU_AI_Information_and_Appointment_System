@@ -1,8 +1,10 @@
-import DeleteDialog from "@/my_components/DeleteDialog";
+import { FAQCard, FAQDialog } from "@/my_components/FAQ";
+
 const TestPage = () => {
   return (
     <div className="w-screen h-screen">
-      <DeleteDialog></DeleteDialog>
+      <FAQCard />
+      <FAQDialog />
     </div>
   );
 };
