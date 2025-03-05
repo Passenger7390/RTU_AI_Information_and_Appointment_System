@@ -32,8 +32,7 @@ const DeleteDialog = ({ onConfirm, isButtonDisabled }: DeleteDialogProps) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="destructive" disabled={isButtonDisabled}>
-          <MdOutlineDeleteForever />
-          Delete
+          <MdOutlineDeleteForever className="size-7" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">

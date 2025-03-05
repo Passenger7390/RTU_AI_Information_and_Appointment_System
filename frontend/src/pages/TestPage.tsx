@@ -10,7 +10,11 @@ const TestPage = () => {
   };
   return (
     <div className="w-screen h-screen">
-      <FAQCard question="test" synonyms={["test", "test1"]} answer="asdfadfg" />
+      <FAQCard
+        questionProp="test"
+        synonymsProp={["test", "test1"]}
+        answerProp="asdfadfg"
+      />
       {/* <FAQDialog /> */}
     </div>
   );
