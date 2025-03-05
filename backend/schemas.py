@@ -34,6 +34,7 @@ class FAQCreate(BaseModel):
 class FAQOut(BaseModel):
     id: int
     question: str
+    synonyms: List[str]
     answer: str
 
     class Config:

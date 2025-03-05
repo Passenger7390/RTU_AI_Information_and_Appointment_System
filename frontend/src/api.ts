@@ -117,3 +117,22 @@ export const getChatbotResponse = async (query: string) => {
   console.log(res);
   return res.data;
 };
+
+export const addFAQ = async (
+  question: string,
+  synonyms: string[],
+  answer: string
+) => {
+  const res = await axios.post(`${chatApi}/faqs`, {
+    question,
+    synonyms,
+    answer,
+  });
+  console.log(res);
+  return res.data;
+};
+
+export const getFAQs = async () => {
+  const res = await axios.get(`${chatApi}/faqs`);
+  return res.data;
+};

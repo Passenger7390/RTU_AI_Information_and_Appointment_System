@@ -1,4 +1,5 @@
 import logging
+from typing import List
 import anyio
 import os
 import string
@@ -44,11 +45,25 @@ async def chat(query_request: QueryRequest, db: Session = Depends(get_db)):
         logger.error("Gemini API error: %s", str(e))
         raise HTTPException(status_code=500, detail="Gemini API call failed: " + str(e))
 
-@router.get("/faqs", response_model=list[FAQOut])
+@router.get("/faqs", response_model=List[FAQOut])
 def read_faqs(db: Session = Depends(get_db)):
-    return get_all_faqs(db)
+    result = get_all_faqs(db)
+    for faq in result:
+        print(f"FAQ {faq.id}: {faq.question}")
+        print(f"Synonyms type: {type(faq.synonyms)}")
+        print(f"Synonyms value: {faq.synonyms}")
+        print(f"Answer: {faq.answer}")
 
-@router.post("/faqs", response_model=FAQOut)
+    return [
+        FAQOut(
+            id=faq.id,
+            synonyms=faq.synonyms,
+            question=faq.question,
+            answer=faq.answer
+        ) for faq in result
+    ]
+
+@router.post("/faqs", response_model=FAQCreate)
 def add_faq(faq: FAQCreate, db: Session = Depends(get_db)):
     existing = get_faq_by_question(db, faq.question)
     if existing:
