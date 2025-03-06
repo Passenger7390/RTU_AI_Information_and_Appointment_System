@@ -31,6 +31,12 @@ class FAQCreate(BaseModel):
     synonyms: Optional[List[str]] = []
     answer: str
 
+class FAQUpdate(BaseModel):
+    id: int
+    question: str
+    synonyms: Optional[List[str]] = []
+    answer: str
+
 class FAQOut(BaseModel):
     id: int
     question: str

@@ -8,14 +8,15 @@ const TestPage = () => {
       console.log(faqs);
     } catch (error) {}
   };
+
   return (
     <div className="w-screen h-screen">
       <FAQCard
+        idProp={2}
         questionProp="test"
         synonymsProp={["test", "test1"]}
         answerProp="asdfadfg"
       />
-      {/* <FAQDialog /> */}
     </div>
   );
 };

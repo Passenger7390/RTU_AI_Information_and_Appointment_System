@@ -1,10 +1,11 @@
 import UploadCard from "@/my_components/UploadCard";
 import DeleteDialog from "@/my_components/DeleteDialog";
 import { DataTable } from "@/my_components/table/DataTable";
-import { getTableData, deleteRows } from "@/api";
+import { getTableData, deleteRows, getFAQs } from "@/api";
 import { columns } from "@/my_components/table/Columns";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
+import { FAQ, FAQCard, FAQDialog } from "@/my_components/FAQ";
 
 interface TableData {
   id: number;
@@ -78,5 +79,46 @@ export const AdComponent = () => {
 };
 
 export const FAQComponent = () => {
-  return <div></div>;
+  const [faqs, setFAQs] = useState<FAQ[]>([]);
+
+  const fetchFAQs = async () => {
+    try {
+      const faqs = await getFAQs();
+      setFAQs(faqs);
+    } catch (error) {
+      toast.error("Failed to fetch FAQs");
+    }
+  };
+
+  useEffect(() => {
+    fetchFAQs();
+  }, []);
+
+  return (
+    <div className="flex-row h-full w-full p-2 space-y-8">
+      <div>
+        <FAQDialog onRefresh={fetchFAQs} />
+      </div>
+      {faqs.length == 0 ? (
+        <div className="border bg-green-700 h-full w-full flex items-center justify-center">
+          <p>Add new FAQ</p>
+          <p>test</p>
+        </div>
+      ) : (
+        <div className="w-full h-full grid grid-cols-3 gap-4">
+          {faqs.map((faq, index) => (
+            <FAQCard
+              key={index}
+              idProp={faq.id}
+              questionProp={faq.question}
+              synonymsProp={faq.synonyms}
+              answerProp={faq.answer}
+              onRefresh={fetchFAQs}
+            />
+          ))}
+        </div>
+      )}
+      {}
+    </div>
+  );
 };

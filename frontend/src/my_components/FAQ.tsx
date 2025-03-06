@@ -1,11 +1,12 @@
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { useEffect, useState } from "react";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { FaRegEdit } from "react-icons/fa";
+import toast from "react-hot-toast";
+import { deleteFAQ, updateFAQ, addFAQ } from "@/api";
+import DeleteDialog from "./DeleteDialog";
 import {
   Dialog,
   DialogContent,
@@ -15,90 +16,146 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { FaRegEdit } from "react-icons/fa";
 
-// import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import toast from "react-hot-toast";
-import { addFAQ } from "@/api";
-import DeleteDialog from "./DeleteDialog";
+// TODO: Implement delete functionality in the card
 
-interface FAQCardProps {
+export interface FAQCardProps {
+  idProp: number;
   questionProp: string;
   synonymsProp: string[];
   answerProp: string;
+  onRefresh?: () => void;
+}
+
+export interface FAQ {
+  id: number;
+  question: string;
+  synonyms: string[];
+  answer: string;
 }
 
 export const FAQCard = ({
+  idProp,
   questionProp,
   synonymsProp,
   answerProp,
+  onRefresh,
 }: FAQCardProps) => {
-  const [questionS, setQuestion] = useState("");
-  const [synonymsS, setSynonyms] = useState("");
-  const [answerS, setAnswer] = useState("");
+  // Combined state for current field values.
+  const [values, setValues] = useState({
+    question: "",
+    synonyms: "",
+    answer: "",
+  });
 
+  // State to store original values in case we cancel editing.
+  const [savedValues, setSavedValues] = useState({
+    question: "",
+    synonyms: "",
+    answer: "",
+  });
   const [edit, setEdit] = useState(false);
 
+  // Initialize state from props.
   useEffect(() => {
-    setQuestion(questionProp);
-    setSynonyms(synonymsProp.join(", "));
-    setAnswer(answerProp);
+    const synonymsStr = synonymsProp.join(", ");
+    setValues({
+      question: questionProp,
+      synonyms: synonymsStr,
+      answer: answerProp,
+    });
+    setSavedValues({
+      question: questionProp,
+      synonyms: synonymsStr,
+      answer: answerProp,
+    });
   }, [questionProp, synonymsProp, answerProp]);
 
-  const handleCancel = () => {
-    setEdit(!edit);
-    setQuestion(questionProp);
-    setSynonyms(synonymsProp.join(", "));
-    setAnswer(answerProp);
-  };
+  // Compute synonyms array from comma-separated string.
+  const synonymsList = useMemo(
+    () =>
+      values.synonyms
+        .split(",")
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0),
+    [values.synonyms]
+  );
 
-  const handleSubmit = () => {
-    if (!questionS || !answerS)
-      return toast.error("Question and Answer are required");
-    const synonymsList = synonymsS.split(",").map((s) => s.trim());
+  const toggleEdit = useCallback(() => {
+    if (edit) {
+      // Cancel editing: restore saved values.
+      setValues(savedValues);
+    }
+    setEdit((prev) => !prev);
+  }, [edit, savedValues]);
+
+  const handleSubmit = async () => {
+    if (!values.question || !values.answer) {
+      toast.error("Question and Answer are required");
+      return;
+    }
+    const params = {
+      id: idProp,
+      question: values.question,
+      synonyms: synonymsList,
+      answer: values.answer,
+    };
 
     try {
-      addFAQ(questionS, synonymsList, answerS);
-      toast.success("FAQ added successfully");
+      await updateFAQ(params);
+      toast.success("FAQ updated successfully");
+      setSavedValues(values);
+      setEdit(false);
+      onRefresh?.();
     } catch (error) {
-      toast.error("Failed to add FAQ");
+      toast.error("Failed to update FAQ");
     }
-    setEdit(false);
-    // TODO: Create new endpoint for edit updating the faq
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteFAQ(idProp);
+      onRefresh?.();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
     <Card className="w-[600px]">
-      <CardHeader>
-        <CardTitle>{questionS}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-2 flex-col items-center justify-center">
+      <CardContent className="space-y-2 flex-col items-center justify-center pt-6">
+        <Label>Question</Label>
         <Textarea
           placeholder="Type your question here."
           maxLength={350}
           className="w-[34rem] max-h-36 overflow-x-hidden resize-none"
-          value={questionS}
-          onChange={(e) => setQuestion(e.target.value)}
+          value={values.question}
+          onChange={(e) =>
+            setValues((prev) => ({ ...prev, question: e.target.value }))
+          }
           required
           disabled={!edit}
         />
+        <Label>Synonyms</Label>
         <Textarea
-          placeholder="Separate the synoyms by comma (,) (e.g. 'Hello', 'Hi')"
+          placeholder="Separate synonyms by comma (e.g. 'Hello, Hi')"
           maxLength={350}
           className="w-[34rem] max-h-36 overflow-x-hidden resize-none"
-          value={synonymsS}
-          onChange={(s) => setSynonyms(s.target.value)}
+          value={values.synonyms}
+          onChange={(e) =>
+            setValues((prev) => ({ ...prev, synonyms: e.target.value }))
+          }
           disabled={!edit}
         />
+        <Label>Answer</Label>
         <Textarea
-          placeholder="Type your synoyms of your questions here."
+          placeholder="Type your answer here."
           maxLength={350}
           className="w-[34rem] max-h-36 overflow-x-hidden resize-none"
-          value={answerS}
-          onChange={(e) => setAnswer(e.target.value)}
+          value={values.answer}
+          onChange={(e) =>
+            setValues((prev) => ({ ...prev, answer: e.target.value }))
+          }
           required
           disabled={!edit}
         />
@@ -110,38 +167,49 @@ export const FAQCard = ({
               Save
             </Button>
           )}
-          {edit && (
-            <Button className="flex-1" onClick={handleCancel}>
-              Cancel
-            </Button>
-          )}
         </div>
-        <div className="w-72"></div>
+        <div className="w-72" />
         <div className="flex justify-end space-x-2">
-          <Button variant="secondary" onClick={handleCancel}>
+          <Button variant="secondary" onClick={toggleEdit}>
             <FaRegEdit className="size-6 m-1" />
           </Button>
-          <DeleteDialog />
+          <DeleteDialog onConfirm={handleDelete} />
         </div>
       </CardFooter>
     </Card>
   );
 };
 
-export const FAQDialog = () => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [question, setQuestion] = useState("");
-  const [synonyms, setSynonyms] = useState("");
-  const [answer, setAnswer] = useState("");
+interface FAQDialogProps {
+  onRefresh?: () => void;
+}
 
-  const handleSubmit = () => {
-    if (!question || !answer)
-      return toast.error("Question and Answer are required");
-    const synonymsList = synonyms.split(",").map((s) => s.trim());
+export const FAQDialog = ({ onRefresh }: FAQDialogProps) => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [values, setValues] = useState({
+    question: "",
+    synonyms: "",
+    answer: "",
+  });
+
+  const resetForm = () => {
+    setValues({ question: "", synonyms: "", answer: "" });
+  };
+
+  const handleSubmit = async () => {
+    if (!values.question || !values.answer) {
+      toast.error("Question and Answer are required");
+      return;
+    }
+    const synonymsList = values.synonyms
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
 
     try {
-      addFAQ(question, synonymsList, answer);
+      await addFAQ(values.question, synonymsList, values.answer);
       toast.success("FAQ added successfully");
+      onRefresh?.();
     } catch (error) {
       toast.error("Failed to add FAQ");
     }
@@ -149,11 +217,6 @@ export const FAQDialog = () => {
     resetForm();
   };
 
-  const resetForm = () => {
-    setQuestion("");
-    setSynonyms("");
-    setAnswer("");
-  };
   return (
     <Dialog
       open={isDialogOpen}
@@ -176,19 +239,23 @@ export const FAQDialog = () => {
             placeholder="Type your question here."
             maxLength={350}
             className="w-[29rem] max-h-36 overflow-x-hidden resize-none"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
+            value={values.question}
+            onChange={(e) =>
+              setValues((prev) => ({ ...prev, question: e.target.value }))
+            }
             required
           />
         </div>
         <div>
           <Label className="font-semibold text-lg">Synonyms</Label>
           <Textarea
-            placeholder="Separate the synoyms by comma (,) (e.g. 'Hello', 'Hi')"
+            placeholder="Separate synonyms by comma (e.g. 'Hello, Hi')"
             maxLength={350}
             className="w-[29rem] max-h-36 overflow-x-hidden resize-none"
-            value={synonyms}
-            onChange={(s) => setSynonyms(s.target.value)} // TODO: Implement this
+            value={values.synonyms}
+            onChange={(e) =>
+              setValues((prev) => ({ ...prev, synonyms: e.target.value }))
+            }
           />
         </div>
         <div>
@@ -196,11 +263,13 @@ export const FAQDialog = () => {
             Answer <span className="font-normal italic">(Required)</span>
           </Label>
           <Textarea
-            placeholder="Type your synoyms of your questions here."
+            placeholder="Type your answer here."
             maxLength={350}
             className="w-[29rem] max-h-36 overflow-x-hidden resize-none"
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
+            value={values.answer}
+            onChange={(e) =>
+              setValues((prev) => ({ ...prev, answer: e.target.value }))
+            }
             required
           />
         </div>

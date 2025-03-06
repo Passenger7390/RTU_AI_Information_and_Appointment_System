@@ -1,5 +1,6 @@
 import axios from "axios";
 import { TableData } from "./my_components/table/Columns";
+import { FAQ } from "./my_components/FAQ";
 // const api = import.meta.env.VITE_PROD_API;
 
 export const api = import.meta.env.VITE_DEV_API;
@@ -123,16 +124,51 @@ export const addFAQ = async (
   synonyms: string[],
   answer: string
 ) => {
-  const res = await axios.post(`${chatApi}/faqs`, {
-    question,
-    synonyms,
-    answer,
-  });
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  const res = await axios.post(
+    `${chatApi}/faqs`,
+    {
+      question,
+      synonyms,
+      answer,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
   console.log(res);
   return res.data;
 };
 
 export const getFAQs = async () => {
   const res = await axios.get(`${chatApi}/faqs`);
+  return res.data;
+};
+
+export const updateFAQ = async (params: FAQ) => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  const res = await axios.put(`${chatApi}/faqs`, params, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+};
+
+export const deleteFAQ = async (id: number) => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  const res = await axios.delete(`${chatApi}/faqs/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
   return res.data;
 };

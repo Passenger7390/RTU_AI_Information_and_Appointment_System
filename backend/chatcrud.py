@@ -7,9 +7,10 @@ from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException
 from rapidfuzz import fuzz, process
 from google import genai
+from auth import read_users_me
 from database import get_db
 from models import FAQ
-from schemas import FAQCreate, FAQOut, QueryRequest, QueryResponse
+from schemas import FAQCreate, FAQOut, FAQUpdate, QueryRequest, QueryResponse, UserBase
 
 router = APIRouter(prefix="/ray", tags=["ray"])
 client = genai.Client(api_key=os.getenv("GEMINI_API"))
@@ -30,7 +31,6 @@ async def chat(query_request: QueryRequest, db: Session = Depends(get_db)):
     
     # Otherwise, look for ambiguous suggestions.
     suggestions = get_faq_suggestions_by_words(query, faqs)
-    print(suggestions)
     if suggestions:
         logger.info("Sending suggestions for fallback response.")
         clarification_text = "I couldn't clearly understand your question. Did you mean one of the following?"
@@ -46,30 +46,45 @@ async def chat(query_request: QueryRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Gemini API call failed: " + str(e))
 
 @router.get("/faqs", response_model=List[FAQOut])
-def read_faqs(db: Session = Depends(get_db)):
+async def read_faqs(db: Session = Depends(get_db)):
     result = get_all_faqs(db)
-    for faq in result:
-        print(f"FAQ {faq.id}: {faq.question}")
-        print(f"Synonyms type: {type(faq.synonyms)}")
-        print(f"Synonyms value: {faq.synonyms}")
-        print(f"Answer: {faq.answer}")
 
     return [
         FAQOut(
             id=faq.id,
-            synonyms=faq.synonyms,
+            synonyms=faq.synonyms if isinstance(faq.synonyms, list) else ([] if faq.synonyms is None else [faq.synonyms]),
             question=faq.question,
             answer=faq.answer
         ) for faq in result
     ]
 
 @router.post("/faqs", response_model=FAQCreate)
-def add_faq(faq: FAQCreate, db: Session = Depends(get_db)):
+async def add_faq(faq: FAQCreate, db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
     existing = get_faq_by_question(db, faq.question)
     if existing:
         raise HTTPException(status_code=400, detail="FAQ with that question already exists")
     new_faq = create_faq(db, faq)
     return new_faq
+
+@router.put("/faqs", response_model=FAQOut)
+async def update_faq(params: FAQUpdate, db: Session = Depends(get_db)):
+    print("this is executed")
+    existing = db.query(FAQ).get(params.id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="FAQ not found")
+    existing.question = params.question
+    existing.synonyms = params.synonyms
+    existing.answer = params.answer
+    print(f"existing: {existing}")
+    db.commit()
+    db.refresh(existing)
+    return existing
+
+@router.delete("/faqs/{faq_id}")
+async def delete_faq(faq_id: int, db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
+    faq = db.query(FAQ).filter(FAQ.id == faq_id).delete()
+    db.commit()
+    return {"message": f"Deleted FAQ with ID {faq_id}"}
 
 def get_all_faqs(db: Session):
     return db.query(FAQ).all()
