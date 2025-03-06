@@ -43,7 +43,7 @@ const Chatbot: React.FC = () => {
     setQuery("");
     try {
       const res = await getChatbotResponse(query);
-      // TODO: Format the response and append the suggestions if not null
+
       if (res.suggestions) {
         const botMessage: Message = {
           sender: "bot",
@@ -146,4 +146,4 @@ const Chatbot: React.FC = () => {
 
 export default Chatbot;
 
-// TODO: Add animation for the bot messages
+// TODO: add functionality to the new chat button

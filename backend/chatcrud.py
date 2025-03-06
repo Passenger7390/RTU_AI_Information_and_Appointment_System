@@ -169,15 +169,22 @@ def get_faq_suggestions_by_words(query: str, faqs, threshold: float = 0.3, max_s
 async def get_gemini_response(query: str, history: list = None) -> str:
     """
     Get an AI-generated response from Google Gemini.
-    
-    This function starts a chat session with the Gemini model and sends the prompt.
+
+    This function starts a chat session with the Gemini model using the provided conversation history,
+    then sends the prompt and returns the response text.
     """
     history = history or []
+    
     def sync_get_response():
-        chat = client.chats.create(model='gemini-2.0-flash')
-        response = chat.send_message(query)
+        # Create a chat session that remembers conversation history.
+        # Adjust the code below based on the actual genai API:
+        chat_session = client.chats.create(model='gemini-2.0-flash', history=history)
+        response = chat_session.send_message(query)
+
         return response.text.strip()
+    
     try:
         return await anyio.to_thread.run_sync(sync_get_response)
     except Exception as e:
         raise Exception("Gemini API error: " + str(e))
+
