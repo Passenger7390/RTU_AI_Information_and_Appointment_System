@@ -6,11 +6,12 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from dotenv import load_dotenv
 from models import User
-from database import get_db
+from database import get_db, db_dependency
 import jwt
 import bcrypt
 import os
-from schemas import Token, UserBase
+from schemas import Token, UserBase, CreateUser
+
 
 load_dotenv()   # Load environment variables
 
@@ -59,5 +60,21 @@ def read_users_me(token: str = Depends(oauth2_scheme), db: Session = Depends(get
     if user is None:    
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     return UserBase(username=username)
+
+
+@router.post("/register", status_code=status.HTTP_201_CREATED)
+async def register(user: CreateUser, db: db_dependency):
+    # Generate a salt and hash the user's password
+    salt = bcrypt.gensalt()
+    hashed_bytes = bcrypt.hashpw(user.password.encode('utf-8'), salt)
+    # Optionally decode the hash to a string if needed for your database
+    hashed_password = hashed_bytes.decode('utf-8')
+    
+    create_user_model = User(
+        username=user.username,
+        hashed_password=hashed_password
+    )
+    db.add(create_user_model)
+    db.commit()
 
 user_dependency = Annotated[dict, Depends(read_users_me)]

@@ -1,8 +1,8 @@
-from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, Integer, String, DateTime, func
-from sqlalchemy.dialects.postgresql import JSONB
-from database import create_session, create_table, db_connect
-Base = declarative_base()
+# from sqlalchemy.orm import declarative_base
+# from sqlalchemy import Column, Integer, String, DateTime, func
+# from sqlalchemy.dialects.postgresql import JSONB
+# from database import create_session, create_table, db_connect
+# Base = declarative_base()
 
 
 # class User(Base):
@@ -20,16 +20,16 @@ Base = declarative_base()
 #     duration = Column(Integer,nullable=False)
 #     expires_in = Column(DateTime(timezone=True),nullable=False)
 
-class FAQ(Base):
-    __tablename__ = "faq"
+# class FAQ(Base):
+#     __tablename__ = "faq"
 
-    id = Column(Integer, primary_key=True, index=True)
-    question = Column(String, unique=True, index=True ,nullable=False)
-    synonyms = Column(JSONB, nullable=True)
-    answer = Column(String, nullable=False)
+#     id = Column(Integer, primary_key=True, index=True)
+#     question = Column(String, unique=True, index=True ,nullable=False)
+#     synonyms = Column(JSONB, nullable=True)
+#     answer = Column(String, nullable=False)
     
-engine, _ = db_connect()
-session = create_session(engine)
-create_table(engine)
-Base.metadata.create_all(engine, checkfirst=True)
-print("table created")
+# engine, _ = db_connect()
+# session = create_session(engine)
+# create_table(engine)
+# Base.metadata.create_all(engine, checkfirst=True)
+# print("table created")

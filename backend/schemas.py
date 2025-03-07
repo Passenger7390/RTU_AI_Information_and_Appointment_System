@@ -5,6 +5,10 @@ from typing import List, Optional
 class UserBase(BaseModel):
     username: str
 
+class CreateUser(BaseModel):    # Create User model
+    username: str
+    password: str
+
 class Token(BaseModel): # Token model
     access_token: str
     token_type: str
