@@ -24,6 +24,10 @@ const Chatbot: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const newChat = () => {
+    setMessages([]);
+  };
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -77,9 +81,11 @@ const Chatbot: React.FC = () => {
     <div className="w-3/4 h-full mx-auto my-auto p-2">
       <Card className="h-[95vh] flex flex-col">
         <CardHeader className="border-b">
-          <CardTitle className="text-center text-xl font-semibold flex justify-center">
+          <CardTitle className="text-center text-xl font-semibold flex justify-center h-10 items-center">
             <div className="w-24">
-              <Button>New chat</Button>
+              <Button variant="secondary" onClick={newChat}>
+                New chat
+              </Button>
             </div>
             <div className="flex-1 justify-between items-center">
               RAY Chatbot
@@ -145,5 +151,3 @@ const Chatbot: React.FC = () => {
 };
 
 export default Chatbot;
-
-// TODO: add functionality to the new chat button
