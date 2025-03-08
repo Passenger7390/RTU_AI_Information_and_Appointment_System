@@ -1,0 +1,12 @@
+anyio
+bcrypt
+fastapi
+google-genai
+pydantic
+pyjwt
+python-dotenv
+python-multipart
+rapidfuzz
+sqlalchemy
+uvicorn
+psycopg2-binary

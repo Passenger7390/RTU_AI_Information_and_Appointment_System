@@ -15,13 +15,9 @@ app.include_router(chat_router)
 
 origins = [
     "http://localhost:5173",
-    "http://localhost:4173",
-    "http://0.0.0.0:4173",
-    "http://0.0.0.0:4173",
-    "http://192.168.100.76:4173/",
-    "http://172.17.0.1:4173/",
-    "http://192.168.100.76:5173",
+    "http://192.168.100.76:5173/",
     "http://192.168.100.76:4173",
+    "http://192.168.100.59:3000",
 ]
 
 app.add_middleware(
