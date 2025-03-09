@@ -6,7 +6,6 @@ import { columns } from "@/my_components/table/Columns";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { FAQ, FAQCard, FAQDialog } from "@/my_components/FAQ";
-import { Button } from "@/components/ui/button";
 
 interface TableData {
   id: number;

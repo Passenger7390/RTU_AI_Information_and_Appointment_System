@@ -1,23 +1,42 @@
-version: "3.8"
 services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile.dev # or your production Dockerfile if needed
-    volumes:
-      - ./backend:/app
+      dockerfile: Dockerfile.prod # Use Dockerfile.dev for development, or Dockerfile for production
+    depends_on:
+      - postgres
+    env_file:
+      - .env
     ports:
       - "8000:8000"
-    environment:
-      - PYTHONDONTWRITEBYTECODE=1
-      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./backend:/app
+      - ./uploads:/uploads
 
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.prod # Use Dockerfile.dev for development, or Dockerfile for production
+    depends_on:
+      - postgres
+    ports:
+      - "3000:80"
+    env_file:
+      - .env
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    ports:
-      - "3000:3000"
+
+volumes:
+  postgres_data:

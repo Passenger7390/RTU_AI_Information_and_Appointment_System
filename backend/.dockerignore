@@ -1,0 +1,10 @@
+# Node.js dependencies (local folder, not needed in image)
+node_modules
+
+# Python cache directories and files
+__pycache__
+*.pyc
+*.pyo
+
+# Environment variable file (avoid including sensitive info)
+.env
