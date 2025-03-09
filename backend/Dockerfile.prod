@@ -1,4 +1,4 @@
-# Stage 1: Build (if needed, e.g. if you have C extensions or assets to compile)
+# Stage 1: Build (if needed)
 FROM python:3.13.2-slim as builder
 
 ENV VIRTUAL_ENV=/opt/venv
@@ -11,10 +11,12 @@ RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements-rpi.
 RUN pip install uvicorn gunicorn
 COPY . .
 
+# Create the uploads directory in the builder stage
+RUN mkdir -p /uploads
+
 # Stage 2: Final image
 FROM python:3.13.2-slim
 
-# Copy the virtual environment from the builder stage
 ENV VIRTUAL_ENV=/opt/venv
 COPY --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
@@ -22,11 +24,13 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 WORKDIR /app
 COPY --from=builder /app /app
 
+# Ensure the uploads directory exists in the final image
+RUN mkdir -p /uploads
+
 EXPOSE 8000
 
-# Create entrypoint script
+# Copy entrypoint script and set executable permissions
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Use entrypoint script instead of direct command
 ENTRYPOINT ["/entrypoint.sh"]

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { TableData } from "./my_components/table/Columns";
 import { FAQ } from "./my_components/FAQ";
-const api = import.meta.env.VITE_PROD_API;
+const api = import.meta.env.VITE_PROD_API || "";
 
 // export const api = import.meta.env.VITE_DEV_API;
 export const adApi = `${api}/ad`;

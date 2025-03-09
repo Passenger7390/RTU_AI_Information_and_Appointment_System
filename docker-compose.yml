@@ -16,27 +16,30 @@ services:
       dockerfile: Dockerfile.prod # Use Dockerfile.dev for development, or Dockerfile for production
     depends_on:
       - postgres
+    restart: always
     env_file:
       - .env
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app
-      - ./uploads:/uploads
+      - uploads:/uploads
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod # Use Dockerfile.dev for development, or Dockerfile for production
     depends_on:
-      - postgres
+      - backend
+    environment:
+      - VITE_PROD_API=
     ports:
       - "3000:80"
+    restart: always
     env_file:
       - .env
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - uploads:/uploads:ro
 
 volumes:
   postgres_data:
+  uploads:
