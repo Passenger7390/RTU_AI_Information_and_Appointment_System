@@ -1,7 +1,6 @@
 import { getUser } from "@/api";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-// import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { AdComponent, FAQComponent } from "@/my_components/Manage";
 

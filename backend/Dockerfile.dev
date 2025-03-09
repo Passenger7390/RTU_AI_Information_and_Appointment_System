@@ -1,0 +1,24 @@
+# Use an official Python image
+FROM python:3.13-slim
+
+# Set environment variables to prevent .pyc files and ensure stdout is unbuffered
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Set working directory
+WORKDIR /app
+
+# Install dependencies
+COPY requirements-rpi.txt .
+RUN python3 -m venv venv
+RUN pip install --upgrade pip && pip install -r requirements-rpi.txt
+
+# Copy the source code into the container
+COPY . .
+
+# Expose the port (adjust if needed)
+EXPOSE 8000
+
+# Run uvicorn with auto-reload enabled for development
+CMD ["source", "venv/bin/activate"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

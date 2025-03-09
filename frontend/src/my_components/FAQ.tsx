@@ -16,8 +16,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
-// TODO: Implement delete functionality in the card
+import { IoAddSharp } from "react-icons/io5";
 
 export interface FAQCardProps {
   idProp: number;
@@ -225,7 +224,12 @@ export const FAQDialog = ({ onRefresh }: FAQDialogProps) => {
         setIsDialogOpen(open);
       }}
     >
-      <DialogTrigger>Add FAQ</DialogTrigger>
+      <DialogTrigger>
+        <Button className="h-10 w-[fit-content] flex justify-center">
+          <IoAddSharp />
+          Add new FAQ
+        </Button>
+      </DialogTrigger>
       <DialogContent className="space-y-2 w-full">
         <DialogHeader>
           <DialogTitle className="text-xl">Add new FAQ</DialogTitle>

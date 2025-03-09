@@ -6,6 +6,7 @@ import { columns } from "@/my_components/table/Columns";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { FAQ, FAQCard, FAQDialog } from "@/my_components/FAQ";
+import { Button } from "@/components/ui/button";
 
 interface TableData {
   id: number;
@@ -100,9 +101,9 @@ export const FAQComponent = () => {
         <FAQDialog onRefresh={fetchFAQs} />
       </div>
       {faqs.length == 0 ? (
-        <div className="border bg-green-700 h-full w-full flex items-center justify-center">
-          <p>Add new FAQ</p>
-          <p>test</p>
+        <div className="flex flex-col justify-center items-center h-[72vh] w-full rounded-xl space-y-2">
+          <p>There is no FAQ. Add a new one.</p>
+          <FAQDialog onRefresh={fetchFAQs} />
         </div>
       ) : (
         <div className="w-full h-full grid grid-cols-3 gap-4">

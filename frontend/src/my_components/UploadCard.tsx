@@ -86,7 +86,6 @@ const UploadCard = ({ onUploadComplete }: UploadCardProps) => {
     try {
       setLoading(true);
       await uploadFile(file, duration, title, formattedDate);
-      // TODO: Do a toast in here
       onUploadComplete?.(); // Refresh table data after successful upload
       resetForm();
       setDialogOpen(false);

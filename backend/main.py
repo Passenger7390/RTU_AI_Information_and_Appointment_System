@@ -7,6 +7,7 @@ from adcrud import router as adcrud_router, periodic_cleanup
 from chatcrud import router as chat_router
 import asyncio
 
+# TODO: Create map function
 
 app = FastAPI()
 app.include_router(auth_router)
