@@ -33,7 +33,7 @@ services:
     environment:
       - VITE_PROD_API=
     ports:
-      - "3000:80"
+      - "80:80"
     restart: always
     env_file:
       - .env
