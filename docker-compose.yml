@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod # Use Dockerfile.dev for development, or Dockerfile for production
+    depends_on:
+      - postgres
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/uploads:/app/uploads
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod # Use Dockerfile.dev for development, or Dockerfile for production
+    depends_on:
+      - backend
+    environment:
+      - VITE_PROD_API=
+    ports:
+      - "3000:80"
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - uploads:/uploads:ro
+
+volumes:
+  postgres_data:
+  uploads:

@@ -7,6 +7,7 @@ from adcrud import router as adcrud_router, periodic_cleanup
 from chatcrud import router as chat_router
 import asyncio
 
+# TODO: Ad Upload not working but everything else is working
 
 app = FastAPI()
 app.include_router(auth_router)
@@ -18,6 +19,8 @@ origins = [
     "http://192.168.100.76:5173/",
     "http://192.168.100.76:4173",
     "http://192.168.100.59:3000",
+    "http://192.168.100.76:3000",
+    "http://localhost:3000"
 ]
 
 app.add_middleware(
