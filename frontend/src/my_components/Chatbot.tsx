@@ -83,12 +83,12 @@ const Chatbot: React.FC = () => {
     const inactivityTimer = setInterval(() => {
       const now = Date.now();
       const inactiveTime = now - lastActivity; // This will measure the inactive time of the user
-      if (inactiveTime > 10000 && messages.length > 0 && isTyping) {
+      if (inactiveTime > 60000 && messages.length > 0 && isTyping) {
         // If the inactive time exceeds 60 seconds, the chat will be reset
         newChat();
         setQuery("");
       }
-    }, 2000);
+    }, 5000);
 
     return () => clearInterval(inactivityTimer);
   }, [lastActivity, messages, isTyping]);

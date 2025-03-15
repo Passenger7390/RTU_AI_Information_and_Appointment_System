@@ -1,7 +1,7 @@
-### Steps to run application ###
+### Steps to run application
 
-1) Install Docker
+1. Get to the root directory.
 
-2) Get the latest image of PostgreSQL in Docker
+2. Run 'chmod +x setup.sh'
 
-3) 
+3. Run './setup.sh' to see the commands

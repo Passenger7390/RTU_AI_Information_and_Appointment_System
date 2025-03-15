@@ -6,7 +6,7 @@ import { useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 const UserPage = () => {
-  const [view, setView] = useState("map");
+  const [view, setView] = useState("chatbot");
 
   return (
     <div className="flex-col">
@@ -17,6 +17,7 @@ const UserPage = () => {
           value={view}
           onValueChange={(value) => value && setView(value)}
           className="flex flex-col gap-3 rounded-lg size-full"
+          defaultChecked
         >
           <ToggleGroupItem
             value="chatbot"
