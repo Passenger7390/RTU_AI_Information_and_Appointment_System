@@ -18,6 +18,8 @@ export interface Message {
   text: string;
 }
 
+// TODO: Implement reset after one minute if the user is not typing
+
 const Chatbot: React.FC = () => {
   const [query, setQuery] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);

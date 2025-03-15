@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import FastAPI, HTTPException,status
 from fastapi.middleware.cors import CORSMiddleware
 from models import Image
@@ -7,8 +8,6 @@ from adcrud import router as adcrud_router, periodic_cleanup
 from chatcrud import router as chat_router
 import asyncio
 
-# TODO: Ad Upload not working but everything else is working
-
 app = FastAPI()
 app.include_router(auth_router)
 app.include_router(adcrud_router)
@@ -16,6 +15,7 @@ app.include_router(chat_router)
 
 origins = [
     "http://localhost:5173",
+    "http://127.0.0.1:5173",
     "http://192.168.100.76:5173/",
     "http://192.168.100.76:4173",
     "http://192.168.100.59:3000",
@@ -35,6 +35,10 @@ app.add_middleware(
 async def startup_event():
     asyncio.create_task(periodic_cleanup())
 
+
+@app.get("/ping", status_code=status.HTTP_200_OK)
+async def ping():
+    return {"message": "pong", "status": "ok", "timestamp": datetime.now().isoformat()}
     
 @app.get("/dashboard", status_code=status.HTTP_200_OK)
 async def getLogin(user: user_dependency, db: db_dependency):
