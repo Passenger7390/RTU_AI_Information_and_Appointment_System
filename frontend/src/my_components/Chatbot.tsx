@@ -121,7 +121,10 @@ const Chatbot: React.FC = () => {
             <div className="w-24"></div>
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex-1 overflow-y-auto p-2 space-y-2 bg-blue-500">
+        <CardContent
+          className="flex-1 overflow-y-auto p-2 space-y-2 bg-blue-500"
+          onScroll={() => setLastActivity(Date.now())}
+        >
           {messages.length === 0 ? ( // This block is a welcome message, this will disappear when the user asks RAY
             <div className="flex h-[95%] items-center justify-center">
               <div className="text-center space-y-2">
