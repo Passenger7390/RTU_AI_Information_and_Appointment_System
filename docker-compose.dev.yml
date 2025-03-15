@@ -36,7 +36,7 @@ services:
     env_file:
       - .env
     environment:
-      - VITE_DEV_API=http://backend:8000
+      - VITE_DEV_API=http://localhost:8000
     ports:
       - "5173:5173"
     restart: always
