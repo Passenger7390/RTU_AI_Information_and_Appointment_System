@@ -7,8 +7,17 @@ from auth import router as auth_router, user_dependency
 from adcrud import router as adcrud_router, periodic_cleanup
 from chatcrud import router as chat_router
 import asyncio
+import os
 
-app = FastAPI()
+env = os.getenv("ENV")
+
+if env == "development":
+    app = FastAPI(title="Running in development environment")
+elif env == "production":
+    app = FastAPI(title="Running in production environment", docs_url=None, redoc_url=None)
+else:
+    app = FastAPI(title="Running in production environment", docs_url=None, redoc_url=None)
+
 app.include_router(auth_router)
 app.include_router(adcrud_router)
 app.include_router(chat_router)
