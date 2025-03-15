@@ -18,12 +18,12 @@ export interface Message {
   text: string;
 }
 
-// TODO: Implement reset after one minute if the user is not typing
-
 const Chatbot: React.FC = () => {
   const [query, setQuery] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [lastActivity, setLastActivity] = useState(Date.now());
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const newChat = () => {
@@ -74,8 +74,34 @@ const Chatbot: React.FC = () => {
         { sender: "bot", text: "Sorry, an error occurred." },
       ]);
     } finally {
-      setQuery("");
       setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // The timer will check for inactivity every two seconds
+    const inactivityTimer = setInterval(() => {
+      const now = Date.now();
+      const inactiveTime = now - lastActivity; // This will measure the inactive time of the user
+      if (inactiveTime > 10000 && messages.length > 0 && isTyping) {
+        // If the inactive time exceeds 60 seconds, the chat will be reset
+        newChat();
+        setQuery("");
+      }
+    }, 2000);
+
+    return () => clearInterval(inactivityTimer);
+  }, [lastActivity, messages, isTyping]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setQuery(query);
+    setLastActivity(Date.now());
+
+    if (query && !isTyping) {
+      setIsTyping(true);
+    } else if (!query && isTyping) {
+      setIsTyping(false);
     }
   };
 
@@ -138,7 +164,7 @@ const Chatbot: React.FC = () => {
             <Input
               type="text"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={handleInputChange}
               placeholder="Type your message..."
               className="flex-1"
             />
