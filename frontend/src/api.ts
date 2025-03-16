@@ -27,7 +27,6 @@ export const fetchImageFilename = async (): Promise<ImageData[]> => {
     // In development: http://localhost:8000/api/images
     // In production: /api/images (relative URL that Nginx proxies)
     const endpoint = `${api}/api/images`;
-    console.log(`Fetching images from ${endpoint} (${env} mode)`);
 
     const response = await axios.get<ImageData[]>(endpoint);
     return response.data; // returns list of image URLs
@@ -146,7 +145,6 @@ export const deleteRows = async (ids: number[]) => {
 
 export const getChatbotResponse = async (query: string) => {
   const res = await axios.post(`${chatApi}/chat`, { query });
-  console.log(res);
   return res.data;
 };
 
@@ -171,7 +169,6 @@ export const addFAQ = async (
       },
     }
   );
-  console.log(res);
   return res.data;
 };
 

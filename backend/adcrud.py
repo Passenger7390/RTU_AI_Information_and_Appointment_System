@@ -33,7 +33,6 @@ async def upload_file(file: UploadFile = File(...), duration: int = Form(...), t
     expiration_time = datetime.strptime(expires_in, '%Y-%m-%d')  # Set Expiration date
 
     today = datetime.now().date()
-    # print(datetime.datetime.time(23,59,59))
     if expiration_time.date() == today:
         expiration_time = datetime.combine(today, time(23,59,59))
     new_image = Image(filename=file.filename, title=title, duration=duration, expires_in=expiration_time)
