@@ -1,7 +1,15 @@
 import axios from "axios";
 import { TableData } from "./my_components/table/Columns";
 import { FAQ } from "./my_components/FAQ";
-const api = import.meta.env.VITE_PROD_API || import.meta.env.VITE_DEV_API;
+
+// Environment-aware API configuration
+const env = import.meta.env.VITE_ENV || "production";
+const isDev = env === "development";
+
+// For development, use the full URL; for production, use relative URLs
+const api = isDev
+  ? import.meta.env.VITE_DEV_API || "http://localhost:8000"
+  : "";
 
 // export const api = import.meta.env.VITE_DEV_API;
 export const adApi = `${api}/ad`;
@@ -16,7 +24,12 @@ export interface ImageData {
 // GET request to / to fetch iamge file name
 export const fetchImageFilename = async (): Promise<ImageData[]> => {
   try {
-    const response = await axios.get<ImageData[]>(`${api}`);
+    // In development: http://localhost:8000/api/images
+    // In production: /api/images (relative URL that Nginx proxies)
+    const endpoint = `${api}/api/images`;
+    console.log(`Fetching images from ${endpoint} (${env} mode)`);
+
+    const response = await axios.get<ImageData[]>(endpoint);
     return response.data; // returns list of image URLs
   } catch (error) {
     console.error("Error fetching ads:", error);
@@ -84,7 +97,10 @@ export const uploadFile = async (
 
 // GET request to /media/{filename} to get image
 export const getImage = (filename: string) => {
-  return `${adApi}/media/${filename}`;
+  // Make sure to include /ad/media/ prefix and handle the case when filename already has it
+  if (!filename) return "";
+  if (filename.startsWith("/ad/media/")) return filename;
+  return `/ad/media/${filename}`;
 };
 
 export const getTableData = async (): Promise<TableData[]> => {

@@ -30,6 +30,9 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod # Use Dockerfile.dev for development, or Dockerfile for production
+      args: # These are build-time arguments
+        VITE_ENV: production
+        VITE_DEV_API: "" # Empty string for relative URLs
     depends_on:
       - backend
     environment:

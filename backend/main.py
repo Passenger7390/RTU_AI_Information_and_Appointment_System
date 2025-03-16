@@ -56,7 +56,13 @@ async def get_images(db: db_dependency):
         list_of_images.append({"filename": image.filename, "duration": image.duration})
     return list_of_images
 
-
+@app.get('/api/images')
+async def get_images_api(db: db_dependency):
+    images = db.query(Image).all()
+    list_of_images = []
+    for image in images:
+        list_of_images.append({"filename": image.filename, "duration": image.duration})
+    return list_of_images
 
 
 
