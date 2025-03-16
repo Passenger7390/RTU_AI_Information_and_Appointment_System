@@ -41,7 +41,6 @@ async def ping():
     
 @app.get("/dashboard", status_code=status.HTTP_200_OK)
 async def getLogin(user: user_dependency, db: db_dependency):
-    print(user)
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed")
     return {"message" : "Welcome Admin!"}
@@ -56,7 +55,13 @@ async def get_images(db: db_dependency):
         list_of_images.append({"filename": image.filename, "duration": image.duration})
     return list_of_images
 
-
+@app.get('/api/images')
+async def get_images_api(db: db_dependency):
+    images = db.query(Image).all()
+    list_of_images = []
+    for image in images:
+        list_of_images.append({"filename": image.filename, "duration": image.duration})
+    return list_of_images
 
 
 

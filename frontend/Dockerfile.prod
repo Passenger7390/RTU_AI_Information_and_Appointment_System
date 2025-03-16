@@ -1,16 +1,23 @@
-# Stage 1: Build the React app using pnpm
+# Build stage
 FROM node:23-alpine as builder
 
-# Install pnpm globally
 RUN npm install -g pnpm
-
 WORKDIR /app
 
-# Copy package files and install dependencies
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install
 
-# Copy the entire app and build for production
+# Accept build arguments with defaults
+ARG VITE_ENV=production
+ARG VITE_DEV_API=''
+
+# Set as environment variables for the build
+ENV VITE_ENV=$VITE_ENV
+ENV VITE_DEV_API=$VITE_DEV_API
+
+# Debug output
+RUN echo "Building frontend with VITE_ENV=$VITE_ENV"
+
 COPY . .
 RUN pnpm build
 

@@ -151,23 +151,39 @@ const UploadCard = ({ onUploadComplete }: UploadCardProps) => {
               <Popover open={openExpiration} onOpenChange={setOpenExpiration}>
                 <PopoverTrigger asChild>
                   <Button
+                    type="button"
                     variant={"outline"}
                     className={cn(
                       "w-[280px] justify-start text-left font-normal",
                       !date && "text-muted-foreground"
                     )}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setOpenExpiration(true);
+                    }}
                   >
                     <FaRegCalendarAlt className="mr-2 h-4 w-4" />
                     {date ? format(date, "PPP") : <span>Pick a date</span>}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
+                <PopoverContent
+                  className="w-auto p-0"
+                  style={{
+                    zIndex: 99999, // Much higher z-index
+                    position: "relative", // Ensure proper stacking context
+                  }}
+                  align="center"
+                  sideOffset={5}
+                >
                   <Calendar
                     mode="single"
                     selected={date}
-                    onSelect={(date) => {
-                      setDate(date);
-                      setOpenExpiration(false);
+                    onSelect={(newDate) => {
+                      if (newDate) {
+                        setDate(newDate);
+                        setTimeout(() => setOpenExpiration(false), 100); // Delay closing
+                      }
                     }}
                     disabled={(date) => date < addDays(new Date(), -1)}
                     initialFocus

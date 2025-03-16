@@ -68,14 +68,12 @@ async def add_faq(faq: FAQCreate, db: Session = Depends(get_db), current_user: U
 
 @router.put("/faqs", response_model=FAQOut)
 async def update_faq(params: FAQUpdate, db: Session = Depends(get_db)):
-    print("this is executed")
     existing = db.query(FAQ).get(params.id)
     if not existing:
         raise HTTPException(status_code=404, detail="FAQ not found")
     existing.question = params.question
     existing.synonyms = params.synonyms
     existing.answer = params.answer
-    print(f"existing: {existing}")
     db.commit()
     db.refresh(existing)
     return existing

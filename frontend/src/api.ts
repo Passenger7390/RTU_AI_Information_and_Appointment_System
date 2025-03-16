@@ -1,7 +1,15 @@
 import axios from "axios";
 import { TableData } from "./my_components/table/Columns";
 import { FAQ } from "./my_components/FAQ";
-const api = import.meta.env.VITE_PROD_API || import.meta.env.VITE_DEV_API;
+
+// Environment-aware API configuration
+const env = import.meta.env.VITE_ENV || "production";
+const isDev = env === "development";
+
+// For development, use the full URL; for production, use relative URLs
+const api = isDev
+  ? import.meta.env.VITE_DEV_API || "http://localhost:8000"
+  : "";
 
 // export const api = import.meta.env.VITE_DEV_API;
 export const adApi = `${api}/ad`;
@@ -16,7 +24,11 @@ export interface ImageData {
 // GET request to / to fetch iamge file name
 export const fetchImageFilename = async (): Promise<ImageData[]> => {
   try {
-    const response = await axios.get<ImageData[]>(`${api}`);
+    // In development: http://localhost:8000/api/images
+    // In production: /api/images (relative URL that Nginx proxies)
+    const endpoint = `${api}/api/images`;
+
+    const response = await axios.get<ImageData[]>(endpoint);
     return response.data; // returns list of image URLs
   } catch (error) {
     console.error("Error fetching ads:", error);
@@ -84,7 +96,25 @@ export const uploadFile = async (
 
 // GET request to /media/{filename} to get image
 export const getImage = (filename: string) => {
-  return `${adApi}/media/${filename}`;
+  if (!filename) return "";
+
+  const env = import.meta.env.VITE_ENV || "production";
+  const isDev = env === "development";
+
+  // Clean the filename (remove any leading slashes)
+  const cleanFilename = filename.startsWith("/")
+    ? filename.substring(1)
+    : filename;
+
+  if (isDev) {
+    // Development: use full URL
+    const baseApi = import.meta.env.VITE_DEV_API || "http://localhost:8000";
+    // Make sure we don't double up on slashes
+    return `${baseApi}/ad/media/${cleanFilename}`;
+  }
+
+  // Production: use relative URL for Nginx proxying
+  return `/ad/media/${cleanFilename}`;
 };
 
 export const getTableData = async (): Promise<TableData[]> => {
@@ -115,7 +145,6 @@ export const deleteRows = async (ids: number[]) => {
 
 export const getChatbotResponse = async (query: string) => {
   const res = await axios.post(`${chatApi}/chat`, { query });
-  console.log(res);
   return res.data;
 };
 
@@ -140,7 +169,6 @@ export const addFAQ = async (
       },
     }
   );
-  console.log(res);
   return res.data;
 };
 

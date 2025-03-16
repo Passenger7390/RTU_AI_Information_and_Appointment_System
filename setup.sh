@@ -85,7 +85,7 @@ esac
 case $ACTION in
   up)
     echo "Starting $ENV containers..."
-    docker compose -f $COMPOSE_FILE up -d
+    docker compose -f $COMPOSE_FILE up -d --build
     ;;
   down)
     echo "Stopping $ENV containers..."
