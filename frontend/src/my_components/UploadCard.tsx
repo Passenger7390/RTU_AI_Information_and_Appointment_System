@@ -167,13 +167,23 @@ const UploadCard = ({ onUploadComplete }: UploadCardProps) => {
                     {date ? format(date, "PPP") : <span>Pick a date</span>}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" style={{ zIndex: 9999 }}>
+                <PopoverContent
+                  className="w-auto p-0"
+                  style={{
+                    zIndex: 99999, // Much higher z-index
+                    position: "relative", // Ensure proper stacking context
+                  }}
+                  align="center"
+                  sideOffset={5}
+                >
                   <Calendar
                     mode="single"
                     selected={date}
-                    onSelect={(date) => {
-                      setDate(date);
-                      setOpenExpiration(false);
+                    onSelect={(newDate) => {
+                      if (newDate) {
+                        setDate(newDate);
+                        setTimeout(() => setOpenExpiration(false), 100); // Delay closing
+                      }
                     }}
                     disabled={(date) => date < addDays(new Date(), -1)}
                     initialFocus

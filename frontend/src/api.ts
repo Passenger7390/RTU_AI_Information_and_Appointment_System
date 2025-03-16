@@ -97,10 +97,25 @@ export const uploadFile = async (
 
 // GET request to /media/{filename} to get image
 export const getImage = (filename: string) => {
-  // Make sure to include /ad/media/ prefix and handle the case when filename already has it
   if (!filename) return "";
-  if (filename.startsWith("/ad/media/")) return filename;
-  return `/ad/media/${filename}`;
+
+  const env = import.meta.env.VITE_ENV || "production";
+  const isDev = env === "development";
+
+  // Clean the filename (remove any leading slashes)
+  const cleanFilename = filename.startsWith("/")
+    ? filename.substring(1)
+    : filename;
+
+  if (isDev) {
+    // Development: use full URL
+    const baseApi = import.meta.env.VITE_DEV_API || "http://localhost:8000";
+    // Make sure we don't double up on slashes
+    return `${baseApi}/ad/media/${cleanFilename}`;
+  }
+
+  // Production: use relative URL for Nginx proxying
+  return `/ad/media/${cleanFilename}`;
 };
 
 export const getTableData = async (): Promise<TableData[]> => {
