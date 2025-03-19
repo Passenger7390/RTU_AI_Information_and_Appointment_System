@@ -9,7 +9,7 @@ import UserPage from "./pages/UserPage";
 
 const App = () => {
   return (
-    <ThemeProvider>
+    <ThemeProvider defaultTheme="dark">
       <Router>
         <Routes>
           <Route path="/" element={<AdPage />} />
