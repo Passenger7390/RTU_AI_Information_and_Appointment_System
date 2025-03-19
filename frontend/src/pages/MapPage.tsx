@@ -1,5 +1,4 @@
 import { FaHome } from "react-icons/fa";
-
 import { Button } from "@/components/ui/button";
 import {
   RtuMap,
@@ -9,7 +8,6 @@ import {
   FourthFloor,
 } from "@/my_components/ImageComponent";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-
 import {
   Dialog,
   DialogContent,
@@ -32,70 +30,74 @@ const MapPage = () => {
       <div className="w-full h-[80vh] bg-gray-800 rounded-lg shadow-lg">
         <TransformWrapper
           initialScale={1}
-          minScale={0.5}
-          maxScale={4}
-          limitToBounds={true}
+          minScale={0.3}
+          maxScale={6}
           centerOnInit={true}
-          alignmentAnimation={{ sizeX: 0, sizeY: 0 }}
+          limitToBounds={false}
+          doubleClick={{ disabled: false }}
+          panning={{ velocityDisabled: false }}
+          alignmentAnimation={{ sizeX: 2, sizeY: 2 }} // Better animation values
           centerZoomedOut={true}
-          initialPositionX={0} // Add this to center horizontally
-          initialPositionY={0} // Add this to center vertically
         >
-          <TransformComponent
-            wrapperStyle={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-            contentStyle={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <div className="p-5 rounded-lg shadow-lg relative">
-              {title === "Rizal Technological University Map" ? (
-                <RtuMap />
-              ) : title === "JVE ITC Ground Floor" ? (
-                <GroundFloor />
-              ) : title === "JVE ITC Second Floor" ? (
-                <SecondFloor />
-              ) : title === "JVE ITC Third Floor" ? (
-                <ThirdFloor />
-              ) : title === "JVE ITC Fourth Floor" ? (
-                <FourthFloor />
-              ) : (
-                <RtuMap />
-              )}
+          {({ resetTransform }) => (
+            <>
+              <TransformComponent
+                wrapperStyle={{
+                  width: "100%",
+                  height: "100%",
+                }}
+                contentStyle={{
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <div className="flex justify-center items-center h-full w-full">
+                  {/* Your map content */}
+                  {title === "Rizal Technological University Map" ? (
+                    <RtuMap />
+                  ) : title === "JVE ITC Ground Floor" ? (
+                    <GroundFloor />
+                  ) : title === "JVE ITC Second Floor" ? (
+                    <SecondFloor />
+                  ) : title === "JVE ITC Third Floor" ? (
+                    <ThirdFloor />
+                  ) : title === "JVE ITC Fourth Floor" ? (
+                    <FourthFloor />
+                  ) : (
+                    <RtuMap />
+                  )}
 
-              <BuildingDialog
-                props="absolute top-[140px] left-[465px] opacity-0 w-[165px] h-[370px]"
-                setTitle={setTitle}
-                open={dialogOpen}
-                setOpen={setDialogOpen}
-                setTrigger={setTrigger}
-                trigger={trigger}
-              />
-            </div>
-          </TransformComponent>
+                  <BuildingDialog
+                    props="absolute top-[140px] left-[465px] opacity-0 w-[165px] h-[370px]"
+                    setTitle={setTitle}
+                    open={dialogOpen}
+                    setOpen={setDialogOpen}
+                    setTrigger={setTrigger}
+                    trigger={trigger}
+                  />
+                </div>
+              </TransformComponent>
+              <Button
+                onClick={() => {
+                  setTitle("Rizal Technological University Map");
+                  setDialogOpen(false);
+                  setTrigger(false);
+                  resetTransform();
+                }}
+                className="mx-auto size-24 flex"
+                size="icon"
+                variant="outline"
+              >
+                <FaHome className="size-10" />
+              </Button>
+            </>
+          )}
         </TransformWrapper>
       </div>
-      <div className="flex">
-        <Button
-          onClick={() => {
-            setTitle("Rizal Technological University Map");
-            setDialogOpen(false);
-            setTrigger(false);
-          }}
-          className="mx-auto size-24 flex"
-          size="icon"
-          variant="outline"
-        >
-          <FaHome className="size-10" />
-        </Button>
-      </div>
+      <div className="flex"></div>
     </div>
   );
 };
