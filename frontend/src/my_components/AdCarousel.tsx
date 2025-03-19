@@ -6,6 +6,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { fetchImageFilename, getImage, ImageData } from "@/api";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 const REFRESH_INTERVAL = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
 // const REFRESH_INTERVAL = 30000; // 30s econds in milliseconds
@@ -98,11 +99,16 @@ const AdCarousel = () => {
       <CarouselContent>
         {images.map((image, index) => (
           <CarouselItem key={index}>
-            <img
-              src={getImage(image.filename)}
-              alt={image.filename}
-              className="w-screen h-screen object-contain"
-            />
+            <AspectRatio
+              ratio={4 / 3}
+              className="bg-muted mx-auto w-full max-w-[1280px]"
+            >
+              <img
+                src={getImage(image.filename)}
+                alt={image.filename}
+                className="w-full h-full object-contain"
+              />
+            </AspectRatio>
           </CarouselItem>
         ))}
       </CarouselContent>
