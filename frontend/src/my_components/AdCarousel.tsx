@@ -101,7 +101,7 @@ const AdCarousel = () => {
           <CarouselItem key={index}>
             <AspectRatio
               ratio={4 / 3}
-              className="bg-muted mx-auto w-full max-w-[1280px]"
+              className="bg-muted mx-auto w-full max-w-[1280px] max-h-[800px]"
             >
               <img
                 src={getImage(image.filename)}
