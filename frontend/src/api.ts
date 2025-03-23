@@ -15,6 +15,8 @@ const api = isDev
 export const adApi = `${api}/ad`;
 export const authApi = `${api}/auth`;
 export const chatApi = `${api}/ray`;
+export const appointmentApi = `${api}/appointment`;
+export const professorApi = `${api}/professor`;
 
 export interface ImageData {
   filename: string;

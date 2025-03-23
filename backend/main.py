@@ -8,7 +8,7 @@ from adcrud import router as adcrud_router, periodic_cleanup
 from chatcrud import router as chat_router
 import asyncio
 import os
-
+from appointmentCore import router as appointment_router
 env = os.getenv("ENV")
 
 if env == "development":
@@ -21,7 +21,7 @@ else:
 app.include_router(auth_router)
 app.include_router(adcrud_router)
 app.include_router(chat_router)
-
+app.include_router(appointment_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
