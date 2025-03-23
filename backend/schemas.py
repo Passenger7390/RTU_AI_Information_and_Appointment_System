@@ -69,7 +69,7 @@ class ProfessorResponse(BaseModel):
     office_hours: Optional[str] = None
     title: Optional[str] = None
 
-class AppointmentRequest(BaseModel):
+class AppointmentCreate(BaseModel):
     student_name: str
     student_id: str
     student_email: str
@@ -85,3 +85,9 @@ class AppointmentResponse(BaseModel):
     start_time: datetime
     end_time: datetime
     status: str
+
+class AppointmentGet(BaseModel):
+    uuid: UUID
+
+class AppointmentGetByReference(BaseModel):
+    reference: str
