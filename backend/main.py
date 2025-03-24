@@ -6,9 +6,10 @@ from database import db_dependency
 from auth import router as auth_router, user_dependency
 from adcrud import router as adcrud_router, periodic_cleanup
 from chatcrud import router as chat_router
+from appointmentCore import router as appointment_router
+from professorCore import router as professor_router
 import asyncio
 import os
-from appointmentCore import router as appointment_router
 env = os.getenv("ENV")
 
 if env == "development":
@@ -22,6 +23,7 @@ app.include_router(auth_router)
 app.include_router(adcrud_router)
 app.include_router(chat_router)
 app.include_router(appointment_router)
+app.include_router(professor_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

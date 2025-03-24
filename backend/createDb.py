@@ -11,6 +11,7 @@ class User(Base):
     username = Column(String, unique=True,nullable=False)
     hashed_password = Column(String,nullable=False)    
 
+
 class Image(Base):
     __tablename__ = "images"
     id = Column(Integer, primary_key=True, index=True)
@@ -20,6 +21,7 @@ class Image(Base):
     duration = Column(Integer,nullable=False)
     expires_in = Column(DateTime(timezone=True),nullable=False)
 
+
 class FAQ(Base):
     __tablename__ = "faq"
 
@@ -28,14 +30,18 @@ class FAQ(Base):
     synonyms = Column(JSONB, nullable=True)
     answer = Column(String, nullable=False)
 
+
 class ProfessorInformation(Base):
     __tablename__ = "professor_information"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, nullable=False)
+    professor_id = Column(UUID, unique=True, nullable=False)
+    first_name = Column(String, nullable=False)
+    last_name = Column(String, unique=True, nullable=False)
     email = Column(String, unique=True, nullable=False)
     office_hours = Column(String, nullable=True)
     title = Column(String, nullable=True)
+
 
 class Appointment(Base):
     __tablename__ = "appointments"
@@ -50,6 +56,7 @@ class Appointment(Base):
     end_time = Column(DateTime(timezone=True), nullable=False)
     status = Column(String, nullable=False)
     
+
 engine, _ = db_connect()
 session = create_session(engine)
 create_table(engine)

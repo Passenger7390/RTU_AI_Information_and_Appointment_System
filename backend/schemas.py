@@ -58,7 +58,8 @@ class QueryResponse(BaseModel):
     suggestions: Optional[List[str]] = None
 
 class CreateProfessor(BaseModel):
-    name: str
+    first_name: str
+    last_name: str
     email: str
     office_hours: Optional[str] = None
     title: Optional[str] = None

@@ -32,7 +32,9 @@ class ProfessorInformation(Base):
     __tablename__ = "professor_information"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, nullable=False)
+    professor_id = Column(UUID, unique=True, nullable=False)
+    first_name = Column(String, nullable=False)
+    last_name = Column(String, unique=True, nullable=False)
     email = Column(String, unique=True, nullable=False)
     office_hours = Column(String, nullable=True)
     title = Column(String, nullable=True)

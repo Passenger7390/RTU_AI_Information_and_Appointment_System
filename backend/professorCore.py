@@ -3,7 +3,8 @@ from auth import read_users_me
 from sqlalchemy.orm import Session
 from schemas import CreateProfessor, ProfessorResponse, UserBase
 from fastapi import APIRouter, Depends, HTTPException, status
-import uuid
+from models import ProfessorInformation
+from uuid import uuid4
 
 router = APIRouter(prefix='/professor', tags=['professor'])
 
@@ -21,8 +22,17 @@ async def get_professors():
     return {'professors': ['Edwin Purisima', 'Christopher Zaplan', 'Dolores Cruz']}
 
 @router.post('/add-professor')
-async def add_professor(db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
+async def add_professor(professor: CreateProfessor, db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
     """This allows the admin to add new professors"""
+    new_professor = ProfessorInformation(professor_id=uuid4(), 
+                                         first_name=professor.first_name, 
+                                         last_name=professor.last_name, 
+                                         email=professor.email, 
+                                         office_hours=professor.office_hours, 
+                                         title=professor.title)
+    db.add(new_professor)
+    db.commit()
+    db.refresh(new_professor)
     return {'message': 'Professor information added successfully'}
 
 @router.put('/update-professor')
