@@ -207,11 +207,11 @@ export const deleteFAQ = async (id: number) => {
 // ======================================================= CHAT API END ========================================================
 // ========================================================= OTP API ========================================================
 export const sendOTP = async (email: string) => {
-  const res = await axios.post(`${authApi}/send-otp`, { email });
+  const res = await axios.post(`${otpApi}/send-otp`, { email });
   return res.data;
 };
 
 export const verifyOTP = async (email: string, otp: string) => {
-  const res = await axios.post(`${authApi}/verify-otp`, { email, otp });
+  const res = await axios.post(`${otpApi}/verify-otp`, { email, otp });
   return res.data;
 };

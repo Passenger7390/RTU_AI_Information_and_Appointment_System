@@ -15,7 +15,8 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { useState } from "react";
-
+import { sendOTP, verifyOTP } from "@/api";
+import toast from "react-hot-toast";
 interface OTPDialogProps {
   email: string;
 }
@@ -24,14 +25,30 @@ const OTPDialog = ({ email }: OTPDialogProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [otp, setOtp] = useState("");
 
-  const handleVerifyEmail = () => {
-    console.log("email: ", email);
-    console.log("otp: ", otp);
+  const handleSendOTP = async () => {
+    await sendOTP(email);
   };
+
+  const handleVerifyEmail = async () => {
+    // TODO: This is working bug there is a bug in toast
+    // TODO: FIx the bug in the dialog
+
+    const res = await verifyOTP(email, otp);
+    console.log(res);
+    if (res) {
+      toast.success("Email verified successfully!");
+      setDialogOpen(false);
+    } else {
+      toast.error(res.message);
+    }
+  };
+
   return (
     <Dialog open={dialogOpen} onOpenChange={(open) => setDialogOpen(open)}>
       <DialogTrigger asChild>
-        <Button className="w-full text-xl">Verify</Button>
+        <Button className="w-full text-xl" onClick={handleSendOTP}>
+          Verify
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md p-6">
         <DialogHeader>

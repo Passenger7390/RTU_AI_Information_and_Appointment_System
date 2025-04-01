@@ -1,5 +1,5 @@
 from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, Integer, String, DateTime, func
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from datetime import datetime, timedelta
 
@@ -63,12 +63,12 @@ class OTPSecret(Base):
     secret = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     expires_at = Column(DateTime(timezone=True), nullable=False)
-    is_used = Column(String, nullable=False)
+    is_used = Column(Boolean, nullable=False)
 
     def is_expired(self):
-        test = self.expires_at < func.now()
-        print(f"OTP expired: {test}")
-        return test  
+        current_time = datetime.now(self.expires_at.tzinfo)
+        is_expired = self.expires_at < current_time
+        return is_expired  
       
     @classmethod
     def create(cls, email, secret, expiry_minutes=5):

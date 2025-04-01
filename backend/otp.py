@@ -117,14 +117,13 @@ async def verify_otp(request: OTPVerify, db: Session = Depends(get_db)):
     """
     email = request.email
     provided_otp = request.otp
+    print("provided_otp", provided_otp)
+    otp_record = get_otp_secret(db, email)
 
-    otp_record = get_otp_secret(email, db)
-    print(f"otp_record: ", otp_record)
-    # TODO: There is a bug in delete, can't verify otp
     if not otp_record:
         raise HTTPException(status_code=404, detail="OTP not found or expired")
     
-    if otp_record.is_used == True:
+    if otp_record.is_used:
         raise HTTPException(status_code=400, detail="OTP already used")
     
     if otp_record.is_expired():
@@ -153,7 +152,7 @@ def create_otp_secret(email: str, secret: str, db: Session = Depends(get_db)):
     return otp_secret
 
 
-def get_otp_secret(email: str, db: Session):
+def get_otp_secret(db: Session, email: str):
     return db.query(OTPSecret).filter(OTPSecret.email == email).first()
 
 
@@ -185,6 +184,6 @@ async def delete_expired_and_used_otp(db: Session):   # Delete expired otp
 async def cleanup_expired_otp():
     while True:
         with session as db:
-            logging.info(f"Deleting expired OTPs at {datetime.now()}")
+            # logging.info(f"Deleting expired OTPs at {datetime.now()}")
             await delete_expired_and_used_otp(db)
         await asyncio.sleep(30)  # Run every 30 seconds

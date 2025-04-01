@@ -184,7 +184,7 @@ const PersonalInfoPage = () => {
             />
             <Label className="text-xl">@rtu.edu.ph</Label>
           </div>
-          <OTPDialog email={`${studentID}@rtu.edu.ph`} />
+          <OTPDialog email={`${studentID}`} />
         </div>
         <div className="grid gap-5 grid-cols-6">
           <Label className="text-3xl text-right flex-1">Concern</Label>
