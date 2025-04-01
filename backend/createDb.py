@@ -2,6 +2,8 @@ from sqlalchemy.orm import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from database import create_session, create_table, db_connect
+from datetime import datetime, timedelta
+
 Base = declarative_base()
 
 
@@ -56,6 +58,24 @@ class Appointment(Base):
     end_time = Column(DateTime(timezone=True), nullable=False)
     status = Column(String, nullable=False)
     
+class OTPSecret(Base):
+    __tablename__ = "otp_secret"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, nullable=False)
+    secret = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    is_used = Column(String, nullable=False)
+
+    def is_expired(self):
+        return self.expires_at < func.now()
+    
+    @classmethod
+    def create(cls, email, secret, expiry_minutes=5):
+        expires_at = datetime.now() + timedelta(minutes=expiry_minutes)
+        return cls(email=email, secret=secret, expires_at=expires_at, is_used=False)
+        
 
 engine, _ = db_connect()
 session = create_session(engine)

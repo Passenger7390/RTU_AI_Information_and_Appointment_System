@@ -72,5 +72,7 @@ jspm_packages/
 
 frontend/.env
 backend/.env
+backend/token.json
+backend/credentials.json
 backend/requirements-no-selinux.txt
 startup.sh

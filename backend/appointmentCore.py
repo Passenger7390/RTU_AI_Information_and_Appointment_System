@@ -21,7 +21,8 @@ async def create_apointment(appointment: AppointmentCreate, db: Session = Depend
         student_name=appointment.student_name,
         student_id=appointment.student_id,
         student_email=appointment.student_email,
-        professor_name=appointment.professor_name,
+        professor_uuid=appointment.professor_uuid,
+        concern=appointment.concern,
         start_time=datetime.strptime(appointment.start_time, '%Y-%m-%d %H:%M:%S'),
         end_time=datetime.strptime(appointment.end_time, '%Y-%m-%d %H:%M:%S'),
         status='pending'
@@ -29,7 +30,7 @@ async def create_apointment(appointment: AppointmentCreate, db: Session = Depend
     db.add(new_appointment)
     db.commit()
     db.refresh(new_appointment)
-    uuid = str(new_appointment.uuid) # THis will give the last 6 digits of uuid to users for reference
+    uuid = str(new_appointment.uuid) # This will give the last 6 digits of uuid to users for reference
     return {'message': 'Appointment created successfully', 'reference': uuid[-6:]}
 
 @router.get('/get-appointment', response_model=AppointmentResponse)

@@ -18,7 +18,7 @@ async def get_professors():
         This is also for the admin to view the list of professors and their information in the admin panel
 
     """
-
+    # TODO: Implement /get-professors function
     return {'professors': ['Edwin Purisima', 'Christopher Zaplan', 'Dolores Cruz']}
 
 @router.post('/add-professor')
@@ -38,9 +38,12 @@ async def add_professor(professor: CreateProfessor, db: Session = Depends(get_db
 @router.put('/update-professor')
 async def update_professor_information(db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
     """This allows the admin to update the information of a professor"""
+    # TODO: Implement /update-professor function
     return {'message': 'Professor information updated successfully'}
 
 @router.delete('/delete-professor')
 async def delete_professor(db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
     """This allows the admin to delete the information of a professor"""
+    # TODO: Implement /delete-professor function
+
     return {'message': 'Professor information deleted successfully'}

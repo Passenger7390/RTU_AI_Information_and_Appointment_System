@@ -1,6 +1,8 @@
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
+from datetime import datetime, timedelta
+
 Base = declarative_base()
 
 class User(Base):
@@ -47,7 +49,28 @@ class Appointment(Base):
     student_name = Column(String, nullable=False)
     student_id = Column(String, nullable=False)
     student_email = Column(String, nullable=False)
-    professor_name = Column(Integer, nullable=False)
+    professor_uuid = Column(UUID, nullable=False)
+    concern = Column(String, nullable=False)
     start_time = Column(DateTime(timezone=True), nullable=False)
     end_time = Column(DateTime(timezone=True), nullable=False)
     status = Column(String, nullable=False)
+
+class OTPSecret(Base):
+    __tablename__ = "otp_secret"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, nullable=False)
+    secret = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    is_used = Column(String, nullable=False)
+
+    def is_expired(self):
+        test = self.expires_at < func.now()
+        print(f"OTP expired: {test}")
+        return test  
+      
+    @classmethod
+    def create(cls, email, secret, expiry_minutes=5):
+        expires_at = datetime.now() + timedelta(minutes=expiry_minutes)
+        return cls(email=email, secret=secret, expires_at=expires_at, is_used=False)

@@ -17,6 +17,7 @@ export const authApi = `${api}/auth`;
 export const chatApi = `${api}/ray`;
 export const appointmentApi = `${api}/appointment`;
 export const professorApi = `${api}/professor`;
+export const otpApi = `${api}/otp`;
 
 export interface ImageData {
   filename: string;
@@ -200,5 +201,17 @@ export const deleteFAQ = async (id: number) => {
       Authorization: `Bearer ${token}`,
     },
   });
+  return res.data;
+};
+
+// ======================================================= CHAT API END ========================================================
+// ========================================================= OTP API ========================================================
+export const sendOTP = async (email: string) => {
+  const res = await axios.post(`${authApi}/send-otp`, { email });
+  return res.data;
+};
+
+export const verifyOTP = async (email: string, otp: string) => {
+  const res = await axios.post(`${authApi}/verify-otp`, { email, otp });
   return res.data;
 };
