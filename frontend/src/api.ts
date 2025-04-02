@@ -1,7 +1,7 @@
 import axios from "axios";
 import { TableData } from "./my_components/table/Columns";
 import { FAQ } from "./my_components/FAQ";
-
+import { Professor } from "./my_components/CreateProfessorDialog";
 // Environment-aware API configuration
 const env = import.meta.env.VITE_ENV || "production";
 const isDev = env === "development";
@@ -216,4 +216,17 @@ export const verifyOTP = async (email: string, otp: string) => {
   return res.data;
 };
 
+// ======================================================= OTP API END ========================================================
+// ========================================================= PROFESSOR API ========================================================
 
+export const createProfessor = async (professor: Professor) => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  const res = await axios.post(`${professorApi}/add-professor`, professor, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+};
