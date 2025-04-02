@@ -1,16 +1,24 @@
 import UploadCard from "@/my_components/UploadCard";
 import DeleteDialog from "@/my_components/DeleteDialog";
 import { DataTable } from "@/my_components/table/DataTable";
-import { getTableData, deleteRows, getFAQs } from "@/api";
+import {
+  getTableData,
+  deleteRows,
+  getFAQs,
+  getProfessors,
+  deleteProfessors,
+} from "@/api";
 import {
   createAdColumns,
   TableData,
   ProfessorData,
+  createProfessorColumns,
 } from "@/my_components/table/Columns";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { FAQ, FAQCard, FAQDialog } from "@/my_components/FAQ";
 import CreateProfessorDialog from "./CreateProfessorDialog";
+import { Button } from "@/components/ui/button";
 
 export const AdComponent = () => {
   const [tableData, setTableData] = useState<TableData[]>([]);
@@ -47,7 +55,7 @@ export const AdComponent = () => {
       setRowSelection({});
       await fetchTableData(); // Refresh the table after deletion
     } catch (error) {
-      console.error("Failed to delete rows:", error);
+      toast.error("Failed to delete rows");
     }
   };
   return (
@@ -92,7 +100,7 @@ export const FAQComponent = () => {
   useEffect(() => {
     fetchFAQs();
   }, []);
-
+  // TODO: Implement EDIT and DELETE functionality for Professors
   return (
     <div className="flex-row h-full w-full p-2 space-y-8">
       <div>
@@ -124,9 +132,60 @@ export const FAQComponent = () => {
 
 export const ProfessorComponent = () => {
   const [professorData, setProfessorData] = useState<ProfessorData[]>([]);
+  const [rowSelection, setRowSelection] = useState({});
+
+  const columns = createProfessorColumns();
+
+  useEffect(() => {
+    fetchTableData();
+  }, []);
+
+  async function fetchTableData() {
+    try {
+      const data = await getProfessors();
+      setProfessorData(data.professors);
+    } catch (error) {
+      toast.error("Failed to fetch table data");
+    }
+  }
+
+  async function handleDeleteSelected() {
+    try {
+      const selectedRows = Object.keys(rowSelection);
+      if (selectedRows.length === 0) return;
+
+      const selectedIds = selectedRows.map(
+        (index) => professorData[parseInt(index)].professor_id
+      );
+      await deleteProfessors(selectedIds);
+      setRowSelection({});
+      await fetchTableData(); // Refresh the table after deletion
+    } catch (error) {
+      toast.error("Failed to delete rows");
+    }
+  }
+
   return (
     <div>
-      <CreateProfessorDialog />
+      <DataTable
+        columns={columns}
+        data={professorData}
+        headerClassName="bg-green-900"
+        onRowSelectionChange={setRowSelection}
+        rowSelection={rowSelection}
+        emptyMessage="No professors found. Add a new professor."
+        enablePagination={false}
+        actions={
+          <>
+            <CreateProfessorDialog onRefresh={fetchTableData} />
+            <Button>Edit</Button>
+            <DeleteDialog
+              onConfirm={handleDeleteSelected}
+              isButtonDisabled={Object.keys(rowSelection).length === 0}
+            />
+          </>
+        }
+      />
     </div>
   );
 };

@@ -15,6 +15,7 @@ import TimeRangePicker from "shadcn-time-range-picker";
 import { useState } from "react";
 import { createProfessor } from "@/api";
 import toast from "react-hot-toast";
+import { IoAddSharp } from "react-icons/io5";
 
 export interface Professor {
   first_name: string;
@@ -24,7 +25,11 @@ export interface Professor {
   title: string;
 }
 
-const CreateProfessorDialog = () => {
+interface CreateProfessorDialogProps {
+  onRefresh: () => void;
+}
+
+const CreateProfessorDialog = ({ onRefresh }: CreateProfessorDialogProps) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -62,13 +67,17 @@ const CreateProfessorDialog = () => {
       console.error(error);
       toast.error("Failed to create professor.");
     } finally {
+      onRefresh();
       closeForm();
     }
   }
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
-        <Button>Add New Professor</Button>
+        <Button>
+          <IoAddSharp />
+          Add New Professor
+        </Button>
       </DialogTrigger>
       <DialogContent className="flex-col w-full">
         <DialogHeader>

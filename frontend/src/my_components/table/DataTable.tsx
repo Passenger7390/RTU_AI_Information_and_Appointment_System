@@ -66,7 +66,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      {actions && <div className="flex justify-end">{actions}</div>}
+      {actions && <div className="flex justify-end gap-2">{actions}</div>}
       <div className="rounded-md border">
         {maxHeight ? (
           <div className={`overflow-auto max-h-[${maxHeight}]`}>

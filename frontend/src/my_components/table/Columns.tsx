@@ -76,18 +76,7 @@ export function createProfessorColumns(
   return [
     createSelectionColumn<ProfessorData>(),
     createDataColumn<ProfessorData>("professor_id", "ID", headerClassName),
-    createDataColumn<ProfessorData>(
-      "first_name",
-      "First Name",
-      headerClassName
-    ),
-    createDataColumn<ProfessorData>(
-      "first_name",
-      "First Name",
-      headerClassName
-    ),
-    createDataColumn<ProfessorData>("last_name", "Last Name", headerClassName),
-    createDataColumn<ProfessorData>("last_name", "Last Name", headerClassName),
+    createDataColumn<ProfessorData>("name", "Name", headerClassName),
     createDataColumn<ProfessorData>("email", "Email", headerClassName),
     createDataColumn<ProfessorData>(
       "office_hours",
@@ -99,8 +88,7 @@ export function createProfessorColumns(
 
 export type ProfessorData = {
   professor_id: string;
-  first_name: string;
-  last_name: string;
+  name: string;
   email: string;
   office_hours: string;
 };

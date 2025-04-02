@@ -230,3 +230,24 @@ export const createProfessor = async (professor: Professor) => {
   });
   return res.data;
 };
+
+export const getProfessors = async () => {
+  const res = await axios.get(`${professorApi}/get-professors`);
+  return res.data;
+};
+
+export const deleteProfessors = async (ids: string[]) => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  const res = await axios.delete(`${professorApi}/delete-professor`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    data: {
+      ids,
+    },
+  });
+
+  return res.data;
+};

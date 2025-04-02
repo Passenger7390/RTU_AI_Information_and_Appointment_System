@@ -101,3 +101,6 @@ class OTPRequest(BaseModel):
 class OTPVerify(BaseModel):
     email: str
     otp: str
+
+class DeleteProfessors(BaseModel):
+    ids: List[UUID]
