@@ -2,88 +2,211 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 
 import {
   Table,
   TableBody,
+  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  onRowSelectionChange: (value: any) => void;
-  rowSelection: any;
+  // Make these optional with defaults
+  onRowSelectionChange?: (value: any) => void;
+  rowSelection?: any;
+  // Add customization options
+  headerClassName?: string;
+  emptyMessage?: string;
+  caption?: React.ReactNode;
+  enableSelection?: boolean;
+  enablePagination?: boolean;
+  pageSize?: number;
+  actions?: React.ReactNode;
+  maxHeight?: string;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   onRowSelectionChange,
-  rowSelection,
+  rowSelection = {},
+  headerClassName = "bg-blue-900",
+  emptyMessage = "No data available",
+  caption,
+  enableSelection = true,
+  enablePagination = false,
+  pageSize = 10,
+  actions,
+  maxHeight,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
     columns,
     state: {
       rowSelection,
+      pagination: enablePagination ? { pageIndex: 0, pageSize } : undefined,
     },
-    enableRowSelection: true, // Add this
-    enableMultiRowSelection: true, // Add this
+    enableRowSelection: enableSelection,
+    enableMultiRowSelection: enableSelection,
     onRowSelectionChange: onRowSelectionChange,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: enablePagination
+      ? getPaginationRowModel()
+      : undefined,
   });
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader className="bg-blue-900">
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-                onClick={row.getToggleSelectedHandler()}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
+    <div className="space-y-4">
+      {actions && <div className="flex justify-end">{actions}</div>}
+      <div className="rounded-md border">
+        {maxHeight ? (
+          <div className={`overflow-auto max-h-[${maxHeight}]`}>
+            <Table>
+              {caption && <TableCaption>{caption}</TableCaption>}
+              <TableHeader className={headerClassName}>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
                 ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No data, Upload a new one.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                      onClick={
+                        enableSelection
+                          ? row.getToggleSelectedHandler()
+                          : undefined
+                      }
+                      className={enableSelection ? "cursor-pointer" : ""}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      {emptyMessage}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        ) : (
+          <Table>
+            {caption && <TableCaption>{caption}</TableCaption>}
+            <TableHeader className={headerClassName}>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    onClick={
+                      enableSelection
+                        ? row.getToggleSelectedHandler()
+                        : undefined
+                    }
+                    className={enableSelection ? "cursor-pointer" : ""}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    {emptyMessage}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        )}
+      </div>
+
+      {enablePagination && (
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Page {table.getState().pagination?.pageIndex + 1} of{" "}
+            {table.getPageCount()}
+          </div>
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

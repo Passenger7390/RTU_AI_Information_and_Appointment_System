@@ -1,3 +1,4 @@
+from typing import List
 from database import get_db
 from auth import read_users_me
 from sqlalchemy.orm import Session
@@ -8,8 +9,8 @@ from uuid import uuid4
 
 router = APIRouter(prefix='/professor', tags=['professor'])
 
-@router.get('/get-professors', response_model=ProfessorResponse)
-async def get_professors():
+@router.get('/get-professors')
+async def get_professors(db: Session = Depends(get_db)):
     """
         Get a list of names of professors
 
@@ -19,14 +20,25 @@ async def get_professors():
 
     """
     # TODO: Implement /get-professors function
-    return {'professors': ['Edwin Purisima', 'Christopher Zaplan', 'Dolores Cruz']}
+    professors = db.query(ProfessorInformation).all()
+    professors_list = []
+    for professor in professors:
+        professors_list.append({
+            'id': professor.id,
+            'professor_id': professor.professor_id,
+            'name': f"{professor.first_name} {professor.last_name}",
+            'email': professor.email,
+            'office_hours': professor.office_hours,
+            'title': professor.title
+        })
+    print("professors_list: ",professors_list)
+    return {'professors': professors_list}
 
 @router.post('/add-professor')
 async def add_professor(professor: CreateProfessor, db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
     """This allows the admin to add new professors"""
 
     # TODO: Working hours is none
-    print("professor working hours", professor.office_hours)
     new_professor = ProfessorInformation(professor_id=uuid4(), 
                                          first_name=professor.first_name, 
                                          last_name=professor.last_name, 

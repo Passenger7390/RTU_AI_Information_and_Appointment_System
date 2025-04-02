@@ -2,11 +2,7 @@ import { getUser } from "@/api";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import {
-  AdComponent,
-  FAQComponent,
-  ProfessorComponent,
-} from "@/my_components/Manage";
+import { AdComponent, FAQComponent, ProfessorComponent } from "@/my_components/Manage";
 
 const Dashboard = () => {
   const navigate = useNavigate();

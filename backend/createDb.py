@@ -44,6 +44,7 @@ class ProfessorInformation(Base):
     office_hours = Column(String, nullable=True)
     title = Column(String, nullable=True)
 
+    appointments = relationship("Appointment", back_populates="professor")
 
 class Appointment(Base):
     __tablename__ = "appointments"
@@ -53,7 +54,7 @@ class Appointment(Base):
     student_name = Column(String, nullable=False)
     student_id = Column(String, nullable=False)
     student_email = Column(String, nullable=False)
-    professor_uuid = Column(UUID, ForeignKey("professor_information.professor_id"), nullable=False, ondelete="CASCADE")
+    professor_uuid = Column(UUID, ForeignKey("professor_information.professor_id", ondelete="CASCADE"), nullable=False)
     concern = Column(String, nullable=False)
     start_time = Column(DateTime(timezone=True), nullable=False)
     end_time = Column(DateTime(timezone=True), nullable=False)

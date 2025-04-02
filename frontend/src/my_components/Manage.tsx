@@ -2,24 +2,21 @@ import UploadCard from "@/my_components/UploadCard";
 import DeleteDialog from "@/my_components/DeleteDialog";
 import { DataTable } from "@/my_components/table/DataTable";
 import { getTableData, deleteRows, getFAQs } from "@/api";
-import { columns } from "@/my_components/table/Columns";
+import {
+  createAdColumns,
+  TableData,
+  ProfessorData,
+} from "@/my_components/table/Columns";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { FAQ, FAQCard, FAQDialog } from "@/my_components/FAQ";
-
-interface TableData {
-  id: number;
-  created_at: string;
-  filename: string;
-  title: string;
-  duration: number;
-  expiration: string;
-}
+import CreateProfessorDialog from "./CreateProfessorDialog";
 
 export const AdComponent = () => {
   const [tableData, setTableData] = useState<TableData[]>([]);
   const [rowSelection, setRowSelection] = useState({});
 
+  const columns = createAdColumns();
   useEffect(() => {
     fetchTableData();
   }, []);
@@ -73,6 +70,8 @@ export const AdComponent = () => {
         data={tableData}
         onRowSelectionChange={setRowSelection}
         rowSelection={rowSelection}
+        emptyMessage="No advertisements available. Upload a new one."
+        enableSelection={true}
       />
     </div>
   );
@@ -124,5 +123,10 @@ export const FAQComponent = () => {
 };
 
 export const ProfessorComponent = () => {
-  return <div>Test</div>;
+  const [professorData, setProfessorData] = useState<ProfessorData[]>([]);
+  return (
+    <div>
+      <CreateProfessorDialog />
+    </div>
+  );
 };
