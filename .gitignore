@@ -76,3 +76,4 @@ backend/token.json
 backend/credentials.json
 backend/requirements-no-selinux.txt
 startup.sh
+frontend/src/pages/TestPage.tsx
