@@ -215,3 +215,5 @@ export const verifyOTP = async (email: string, otp: string) => {
   const res = await axios.post(`${otpApi}/verify-otp`, { email, otp });
   return res.data;
 };
+
+

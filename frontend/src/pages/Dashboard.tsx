@@ -2,7 +2,11 @@ import { getUser } from "@/api";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { AdComponent, FAQComponent } from "@/my_components/Manage";
+import {
+  AdComponent,
+  FAQComponent,
+  ProfessorComponent,
+} from "@/my_components/Manage";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -52,15 +56,28 @@ const Dashboard = () => {
             <ToggleGroupItem value="manage-faq">
               <p className="font-bold text-xl">Manage FAQs</p>
             </ToggleGroupItem>
+            <ToggleGroupItem value="manage-professor">
+              <p className="font-bold text-xl">Manage Professors</p>
+            </ToggleGroupItem>
+            <ToggleGroupItem value="manage-appointments">
+              <p className="font-bold text-xl">Manage Appointments</p>
+            </ToggleGroupItem>
           </ToggleGroup>
         </div>
-        <div className="flex w-[500px]"></div>
+        <div className="flex w-[100px]"></div>
       </div>
-      {currentView == "manage-advertisement" ? (
-        <AdComponent />
-      ) : (
-        <FAQComponent />
-      )}
+      {(() => {
+        switch (currentView) {
+          case "manage-advertisement":
+            return <AdComponent />;
+          case "manage-faq":
+            return <FAQComponent />;
+          case "manage-professor":
+            return <ProfessorComponent />; // Placeholder for Professor management
+          default:
+            return <AdComponent />; // Fallback view
+        }
+      })()}
     </div>
   );
 };

@@ -1,5 +1,5 @@
-from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, func
+from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, func, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from datetime import datetime, timedelta
 
@@ -49,11 +49,13 @@ class Appointment(Base):
     student_name = Column(String, nullable=False)
     student_id = Column(String, nullable=False)
     student_email = Column(String, nullable=False)
-    professor_uuid = Column(UUID, nullable=False)
+    professor_uuid = Column(UUID, ForeignKey("professor_information.professor_id"), nullable=False, ondelete="CASCADE")
     concern = Column(String, nullable=False)
     start_time = Column(DateTime(timezone=True), nullable=False)
     end_time = Column(DateTime(timezone=True), nullable=False)
     status = Column(String, nullable=False)
+
+    professor = relationship("ProfessorInformation", back_populates="appointments")
 
 class OTPSecret(Base):
     __tablename__ = "otp_secret"

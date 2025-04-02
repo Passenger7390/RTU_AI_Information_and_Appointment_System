@@ -6,14 +6,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import OTPDialog from "./OTPDialog";
 import { UUID } from "crypto";
 import toast from "react-hot-toast";
+import { KeyboardInput } from "./KeyboardInput";
+import { KeyboardTextArea } from "./KeyboardTextArea";
 
 const AppointmentComponent = () => {
   const [activeView, setActiveView] = useState("none");
@@ -71,29 +72,45 @@ export const CreateAppointmentComponent = ({
     studentID: string;
     studentEmail: string;
     concern: string;
+    isEmailVerified: boolean;
   }
 
   const [currentPage, setCurrentPage] = useState(0);
   const [studentInformation, setStudentInformation] =
     useState<StudentInformation>();
+
   const totalPages = 3;
 
   const renderPage = () => {
     switch (currentPage) {
       case 0:
-        return <PersonalInfoPage />;
+        return (
+          <PersonalInfoPage setStudentInformation={setStudentInformation} />
+        );
       case 1:
         return <ProfessorInfoPage />;
       case 2:
         return <VerifyInformationPage />;
       default:
-        return <PersonalInfoPage />;
+        return (
+          <PersonalInfoPage setStudentInformation={setStudentInformation} />
+        );
     }
   };
 
   const nextPage = () => {
     if (currentPage === 0) {
-      if (!studentInformation) {
+      if (
+        !studentInformation ||
+        !studentInformation.studentName ||
+        !studentInformation.studentID ||
+        !studentInformation.concern ||
+        !studentInformation.studentEmail
+      ) {
+        if (!studentInformation?.isEmailVerified) {
+          toast.error("Please verify your email before proceeding.");
+          return;
+        }
         toast.error("Please fill out the form before proceeding.");
         return;
       }
@@ -101,6 +118,7 @@ export const CreateAppointmentComponent = ({
 
     if (currentPage < totalPages - 1) {
       setCurrentPage(currentPage + 1);
+      // TODO: Save the data of the student info
     }
   };
 
@@ -158,41 +176,79 @@ export const CreateAppointmentComponent = ({
   );
 };
 
-const PersonalInfoPage = () => {
-  const [studentID, setStudentID] = useState("");
+interface PersonalInfoPageProps {
+  setStudentInformation: (info: any) => void;
+}
 
+const PersonalInfoPage = ({ setStudentInformation }: PersonalInfoPageProps) => {
+  const [studentID, setStudentID] = useState("");
+  const [studentName, setStudentName] = useState("");
+  const [concern, setConcern] = useState("");
+  const [emailVerified, setEmailVerified] = useState(false);
   // Handle the pagination
+
+  const onEmailVerified = () => {
+    setEmailVerified(true);
+  };
+
+  useEffect(() => {
+    setStudentInformation({
+      studentName,
+      studentID,
+      studentEmail: `${studentID}@rtu.edu.ph`,
+      concern,
+      isEmailVerified: emailVerified,
+    });
+  }, [studentName, studentID, concern, emailVerified, setStudentInformation]);
 
   return (
     <div className="flex flex-col items-center justify-center min-w-full min-h-full w-[1000px]">
       <div className="p-10 space-y-5 grid gap-4 items-center w-[1000px]">
         <div className="grid gap-5 grid-cols-6">
           <Label className="text-3xl text-right">Name</Label>
-          <Input className="!text-xl col-span-5" required type="text" />
+          {/* <Input className="!text-xl col-span-5" required type="text" /> */}
+          <KeyboardInput
+            type="text"
+            value={studentName}
+            onChange={(e) => setStudentName(e.target.value)}
+            keyboardType="alphanumeric"
+            className="!text-xl col-span-5"
+            required
+          />
         </div>
         <div className="grid gap-5 grid-cols-6">
           <Label className="text-3xl text-right">Email</Label>
           <div className="flex col-span-4">
-            <Input
-              className="!text-xl"
-              placeholder="2021-123456"
+            <KeyboardInput
               type="email"
               value={studentID}
               onChange={(e) => setStudentID(e.target.value)}
-              required
-              size={12}
+              keyboardType="alphanumeric"
             />
             <Label className="text-xl">@rtu.edu.ph</Label>
           </div>
-          <OTPDialog email={`${studentID}`} />
+          <OTPDialog
+            email={`${studentID}`}
+            onVerified={onEmailVerified}
+            key={studentID}
+          />
         </div>
         <div className="grid gap-5 grid-cols-6">
           <Label className="text-3xl text-right flex-1">Concern</Label>
-          <Textarea
+          {/* <Textarea
             placeholder="Type your concern here."
             maxLength={500}
             className="max-w-[64rem] !text-xl col-span-5 max-h-36 overflow-x-hidden resize-none"
             required
+          /> */}
+          <KeyboardTextArea
+            placeholder="Type your concern here."
+            maxLength={500}
+            className="max-w-[64rem] !text-xl col-span-5 max-h-36 overflow-x-hidden resize-none"
+            required
+            value={concern}
+            onChange={(e) => setConcern(e.target.value)}
+            keyboardType="alphanumeric"
           />
         </div>
       </div>
@@ -201,6 +257,7 @@ const PersonalInfoPage = () => {
 };
 
 const ProfessorInfoPage = () => {
+  // TODO: Implement professorInfoPage
   return (
     <div className="flex flex-col items-center justify-center min-w-full min-h-full w-[1000px]">
       test

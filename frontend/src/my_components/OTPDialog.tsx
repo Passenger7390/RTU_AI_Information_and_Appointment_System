@@ -17,26 +17,38 @@ import {
 import { useState } from "react";
 import { sendOTP, verifyOTP } from "@/api";
 import toast from "react-hot-toast";
+
 interface OTPDialogProps {
   email: string;
+  onVerified: () => void;
 }
 
-const OTPDialog = ({ email }: OTPDialogProps) => {
+const OTPDialog = ({ email, onVerified }: OTPDialogProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [otp, setOtp] = useState("");
+  const [label, setLabel] = useState("Verify Email");
+
+  const [isVerified, setIsVerified] = useState(false);
 
   const handleSendOTP = async () => {
+    if (!email) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+    setLabel("Sending OTP...");
     await sendOTP(email);
   };
 
   const handleVerifyEmail = async () => {
-    // TODO: This is working bug there is a bug in toast
     // TODO: FIx the bug in the dialog
 
     const res = await verifyOTP(email, otp);
     console.log(res);
     if (res) {
       toast.success("Email verified successfully!");
+      setLabel("Verified");
+      setIsVerified(true);
+      onVerified();
       setDialogOpen(false);
     } else {
       toast.error(res.message);
@@ -44,10 +56,34 @@ const OTPDialog = ({ email }: OTPDialogProps) => {
   };
 
   return (
-    <Dialog open={dialogOpen} onOpenChange={(open) => setDialogOpen(open)}>
+    <Dialog
+      open={dialogOpen}
+      onOpenChange={(open) => {
+        setDialogOpen(open);
+        if (!open) {
+          setLabel("Verify Email");
+        }
+      }}
+    >
       <DialogTrigger asChild>
-        <Button className="w-full text-xl" onClick={handleSendOTP}>
-          Verify
+        <Button
+          className="w-full text-lg"
+          onClick={(e) => {
+            // Prevent DialogTrigger from automatically opening dialog
+            if (!email) {
+              e.preventDefault();
+              toast.error("Please enter a valid email address");
+              return;
+            }
+
+            // If email exists, send OTP (dialog will open automatically)
+            handleSendOTP();
+          }}
+          variant={"secondary"}
+          // The button should not be disabled when the user changes the email
+          disabled={isVerified}
+        >
+          {label}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md p-6">

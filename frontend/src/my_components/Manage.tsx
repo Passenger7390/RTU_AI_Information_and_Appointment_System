@@ -122,3 +122,7 @@ export const FAQComponent = () => {
     </div>
   );
 };
+
+export const ProfessorComponent = () => {
+  return <div>Test</div>;
+};
