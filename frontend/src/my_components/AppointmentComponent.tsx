@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import OTPDialog from "./OTPDialog";
 import toast from "react-hot-toast";
@@ -22,8 +22,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DateTimePicker } from "./dateTimePicker";
+// import { DateTimePicker } from "./dateTimePicker";
+
 import { getProfessors, ProfessorList } from "@/api";
+import { MyCalendar } from "./myCalendar";
 
 const AppointmentComponent = () => {
   const [activeView, setActiveView] = useState("none");
@@ -93,32 +95,54 @@ export const CreateAppointmentComponent = ({
   const renderPage = () => {
     switch (currentPage) {
       case 0:
-        return <PersonalInfoPage setStudentInformation={setAppointmentData} />;
+        return (
+          <PersonalInfoPage
+            setStudentInformation={setAppointmentData}
+            initialData={{
+              studentName: appointmentData.studentName,
+              studentID: appointmentData.studentID,
+              studentEmail: appointmentData.studentEmail,
+              concern: appointmentData.concern,
+              isEmailVerified: appointmentData.isEmailVerified,
+            }}
+          />
+        );
       case 1:
         return <ProfessorInfoPage />;
       case 2:
         return <VerifyInformationPage />;
       default:
-        return <PersonalInfoPage setStudentInformation={setAppointmentData} />;
+        return (
+          <PersonalInfoPage
+            setStudentInformation={setAppointmentData}
+            initialData={{
+              studentName: appointmentData.studentName,
+              studentID: appointmentData.studentID,
+              studentEmail: appointmentData.studentEmail,
+              concern: appointmentData.concern,
+              isEmailVerified: appointmentData.isEmailVerified,
+            }}
+          />
+        );
     }
   };
 
   const nextPage = () => {
     if (currentPage === 0) {
-      if (
-        !appointmentData ||
-        !appointmentData.studentName ||
-        !appointmentData.studentID ||
-        !appointmentData.concern ||
-        !appointmentData.studentEmail
-      ) {
-        if (!appointmentData.isEmailVerified) {
-          toast.error("Please verify your email before proceeding.");
-          return;
-        }
-        toast.error("Please fill out the form before proceeding.");
-        return;
-      }
+      // if (
+      //   !appointmentData ||
+      //   !appointmentData.studentName ||
+      //   !appointmentData.studentID ||
+      //   !appointmentData.concern ||
+      //   !appointmentData.studentEmail
+      // ) {
+      //   toast.error("Please fill out the form before proceeding.");
+      //   return;
+      // }
+      // if (!appointmentData.isEmailVerified) {
+      //   toast.error("Please verify your email before proceeding.");
+      //   return;
+      // }
     }
 
     if (currentPage < totalPages - 1) {
@@ -184,21 +208,37 @@ export const CreateAppointmentComponent = ({
 
 interface PersonalInfoPageProps {
   setStudentInformation: (info: any) => void;
-  initialData: {};
+  initialData: {
+    studentName: string;
+    studentID: string;
+    studentEmail: string;
+    concern: string;
+    isEmailVerified: boolean;
+  };
 }
 
-const PersonalInfoPage = ({ setStudentInformation }: PersonalInfoPageProps) => {
-  const [studentID, setStudentID] = useState("");
-  const [studentName, setStudentName] = useState("");
-  const [concern, setConcern] = useState("");
-  const [emailVerified, setEmailVerified] = useState(false);
+const PersonalInfoPage = ({
+  setStudentInformation,
+  initialData,
+}: PersonalInfoPageProps) => {
+  const [studentID, setStudentID] = useState(initialData.studentID);
+  const [studentName, setStudentName] = useState(initialData.studentName);
+  const [concern, setConcern] = useState(initialData.concern);
+  const [emailVerified, setEmailVerified] = useState(
+    initialData.isEmailVerified
+  );
   // Handle the pagination
 
   const onEmailVerified = () => {
+    console.log("Email verified", emailVerified);
     setEmailVerified(true);
   };
-
+  const isFirstRender = useRef(true);
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     setStudentInformation({
       studentName,
       studentID,
@@ -229,7 +269,10 @@ const PersonalInfoPage = ({ setStudentInformation }: PersonalInfoPageProps) => {
             <KeyboardInput
               type="email"
               value={studentID}
-              onChange={(e) => setStudentID(e.target.value)}
+              onChange={(e) => {
+                setStudentID(e.target.value);
+                setEmailVerified(false);
+              }}
               keyboardType="alphanumeric"
               className="!text-xl flex-1"
             />
@@ -265,12 +308,13 @@ const PersonalInfoPage = ({ setStudentInformation }: PersonalInfoPageProps) => {
 };
 
 const ProfessorInfoPage = () => {
-  // TODO: Implement professorInfoPage
-
   const [title, setTitle] = useState("Select Professor");
   const [professor, setProfessor] = useState<ProfessorList>();
   const [professorList, setProfessorList] = useState<ProfessorList[]>([]);
   const [date, setDate] = useState<Date>();
+
+  // TODO: Set the time range for the appointment
+  // TODO: disabled the hours if professor has appointment already
 
   async function fetchProfessors() {
     try {
@@ -303,7 +347,6 @@ const ProfessorInfoPage = () => {
     );
     setTitle(selectedProfessor?.name || "Select Professor");
     setProfessor(selectedProfessor);
-    console.log(date);
   }
 
   useEffect(() => {
@@ -342,7 +385,11 @@ const ProfessorInfoPage = () => {
           formatHours() || ""
         }`}</Label>
       </div>
-      <DateTimePicker
+      {/* <DateTimePicker
+        getDate={setDate}
+        disabled={title === "Select Professor" ? true : false}
+      /> */}
+      <MyCalendar
         getDate={setDate}
         disabled={title === "Select Professor" ? true : false}
       />
