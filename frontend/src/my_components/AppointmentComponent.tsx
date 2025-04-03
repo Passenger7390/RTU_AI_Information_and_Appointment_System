@@ -11,7 +11,6 @@ import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import OTPDialog from "./OTPDialog";
-import { UUID } from "crypto";
 import toast from "react-hot-toast";
 import { KeyboardInput } from "./KeyboardInput";
 import { KeyboardTextArea } from "./KeyboardTextArea";
@@ -57,15 +56,15 @@ export const CreateAppointmentComponent = ({
 }: {
   onBack: () => void;
 }) => {
-  interface Appointment {
-    studentName: string;
-    studentID: string;
-    studentEmail: string;
-    professor_uuid: UUID;
-    concern: string;
-    appointmentDate: Date;
-    appointmentTime: Date;
-  }
+  // interface Appointment {
+  //   studentName: string;
+  //   studentID: string;
+  //   studentEmail: string;
+  //   professor_uuid: UUID;
+  //   concern: string;
+  //   appointmentDate: Date;
+  //   appointmentTime: Date;
+  // }
 
   interface StudentInformation {
     studentName: string;
@@ -218,12 +217,13 @@ const PersonalInfoPage = ({ setStudentInformation }: PersonalInfoPageProps) => {
         </div>
         <div className="grid gap-5 grid-cols-6">
           <Label className="text-3xl text-right">Email</Label>
-          <div className="flex col-span-4">
+          <div className="flex col-span-4 gap-1">
             <KeyboardInput
               type="email"
               value={studentID}
               onChange={(e) => setStudentID(e.target.value)}
               keyboardType="alphanumeric"
+              className="!text-xl flex-1"
             />
             <Label className="text-xl">@rtu.edu.ph</Label>
           </div>

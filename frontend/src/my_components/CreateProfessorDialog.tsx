@@ -26,7 +26,7 @@ export interface Professor {
 }
 
 interface CreateProfessorDialogProps {
-  onRefresh: () => void;
+  onRefresh?: () => void;
 }
 
 const CreateProfessorDialog = ({ onRefresh }: CreateProfessorDialogProps) => {
@@ -67,7 +67,7 @@ const CreateProfessorDialog = ({ onRefresh }: CreateProfessorDialogProps) => {
       console.error(error);
       toast.error("Failed to create professor.");
     } finally {
-      onRefresh();
+      onRefresh?.();
       closeForm();
     }
   }

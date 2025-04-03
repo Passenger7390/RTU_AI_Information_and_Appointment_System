@@ -55,6 +55,16 @@ const OTPDialog = ({ email, onVerified }: OTPDialogProps) => {
     }
   };
 
+  const handleDigitClick = (digit: string) => {
+    if (otp.length < 6) {
+      setOtp((current) => current + digit);
+    }
+  };
+
+  const handleBackspace = () => {
+    setOtp((current) => current.slice(0, -1));
+  };
+
   return (
     <Dialog
       open={dialogOpen}
@@ -110,11 +120,46 @@ const OTPDialog = ({ email, onVerified }: OTPDialogProps) => {
             </InputOTPGroup>
           </InputOTP>
         </div>
+        <div className="grid grid-cols-3 gap-2 mt-4 mb-4">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+            <Button
+              key={num}
+              variant="outline"
+              onClick={() => handleDigitClick(num.toString())}
+              className="h-12 text-lg"
+            >
+              {num}
+            </Button>
+          ))}
+          <Button
+            variant="outline"
+            className="h-12 text-lg"
+            onClick={handleBackspace}
+          >
+            ⌫
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => handleDigitClick("0")}
+            className="h-12 text-lg"
+          >
+            0
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setOtp("")}
+            className="h-12 text-lg"
+          >
+            Clear
+          </Button>
+        </div>
         <DialogFooter className="flex justify-end gap-2 pt-2">
           <Button variant={"outline"} onClick={() => setDialogOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={handleVerifyEmail}>Confirm</Button>
+          <Button onClick={handleVerifyEmail} disabled={otp.length !== 6}>
+            Confirm
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

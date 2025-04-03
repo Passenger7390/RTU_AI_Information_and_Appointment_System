@@ -106,7 +106,7 @@ async def send_otp(request: OTPRequest, db: Session = Depends(get_db)):
             .send(userId="me", body=create_message)
             .execute()
         )
-        return {"message_id": send_message["id"], "status": "sent", "otp": otp_code}
+        return {"message_id": send_message["id"], "status": "sent"}
     except HttpError as error:
         raise HTTPException(status_code=500, detail=str(error))
     
