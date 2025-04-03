@@ -20,7 +20,9 @@ const AdCarousel = () => {
   const loadImage = async () => {
     try {
       const res: ImageData[] = await fetchImageFilename();
-      setImages(res); // Store complete ImageData objects
+
+      setImages(res);
+      console.log(images); // Store complete ImageData objects
       if (res.length > 0) {
         setCurrentDuration(res[0].duration);
       }

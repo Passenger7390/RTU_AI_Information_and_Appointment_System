@@ -1,7 +1,6 @@
 import axios from "axios";
 import { TableData } from "./my_components/table/Columns";
 import { FAQ } from "./my_components/FAQ";
-import { Professor } from "./my_components/CreateProfessorDialog";
 // Environment-aware API configuration
 const env = import.meta.env.VITE_ENV || "production";
 const isDev = env === "development";
@@ -22,6 +21,22 @@ export const otpApi = `${api}/otp`;
 export interface ImageData {
   filename: string;
   duration: number;
+}
+
+export interface ProfessorList {
+  email: string;
+  id: number;
+  name: string;
+  office_hours: string;
+  professor_id: string;
+}
+
+export interface Professor {
+  first_name: string;
+  last_name: string;
+  email: string;
+  office_hours: string;
+  title: string;
 }
 
 // GET request to / to fetch iamge file name

@@ -7,6 +7,7 @@ import {
   getFAQs,
   getProfessors,
   deleteProfessors,
+  ProfessorList,
 } from "@/api";
 import {
   createAdColumns,
@@ -100,7 +101,7 @@ export const FAQComponent = () => {
   useEffect(() => {
     fetchFAQs();
   }, []);
-  // TODO: Implement EDIT and DELETE functionality for Professors
+  // TODO: Implement EDIT functionality for Professors
   return (
     <div className="flex-row h-full w-full p-2 space-y-8">
       <div>
@@ -143,7 +144,7 @@ export const ProfessorComponent = () => {
   async function fetchTableData() {
     try {
       const data = await getProfessors();
-      setProfessorData(data.professors);
+      setProfessorData(data);
     } catch (error) {
       toast.error("Failed to fetch table data");
     }

@@ -13,17 +13,9 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import TimeRangePicker from "shadcn-time-range-picker";
 import { useState } from "react";
-import { createProfessor } from "@/api";
+import { createProfessor, Professor } from "@/api";
 import toast from "react-hot-toast";
 import { IoAddSharp } from "react-icons/io5";
-
-export interface Professor {
-  first_name: string;
-  last_name: string;
-  email: string;
-  office_hours: string;
-  title: string;
-}
 
 interface CreateProfessorDialogProps {
   onRefresh?: () => void;

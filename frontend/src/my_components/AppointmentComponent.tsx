@@ -7,13 +7,23 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-
 import { useEffect, useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import OTPDialog from "./OTPDialog";
 import toast from "react-hot-toast";
 import { KeyboardInput } from "./KeyboardInput";
 import { KeyboardTextArea } from "./KeyboardTextArea";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { DateTimePicker } from "./dateTimePicker";
+import { getProfessors, ProfessorList } from "@/api";
 
 const AppointmentComponent = () => {
   const [activeView, setActiveView] = useState("none");
@@ -56,57 +66,53 @@ export const CreateAppointmentComponent = ({
 }: {
   onBack: () => void;
 }) => {
-  // interface Appointment {
-  //   studentName: string;
-  //   studentID: string;
-  //   studentEmail: string;
-  //   professor_uuid: UUID;
-  //   concern: string;
-  //   appointmentDate: Date;
-  //   appointmentTime: Date;
-  // }
-
-  interface StudentInformation {
+  interface Appointment {
     studentName: string;
     studentID: string;
     studentEmail: string;
+    professor_uuid: string;
     concern: string;
+    appointmentDate: Date;
+    appointmentTime: Date;
     isEmailVerified: boolean;
   }
 
   const [currentPage, setCurrentPage] = useState(0);
-  const [studentInformation, setStudentInformation] =
-    useState<StudentInformation>();
-
+  const [appointmentData, setAppointmentData] = useState<Appointment>({
+    studentName: "",
+    studentID: "",
+    studentEmail: "",
+    professor_uuid: "",
+    concern: "",
+    appointmentDate: new Date(),
+    appointmentTime: new Date(),
+    isEmailVerified: false,
+  });
   const totalPages = 3;
 
   const renderPage = () => {
     switch (currentPage) {
       case 0:
-        return (
-          <PersonalInfoPage setStudentInformation={setStudentInformation} />
-        );
+        return <PersonalInfoPage setStudentInformation={setAppointmentData} />;
       case 1:
         return <ProfessorInfoPage />;
       case 2:
         return <VerifyInformationPage />;
       default:
-        return (
-          <PersonalInfoPage setStudentInformation={setStudentInformation} />
-        );
+        return <PersonalInfoPage setStudentInformation={setAppointmentData} />;
     }
   };
 
   const nextPage = () => {
     if (currentPage === 0) {
       if (
-        !studentInformation ||
-        !studentInformation.studentName ||
-        !studentInformation.studentID ||
-        !studentInformation.concern ||
-        !studentInformation.studentEmail
+        !appointmentData ||
+        !appointmentData.studentName ||
+        !appointmentData.studentID ||
+        !appointmentData.concern ||
+        !appointmentData.studentEmail
       ) {
-        if (!studentInformation?.isEmailVerified) {
+        if (!appointmentData.isEmailVerified) {
           toast.error("Please verify your email before proceeding.");
           return;
         }
@@ -118,6 +124,7 @@ export const CreateAppointmentComponent = ({
     if (currentPage < totalPages - 1) {
       setCurrentPage(currentPage + 1);
       // TODO: Save the data of the student info
+      console.log(appointmentData);
     }
   };
 
@@ -177,6 +184,7 @@ export const CreateAppointmentComponent = ({
 
 interface PersonalInfoPageProps {
   setStudentInformation: (info: any) => void;
+  initialData: {};
 }
 
 const PersonalInfoPage = ({ setStudentInformation }: PersonalInfoPageProps) => {
@@ -258,9 +266,86 @@ const PersonalInfoPage = ({ setStudentInformation }: PersonalInfoPageProps) => {
 
 const ProfessorInfoPage = () => {
   // TODO: Implement professorInfoPage
+
+  const [title, setTitle] = useState("Select Professor");
+  const [professor, setProfessor] = useState<ProfessorList>();
+  const [professorList, setProfessorList] = useState<ProfessorList[]>([]);
+  const [date, setDate] = useState<Date>();
+
+  async function fetchProfessors() {
+    try {
+      const res = await getProfessors();
+      setProfessorList(res);
+    } catch (error) {
+      console.error("Error fetching professors:", error);
+    }
+  }
+
+  function formatHours() {
+    if (professor?.office_hours) {
+      const hours = professor.office_hours.split("-");
+      const start = new Date(`1970-01-01T${hours[0]}:00`);
+      const end = new Date(`1970-01-01T${hours[1]}:00`);
+      return `${start.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })} - ${end.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`;
+    }
+    return "";
+  }
+
+  function handleSelectorChange(id: string) {
+    const selectedProfessor = professorList.find(
+      (professor) => professor.professor_id === id
+    );
+    setTitle(selectedProfessor?.name || "Select Professor");
+    setProfessor(selectedProfessor);
+    console.log(date);
+  }
+
+  useEffect(() => {
+    fetchProfessors();
+  }, []);
+
   return (
     <div className="flex flex-col items-center justify-center min-w-full min-h-full w-[1000px]">
-      test
+      <div className="w-full flex gap-4 item-center justify-center">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant={"outline"} className="text-2xl p-5 w-full">
+              {title}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56">
+            <DropdownMenuLabel>Professor List</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuRadioGroup
+              value={professor?.professor_id}
+              onValueChange={handleSelectorChange}
+            >
+              {professorList.map((prof) => (
+                <DropdownMenuRadioItem
+                  key={prof.professor_id}
+                  value={prof.professor_id}
+                >
+                  {prof.name}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <Label className="text-2xl min-w-[450px] items-center flex">{`Office Hours: ${
+          formatHours() || ""
+        }`}</Label>
+      </div>
+      <DateTimePicker
+        getDate={setDate}
+        disabled={title === "Select Professor" ? true : false}
+      />
     </div>
   );
 };

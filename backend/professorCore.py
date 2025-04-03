@@ -31,7 +31,7 @@ async def get_professors(db: Session = Depends(get_db)):
             'office_hours': professor.office_hours,
         })
     print("professors_list: ",professors_list)
-    return {'professors': professors_list}
+    return professors_list
 
 @router.post('/add-professor')
 async def add_professor(professor: CreateProfessor, db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):

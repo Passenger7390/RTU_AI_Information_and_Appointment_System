@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { format } from "date-fns";
 import { FaRegCalendarAlt } from "react-icons/fa";
@@ -12,7 +13,12 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
-export function DateTimePicker() {
+interface DateTimePickerProps {
+  getDate: (date: Date) => void;
+  disabled?: boolean;
+}
+
+export function DateTimePicker({ getDate, disabled }: DateTimePickerProps) {
   const [date, setDate] = React.useState<Date>();
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -42,8 +48,19 @@ export function DateTimePicker() {
         );
       }
       setDate(newDate);
+      getDate(newDate);
     }
   };
+
+  const calendarRef = useRef<HTMLDivElement>(null);
+  const [calendarHeight, setCalendarHeight] = useState(380);
+
+  useEffect(() => {
+    if (calendarRef.current) {
+      const height = calendarRef.current.getBoundingClientRect().height;
+      setCalendarHeight(height);
+    }
+  }, [isOpen]);
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -51,9 +68,10 @@ export function DateTimePicker() {
         <Button
           variant="outline"
           className={cn(
-            "w-full justify-start text-left font-normal",
+            "w-full justify-start text-left font-normal text-2xl p-5",
             !date && "text-muted-foreground"
           )}
+          disabled={disabled}
         >
           <FaRegCalendarAlt className="mr-2 h-4 w-4" />
           {date ? (
@@ -65,14 +83,27 @@ export function DateTimePicker() {
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
         <div className="sm:flex">
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={handleDateSelect}
-            initialFocus
-          />
-          <div className="flex flex-col sm:flex-row sm:h-[300px] divide-y sm:divide-y-0 sm:divide-x">
-            <ScrollArea className="w-64 sm:w-auto">
+          <div ref={calendarRef}>
+            <Calendar
+              mode="single"
+              selected={date}
+              onSelect={handleDateSelect}
+              initialFocus
+              disabled={(date) => date < new Date()}
+              classNames={{
+                day: "h-14 w-14 text-lg font-medium p-0 focus-visible:bg-primary focus-visible:text-primary-foreground",
+                day_selected:
+                  "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground rounded-md",
+                day_today: "bg-accent text-accent-foreground rounded-md",
+              }}
+            />
+          </div>
+
+          <div
+            className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x"
+            style={{ height: `${calendarHeight}px` }}
+          >
+            <ScrollArea className="w-64 sm:w-auto h-full">
               <div className="flex sm:flex-col p-2">
                 {hours.reverse().map((hour) => (
                   <Button
@@ -83,7 +114,7 @@ export function DateTimePicker() {
                         ? "default"
                         : "ghost"
                     }
-                    className="sm:w-full shrink-0 aspect-square"
+                    className="sm:w-full shrink-0 aspect-square h-16 w-16 text-xl"
                     onClick={() => handleTimeChange("hour", hour.toString())}
                   >
                     {hour}
@@ -101,7 +132,7 @@ export function DateTimePicker() {
                     variant={
                       date && date.getMinutes() === minute ? "default" : "ghost"
                     }
-                    className="sm:w-full shrink-0 aspect-square"
+                    className="sm:w-full shrink-0 aspect-square h-16 w-16 text-xl"
                     onClick={() =>
                       handleTimeChange("minute", minute.toString())
                     }
@@ -125,7 +156,7 @@ export function DateTimePicker() {
                         ? "default"
                         : "ghost"
                     }
-                    className="sm:w-full shrink-0 aspect-square"
+                    className="sm:w-full shrink-0 aspect-square h-16 w-16 text-xl"
                     onClick={() => handleTimeChange("ampm", ampm)}
                   >
                     {ampm}
