@@ -7,7 +7,6 @@ import {
   getFAQs,
   getProfessors,
   deleteProfessors,
-  ProfessorList,
 } from "@/api";
 import {
   createAdColumns,
@@ -17,9 +16,11 @@ import {
 } from "@/my_components/table/Columns";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
-import { FAQ, FAQCard, FAQDialog } from "@/my_components/FAQ";
+import { FAQCard, FAQDialog } from "@/my_components/FAQ";
 import CreateProfessorDialog from "./CreateProfessorDialog";
 import { Button } from "@/components/ui/button";
+import { FAQ } from "@/interface";
+import EditProfileDialog from "./EditProfileDialog";
 
 export const AdComponent = () => {
   const [tableData, setTableData] = useState<TableData[]>([]);
@@ -139,6 +140,7 @@ export const ProfessorComponent = () => {
 
   useEffect(() => {
     fetchTableData();
+    handleEditSelected();
   }, []);
 
   async function fetchTableData() {
@@ -166,6 +168,16 @@ export const ProfessorComponent = () => {
     }
   }
 
+  function handleEditSelected() {
+    const selectedRows = Object.keys(rowSelection);
+    if (selectedRows.length === 0) return;
+
+    const selectedIds = selectedRows.map(
+      (index) => professorData[parseInt(index)].professor_id
+    );
+    console.log("Selected IDs:", selectedRows);
+  }
+
   return (
     <div>
       <DataTable
@@ -179,7 +191,13 @@ export const ProfessorComponent = () => {
         actions={
           <>
             <CreateProfessorDialog onRefresh={fetchTableData} />
-            <Button>Edit</Button>
+            <EditProfileDialog
+              professor_uuid={"72f397a3-9b58-4060-8c55-e7daa6420e26"}
+              disabled={
+                Object.keys(rowSelection).length === 0 ||
+                Object.keys(rowSelection).length > 1
+              }
+            />
             <DeleteDialog
               onConfirm={handleDeleteSelected}
               isButtonDisabled={Object.keys(rowSelection).length === 0}

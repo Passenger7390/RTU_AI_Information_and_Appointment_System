@@ -33,6 +33,20 @@ async def get_professors(db: Session = Depends(get_db)):
     print("professors_list: ",professors_list)
     return professors_list
 
+@router.get('/get-professor/{professor_id}', response_model=CreateProfessor)
+async def getProfessorById(professor_id: str, db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
+    """
+        Get a professor by id
+
+        This is for the admin to view the information of a professor in the admin panel
+
+    """
+    if not professor_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No professor id provided")
+    professor = db.query(ProfessorInformation).filter(ProfessorInformation.professor_id == professor_id).first()
+
+    return professor
+
 @router.post('/add-professor')
 async def add_professor(professor: CreateProfessor, db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
     """This allows the admin to add new professors"""

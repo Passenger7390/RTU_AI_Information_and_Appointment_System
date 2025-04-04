@@ -246,5 +246,18 @@ export const deleteProfessors = async (ids: string[]) => {
   return res.data;
 };
 
+export const getProfessorById = async (id: string) => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  const res = await axios.get(`${professorApi}/get-professor/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.data;
+};
+
 // =============================================================== APPOINTMENT API ============================================================
 export const createAppointment = async () => {};

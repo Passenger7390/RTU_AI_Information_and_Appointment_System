@@ -187,3 +187,8 @@ export interface buildingDialogProps {
   trigger: boolean;
   setTrigger: (trigger: boolean) => void;
 }
+
+export interface EditProfileDialogProps {
+  disabled?: boolean;
+  professor_uuid: string;
+}
