@@ -26,6 +26,8 @@ import {
 
 import { getProfessors, ProfessorList } from "@/api";
 import { MyCalendar } from "./myCalendar";
+// import TimeRangePicker from "shadcn-time-range-picker";
+import { TimePicker } from "./timePicker";
 
 const AppointmentComponent = () => {
   const [activeView, setActiveView] = useState("none");
@@ -312,6 +314,7 @@ const ProfessorInfoPage = () => {
   const [professor, setProfessor] = useState<ProfessorList>();
   const [professorList, setProfessorList] = useState<ProfessorList[]>([]);
   const [date, setDate] = useState<Date>();
+  const [hours, setHours] = useState("");
 
   // TODO: Set the time range for the appointment
   // TODO: disabled the hours if professor has appointment already
@@ -320,16 +323,20 @@ const ProfessorInfoPage = () => {
     try {
       const res = await getProfessors();
       setProfessorList(res);
+      console.log(date);
+      console.log(hours);
     } catch (error) {
       console.error("Error fetching professors:", error);
     }
   }
 
   function formatHours() {
+    // This will be used in label in office hours
     if (professor?.office_hours) {
       const hours = professor.office_hours.split("-");
       const start = new Date(`1970-01-01T${hours[0]}:00`);
       const end = new Date(`1970-01-01T${hours[1]}:00`);
+
       return `${start.toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -341,6 +348,39 @@ const ProfessorInfoPage = () => {
     return "";
   }
 
+  function getStartHour() {
+    if (professor?.office_hours) {
+      const hours = professor.office_hours.split("-");
+
+      const hourNumeric = parseInt(hours[0].split(":")[0], 10);
+      const hourNumeric12 = hourNumeric > 12 ? hourNumeric - 12 : hourNumeric;
+
+      const startHour = hourNumeric12.toString();
+      const startMinute = hours[0].split(":")[1];
+      const startPeriod = hourNumeric > 12 ? "PM" : "AM";
+
+      console.log(`${startHour} ${startMinute} ${startPeriod}`);
+      return [startHour, startMinute, startPeriod];
+    }
+    return ["6", "00", "AM"];
+  }
+
+  function getEndHour() {
+    if (professor?.office_hours) {
+      const hours = professor.office_hours.split("-");
+
+      const hourNumeric = parseInt(hours[1].split(":")[0], 10);
+      const hourNumeric12 = hourNumeric > 12 ? hourNumeric - 12 : hourNumeric;
+      const endHour = hourNumeric12.toString();
+
+      const endMinute = hours[1].split(":")[1];
+      const endPeriod = hourNumeric > 12 ? "PM" : "AM";
+
+      return [endHour, endMinute, endPeriod];
+    }
+    return ["6", "00", "PM"];
+  }
+
   function handleSelectorChange(id: string) {
     const selectedProfessor = professorList.find(
       (professor) => professor.professor_id === id
@@ -349,50 +389,95 @@ const ProfessorInfoPage = () => {
     setProfessor(selectedProfessor);
   }
 
+  function getOfficeHoursRange() {
+    if (professor?.office_hours) {
+      const hours = professor.office_hours.split("-");
+
+      // Parse start hour
+      const startParts = hours[0].split(":");
+      let startHour = parseInt(startParts[0], 10);
+      if (startParts[0].includes("PM") && startHour < 12) startHour += 12;
+
+      // Parse end hour
+      const endParts = hours[1].split(":");
+      let endHour = parseInt(endParts[0], 10);
+      if (endParts[1].includes("PM") && endHour < 12) endHour += 12;
+
+      return { minHour: startHour, maxHour: endHour };
+    }
+    return { minHour: 0, maxHour: 23 }; // Default to full day
+  }
+
+  const officeHoursRange = getOfficeHoursRange();
+
   useEffect(() => {
     fetchProfessors();
   }, []);
 
   return (
     <div className="flex flex-col items-center justify-center min-w-full min-h-full w-[1000px]">
-      <div className="w-full flex gap-4 item-center justify-center">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant={"outline"} className="text-2xl p-5 w-full">
-              {title}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
-            <DropdownMenuLabel>Professor List</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuRadioGroup
-              value={professor?.professor_id}
-              onValueChange={handleSelectorChange}
-            >
-              {professorList.map((prof) => (
-                <DropdownMenuRadioItem
-                  key={prof.professor_id}
-                  value={prof.professor_id}
-                >
-                  {prof.name}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      <div className="w-full px-5 mb-10">
+        <Label className="text-2xl font-semibold">Professor Schedule</Label>
+        <div className="w-full flex gap-4 item-center justify-center h-20">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant={"outline"}
+                className="text-2xl p-5 w-full flex items-center my-auto"
+              >
+                {title}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>Professor List</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuRadioGroup
+                value={professor?.professor_id}
+                onValueChange={handleSelectorChange}
+              >
+                {professorList.map((prof) => (
+                  <DropdownMenuRadioItem
+                    key={prof.professor_id}
+                    value={prof.professor_id}
+                  >
+                    {prof.name}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-        <Label className="text-2xl min-w-[450px] items-center flex">{`Office Hours: ${
-          formatHours() || ""
-        }`}</Label>
+          <Label className="text-2xl min-w-[450px] flex items-center">{`Office Hours: ${
+            formatHours() || ""
+          }`}</Label>
+        </div>
       </div>
-      {/* <DateTimePicker
-        getDate={setDate}
-        disabled={title === "Select Professor" ? true : false}
-      /> */}
-      <MyCalendar
-        getDate={setDate}
-        disabled={title === "Select Professor" ? true : false}
-      />
+      <div className="w-full px-5 mb-10">
+        <Label className="text-2xl font-semibold">
+          Professer's Available Schedule
+        </Label>
+        <div className="w-full flex items-center justify-end gap-4 ">
+          <MyCalendar
+            getDate={setDate}
+            disabled={title === "Select Professor" ? true : false}
+          />
+          <TimePicker
+            key={professor?.professor_id}
+            defaultStartHour={getStartHour()[0]}
+            defaultStartMinute={getStartHour()[1]}
+            defaultStartPeriod={getStartHour()[2]}
+            defaultEndHour={getEndHour()[0]}
+            defaultEndMinute={getEndHour()[1]}
+            defaultEndPeriod={getEndHour()[2]}
+            minHour={officeHoursRange.minHour}
+            maxHour={officeHoursRange.maxHour}
+            onChange={(timeRange) =>
+              setHours(`${timeRange.startTime} - ${timeRange.endTime}`)
+            }
+            disabled={title === "Select Professor" ? true : false}
+          />
+        </div>
+      </div>
     </div>
   );
 };
