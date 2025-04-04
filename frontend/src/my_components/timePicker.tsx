@@ -100,8 +100,8 @@ export function TimePicker({
   useEffect(() => {
     if (onChange) {
       onChange({
-        startTime: `${startHour} ${startPeriod}`,
-        endTime: `${endHour} ${endPeriod}`,
+        startTime: `${startHour}:${startMinute} ${startPeriod}`,
+        endTime: `${endHour}:${endMinute} ${endPeriod}`,
       });
     }
   }, [startHour, endHour, startPeriod, endPeriod, onChange]);
