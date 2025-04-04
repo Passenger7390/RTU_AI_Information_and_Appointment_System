@@ -29,7 +29,13 @@ import { IoMdClose } from "react-icons/io";
 
 // Interfaces
 interface PersonalInfoPageProps {
-  setStudentInformation: (info: any) => void;
+  setStudentInformation: (info: {
+    studentName: string;
+    studentID: string;
+    studentEmail: string;
+    concern: string;
+    isEmailVerified: boolean;
+  }) => void;
   initialData: {
     studentName: string;
     studentID: string;
@@ -39,60 +45,105 @@ interface PersonalInfoPageProps {
   };
 }
 
+interface ProfessorInfoPageProps {
+  setStudentInformation: (info: {
+    professor_uuid: string;
+    appointmentStart: string;
+    appointmentEnd: string;
+    isDateValid: boolean;
+    isTimeValid: boolean;
+  }) => void;
+  initialData: {
+    professor_uuid: string;
+    appointmentStart: string;
+    appointmentEnd: string;
+    isDateValid: boolean;
+    isTimeValid: boolean;
+  };
+}
 interface Appointment {
   studentName: string;
   studentID: string;
   studentEmail: string;
   professor_uuid: string;
   concern: string;
-  appointmentDate: Date;
-  appointmentTime: Date;
-  isEmailVerified: boolean;
+  appointmentStart: string;
+  appointmentEnd: string;
 }
 
 const CreateAppointmentComponent = ({ onBack }: { onBack: () => void }) => {
   const [currentPage, setCurrentPage] = useState(0);
-  const [appointmentData, setAppointmentData] = useState<Appointment>({
+  // const [appointmentData, setAppointmentData] = useState<Appointment>({
+  //   studentName: "",
+  //   studentID: "",
+  //   studentEmail: "",
+  //   professor_uuid: "",
+  //   concern: "",
+  //   appointmentStart: new Date(),
+  //   appointmentEnd: new Date(),
+  //   isEmailVerified: false,
+  // });
+
+  const totalPages = 3;
+
+  const [studentInfoPage, setStudentInfoPage] = useState({
     studentName: "",
     studentID: "",
     studentEmail: "",
-    professor_uuid: "",
     concern: "",
-    appointmentDate: new Date(),
-    appointmentTime: new Date(),
     isEmailVerified: false,
   });
-  const totalPages = 3;
+
+  const [professorInfoPage, setProfessorInfoPage] = useState({
+    professor_uuid: "",
+    appointmentStart: "",
+    appointmentEnd: "",
+    isDateValid: false,
+    isTimeValid: false,
+  });
+
+  const [verifyInfoPage, setVerifyInfoPage] = useState<Appointment>();
 
   const renderPage = () => {
     switch (currentPage) {
       case 0:
         return (
           <PersonalInfoPage
-            setStudentInformation={setAppointmentData}
+            setStudentInformation={setStudentInfoPage}
             initialData={{
-              studentName: appointmentData.studentName,
-              studentID: appointmentData.studentID,
-              studentEmail: appointmentData.studentEmail,
-              concern: appointmentData.concern,
-              isEmailVerified: appointmentData.isEmailVerified,
+              studentName: studentInfoPage.studentName,
+              studentID: studentInfoPage.studentID,
+              studentEmail: studentInfoPage.studentEmail,
+              concern: studentInfoPage.concern,
+              isEmailVerified: studentInfoPage.isEmailVerified,
             }}
           />
         );
       case 1:
-        return <ProfessorInfoPage />;
+        return (
+          <ProfessorInfoPage
+            setStudentInformation={setProfessorInfoPage}
+            initialData={{
+              professor_uuid: professorInfoPage.professor_uuid,
+              appointmentStart: professorInfoPage.appointmentStart,
+              appointmentEnd: professorInfoPage.appointmentEnd,
+              isDateValid: professorInfoPage.isDateValid,
+              isTimeValid: professorInfoPage.isTimeValid,
+            }}
+          />
+        );
       case 2:
-        return <VerifyInformationPage />;
+        return <VerifyInformationPage data={verifyInfoPage} />;
       default:
         return (
           <PersonalInfoPage
-            setStudentInformation={setAppointmentData}
+            setStudentInformation={setStudentInfoPage}
             initialData={{
-              studentName: appointmentData.studentName,
-              studentID: appointmentData.studentID,
-              studentEmail: appointmentData.studentEmail,
-              concern: appointmentData.concern,
-              isEmailVerified: appointmentData.isEmailVerified,
+              studentName: studentInfoPage.studentName,
+              studentID: studentInfoPage.studentID,
+              studentEmail: studentInfoPage.studentEmail,
+              concern: studentInfoPage.concern,
+              isEmailVerified: studentInfoPage.isEmailVerified,
             }}
           />
         );
@@ -101,26 +152,41 @@ const CreateAppointmentComponent = ({ onBack }: { onBack: () => void }) => {
 
   const nextPage = () => {
     if (currentPage === 0) {
-      // if (
-      //   !appointmentData ||
-      //   !appointmentData.studentName ||
-      //   !appointmentData.studentID ||
-      //   !appointmentData.concern ||
-      //   !appointmentData.studentEmail
-      // ) {
-      //   toast.error("Please fill out the form before proceeding.");
-      //   return;
-      // }
-      // if (!appointmentData.isEmailVerified) {
-      //   toast.error("Please verify your email before proceeding.");
-      //   return;
-      // }
+      if (
+        !studentInfoPage ||
+        !studentInfoPage.studentName ||
+        !studentInfoPage.studentID ||
+        !studentInfoPage.concern ||
+        !studentInfoPage.studentEmail
+      ) {
+        toast.error("Please fill out the form before proceeding.");
+        return;
+      }
+      if (!studentInfoPage.isEmailVerified) {
+        toast.error("Please verify your email before proceeding.");
+        return;
+      }
+    }
+
+    if (currentPage === 1) {
+      if (professorInfoPage.isDateValid && professorInfoPage.isTimeValid) {
+        setVerifyInfoPage({
+          studentName: studentInfoPage.studentName,
+          studentID: studentInfoPage.studentID,
+          studentEmail: studentInfoPage.studentEmail,
+          professor_uuid: professorInfoPage.professor_uuid,
+          concern: studentInfoPage.concern,
+          appointmentStart: professorInfoPage.appointmentStart,
+          appointmentEnd: professorInfoPage.appointmentEnd,
+        });
+      } else {
+        toast.error("Please select a valid date and time.");
+        return;
+      }
     }
 
     if (currentPage < totalPages - 1) {
       setCurrentPage(currentPage + 1);
-      // TODO: Save the data of the student info
-      console.log(appointmentData);
     }
   };
 
@@ -137,6 +203,8 @@ const CreateAppointmentComponent = ({ onBack }: { onBack: () => void }) => {
       // Submit the form data
       toast.success("Appointment created successfully!");
       onBack();
+      // TODO: Send the data to the backend
+      // TODO: format the data to save in database
     }
   };
 
@@ -191,7 +259,6 @@ const PersonalInfoPage = ({
   // Handle the pagination
 
   const onEmailVerified = () => {
-    console.log("Email verified", emailVerified);
     setEmailVerified(true);
   };
   const isFirstRender = useRef(true);
@@ -268,22 +335,22 @@ const PersonalInfoPage = ({
   );
 };
 
-const ProfessorInfoPage = () => {
+const ProfessorInfoPage = ({
+  setStudentInformation,
+  initialData,
+}: ProfessorInfoPageProps) => {
   const [title, setTitle] = useState("Select Professor");
   const [professor, setProfessor] = useState<ProfessorList>();
   const [professorList, setProfessorList] = useState<ProfessorList[]>([]);
-  const [date, setDate] = useState<Date>();
+  const [date, setDate] = useState("");
   const [hours, setHours] = useState("");
 
-  // TODO: Set the time range for the appointment
   // TODO: disabled the hours if professor has appointment already
 
   async function fetchProfessors() {
     try {
       const res = await getProfessors();
       setProfessorList(res);
-      console.log(date);
-      console.log(hours);
     } catch (error) {
       console.error("Error fetching professors:", error);
     }
@@ -318,7 +385,6 @@ const ProfessorInfoPage = () => {
       const startMinute = hours[0].split(":")[1];
       const startPeriod = hourNumeric > 12 ? "PM" : "AM";
 
-      console.log(`${startHour} ${startMinute} ${startPeriod}`);
       return [startHour, startMinute, startPeriod];
     }
     return ["6", "00", "AM"];
@@ -366,12 +432,38 @@ const ProfessorInfoPage = () => {
     }
     return { minHour: 0, maxHour: 23 }; // Default to full day
   }
-
   const officeHoursRange = getOfficeHoursRange();
 
   useEffect(() => {
     fetchProfessors();
   }, []);
+
+  useEffect(() => {
+    setStudentInformation({
+      professor_uuid: professor?.professor_id || "test",
+      appointmentStart: `${date} ${hours.split("-")[0]}`,
+      appointmentEnd: `${date} ${hours.split("-")[1]}`,
+      isDateValid: date !== "",
+      isTimeValid: hours !== "",
+    });
+
+    console.log("hours: ", hours);
+  }, [professor, date, hours, setStudentInformation]);
+
+  useEffect(() => {
+    // Only run this if we have both the professor list and an initial ID
+    if (initialData?.professor_uuid && professorList.length > 0) {
+      // Find the professor object matching the ID
+      const initialProfessor = professorList.find(
+        (prof) => prof.professor_id === initialData.professor_uuid
+      );
+
+      if (initialProfessor) {
+        setProfessor(initialProfessor);
+        setTitle(initialProfessor.name); // Update dropdown title too
+      }
+    }
+  }, [initialData.professor_uuid, professorList]);
 
   return (
     <div className="flex flex-col items-center justify-center min-w-full min-h-full w-[1000px]">
@@ -431,7 +523,7 @@ const ProfessorInfoPage = () => {
             minHour={officeHoursRange.minHour}
             maxHour={officeHoursRange.maxHour}
             onChange={(timeRange) =>
-              setHours(`${timeRange.startTime} - ${timeRange.endTime}`)
+              setHours(`${timeRange.startTime}-${timeRange.endTime}`)
             }
             disabled={title === "Select Professor" ? true : false}
           />
@@ -441,10 +533,23 @@ const ProfessorInfoPage = () => {
   );
 };
 
-const VerifyInformationPage = () => {
+const VerifyInformationPage = ({ data }: { data: Appointment | undefined }) => {
+  useEffect(() => {
+    console.log("Data to verify: ", data);
+  }, [data]);
+  if (!data) {
+    return <div>No appointment data available</div>;
+  }
   return (
     <div className="flex flex-col items-center justify-center min-w-full min-h-full w-[1000px]">
-      test
+      <Label>{`${data.studentName}`}</Label>
+      <Label>{data.studentID}</Label>
+      <Label>{data.studentEmail}</Label>
+      <Label>{data.concern}</Label>
+      <Label>{data.professor_uuid}</Label>
+      <Label>{data.appointmentStart}</Label>
+      <Label>{data.appointmentEnd}</Label>
+      <Button>{data.studentName}</Button>
     </div>
   );
 };

@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 interface CalendarComponentProps {
-  getDate?: (date: Date) => void;
+  getDate?: (date: string) => void;
   disabled?: boolean;
 }
 
@@ -23,7 +23,8 @@ export const MyCalendar = ({ getDate, disabled }: CalendarComponentProps) => {
     if (selectedDate) {
       // Only call getDate if it's provided
       if (getDate) {
-        getDate(selectedDate);
+        const formattedDate = format(selectedDate, "yyyy-MM-dd");
+        getDate(formattedDate);
       }
       setDate(selectedDate);
     }
