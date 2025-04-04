@@ -1,11 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useKeyboard } from "@/my_components/KeyboardContext";
 import { Input } from "@/components/ui/input";
-
-interface KeyboardInputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
-  keyboardType?: "numeric" | "alphanumeric" | "email";
-}
+import { KeyboardInputProps } from "@/interface";
 
 export const KeyboardInput = ({
   value,

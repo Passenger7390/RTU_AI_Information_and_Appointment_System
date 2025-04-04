@@ -1,11 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useKeyboard } from "@/my_components/KeyboardContext";
 import { Textarea } from "@/components/ui/textarea";
-
-interface KeyboardTextAreaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  keyboardType?: "numeric" | "alphanumeric" | "email";
-}
+import { KeyboardTextAreaProps } from "@/interface";
 
 export const KeyboardTextArea = ({
   value,

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { TableData } from "./my_components/table/Columns";
-import { FAQ } from "./my_components/FAQ";
+import { FAQ, Professor } from "./interface";
 // Environment-aware API configuration
 const env = import.meta.env.VITE_ENV || "production";
 const isDev = env === "development";
@@ -17,27 +17,6 @@ export const chatApi = `${api}/ray`;
 export const appointmentApi = `${api}/appointment`;
 export const professorApi = `${api}/professor`;
 export const otpApi = `${api}/otp`;
-
-export interface ImageData {
-  filename: string;
-  duration: number;
-}
-
-export interface ProfessorList {
-  email: string;
-  id: number;
-  name: string;
-  office_hours: string;
-  professor_id: string;
-}
-
-export interface Professor {
-  first_name: string;
-  last_name: string;
-  email: string;
-  office_hours: string;
-  title: string;
-}
 
 // GET request to / to fetch iamge file name
 export const fetchImageFilename = async (): Promise<ImageData[]> => {
@@ -266,3 +245,6 @@ export const deleteProfessors = async (ids: string[]) => {
 
   return res.data;
 };
+
+// =============================================================== APPOINTMENT API ============================================================
+export const createAppointment = async () => {};

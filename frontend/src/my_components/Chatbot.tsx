@@ -12,11 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getChatbotResponse } from "@/api";
 import MarkdownResponse from "@/my_components/MarkdownResponse";
 import { KeyboardInput } from "./KeyboardInput";
-
-export interface Message {
-  sender: "user" | "bot";
-  text: string;
-}
+import { Message } from "@/interface";
 
 const Chatbot: React.FC = () => {
   const [query, setQuery] = useState("");

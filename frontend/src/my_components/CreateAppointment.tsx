@@ -22,54 +22,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import { getProfessors, ProfessorList } from "@/api";
+import { getProfessors } from "@/api";
 import { MyCalendar } from "./myCalendar";
 import { TimePicker } from "./timePicker";
 import { IoMdClose } from "react-icons/io";
-
-// Interfaces
-interface PersonalInfoPageProps {
-  setStudentInformation: (info: {
-    studentName: string;
-    studentID: string;
-    studentEmail: string;
-    concern: string;
-    isEmailVerified: boolean;
-  }) => void;
-  initialData: {
-    studentName: string;
-    studentID: string;
-    studentEmail: string;
-    concern: string;
-    isEmailVerified: boolean;
-  };
-}
-
-interface ProfessorInfoPageProps {
-  setStudentInformation: (info: {
-    professor_uuid: string;
-    appointmentStart: string;
-    appointmentEnd: string;
-    isDateValid: boolean;
-    isTimeValid: boolean;
-  }) => void;
-  initialData: {
-    professor_uuid: string;
-    appointmentStart: string;
-    appointmentEnd: string;
-    isDateValid: boolean;
-    isTimeValid: boolean;
-  };
-}
-interface Appointment {
-  studentName: string;
-  studentID: string;
-  studentEmail: string;
-  professor_uuid: string;
-  concern: string;
-  appointmentStart: string;
-  appointmentEnd: string;
-}
+import {
+  Appointment,
+  PersonalInfoPageProps,
+  ProfessorInfoPageProps,
+  ProfessorList,
+} from "@/interface";
 
 const CreateAppointmentComponent = ({ onBack }: { onBack: () => void }) => {
   const [currentPage, setCurrentPage] = useState(0);

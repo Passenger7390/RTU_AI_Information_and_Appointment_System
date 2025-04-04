@@ -8,26 +8,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import toast from "react-hot-toast";
-
-interface TimeRangeProps {
-  startTime: string;
-  endTime: string;
-}
-
-interface TimePickerProps {
-  onChange?: (timeRange: TimeRangeProps) => void;
-  defaultStartHour?: string;
-  defaultEndHour?: string;
-  defaultStartMinute?: string; // New prop
-  defaultEndMinute?: string; // New prop
-  defaultStartPeriod?: string;
-  defaultEndPeriod?: string;
-  className?: string;
-  disabled?: boolean;
-  // New props for limiting hours
-  minHour?: number; // 0-23, 24-hour format
-  maxHour?: number; // 0-23, 24-hour format
-}
+import { TimePickerProps } from "@/interface";
 
 export function TimePicker({
   onChange,

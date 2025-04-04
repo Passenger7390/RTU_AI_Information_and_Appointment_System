@@ -1,0 +1,189 @@
+import { ColumnDef } from "@tanstack/react-table";
+
+export interface ImageData {
+  filename: string;
+  duration: number;
+}
+
+export interface ProfessorList {
+  email: string;
+  id: number;
+  name: string;
+  office_hours: string;
+  professor_id: string;
+}
+
+export interface Professor {
+  first_name: string;
+  last_name: string;
+  email: string;
+  office_hours: string;
+  title: string;
+}
+
+export interface Message {
+  sender: "user" | "bot";
+  text: string;
+}
+
+export interface PersonalInfoPageProps {
+  setStudentInformation: (info: {
+    studentName: string;
+    studentID: string;
+    studentEmail: string;
+    concern: string;
+    isEmailVerified: boolean;
+  }) => void;
+  initialData: {
+    studentName: string;
+    studentID: string;
+    studentEmail: string;
+    concern: string;
+    isEmailVerified: boolean;
+  };
+}
+
+export interface ProfessorInfoPageProps {
+  setStudentInformation: (info: {
+    professor_uuid: string;
+    appointmentStart: string;
+    appointmentEnd: string;
+    isDateValid: boolean;
+    isTimeValid: boolean;
+  }) => void;
+  initialData: {
+    professor_uuid: string;
+    appointmentStart: string;
+    appointmentEnd: string;
+    isDateValid: boolean;
+    isTimeValid: boolean;
+  };
+}
+
+export interface Appointment {
+  studentName: string;
+  studentID: string;
+  studentEmail: string;
+  professor_uuid: string;
+  concern: string;
+  appointmentStart: string;
+  appointmentEnd: string;
+}
+
+export interface CreateProfessorDialogProps {
+  onRefresh?: () => void;
+}
+
+export interface DateTimePickerProps {
+  getDate: (date: Date) => void;
+  disabled?: boolean;
+}
+
+export interface DeleteDialogProps {
+  onConfirm?: () => void;
+  isButtonDisabled?: boolean;
+}
+
+export interface FAQCardProps {
+  idProp: number;
+  questionProp: string;
+  synonymsProp: string[];
+  answerProp: string;
+  onRefresh?: () => void;
+}
+
+export interface FAQ {
+  id: number;
+  question: string;
+  synonyms: string[];
+  answer: string;
+}
+
+export interface FAQDialogProps {
+  onRefresh?: () => void;
+}
+
+export interface KeyboardContextProps {
+  showKeyboard: (
+    inputValue: string,
+    onChange: (value: string) => void,
+    maxLength?: number,
+    keyboardType?: "numeric" | "alphanumeric" | "email"
+  ) => void;
+  hideKeyboard: () => void;
+  isKeyboardVisible: boolean;
+}
+
+export interface KeyboardInputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {
+  keyboardType?: "numeric" | "alphanumeric" | "email";
+}
+
+export interface KeyboardTextAreaProps
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  keyboardType?: "numeric" | "alphanumeric" | "email";
+}
+
+export interface MarkdownResponseProps {
+  response: string;
+}
+
+export interface CalendarComponentProps {
+  getDate?: (date: string) => void;
+  disabled?: boolean;
+}
+
+export interface OTPDialogProps {
+  email: string;
+  onVerified: () => void;
+}
+
+export interface TimeRangeProps {
+  startTime: string;
+  endTime: string;
+}
+
+export interface TimePickerProps {
+  onChange?: (timeRange: TimeRangeProps) => void;
+  defaultStartHour?: string;
+  defaultEndHour?: string;
+  defaultStartMinute?: string; // New prop
+  defaultEndMinute?: string; // New prop
+  defaultStartPeriod?: string;
+  defaultEndPeriod?: string;
+  className?: string;
+  disabled?: boolean;
+  // New props for limiting hours
+  minHour?: number; // 0-23, 24-hour format
+  maxHour?: number; // 0-23, 24-hour format
+}
+
+export interface UploadCardProps {
+  onUploadComplete?: () => void;
+}
+
+export interface DataTableProps<TData, TValue> {
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  // Make these optional with defaults
+  onRowSelectionChange?: (value: any) => void;
+  rowSelection?: any;
+  // Add customization options
+  headerClassName?: string;
+  emptyMessage?: string;
+  caption?: React.ReactNode;
+  enableSelection?: boolean;
+  enablePagination?: boolean;
+  pageSize?: number;
+  actions?: React.ReactNode;
+  maxHeight?: string;
+}
+
+export interface buildingDialogProps {
+  props: string;
+  setTitle: (title: string) => void;
+  setOpen: (open: boolean) => void;
+  open: boolean;
+  trigger: boolean;
+  setTrigger: (trigger: boolean) => void;
+}

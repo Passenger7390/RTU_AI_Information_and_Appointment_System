@@ -17,11 +17,9 @@ import {
 import { useState } from "react";
 import { sendOTP, verifyOTP } from "@/api";
 import toast from "react-hot-toast";
+import { OTPDialogProps } from "@/interface";
 
-interface OTPDialogProps {
-  email: string;
-  onVerified: () => void;
-}
+
 
 const OTPDialog = ({ email, onVerified }: OTPDialogProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);

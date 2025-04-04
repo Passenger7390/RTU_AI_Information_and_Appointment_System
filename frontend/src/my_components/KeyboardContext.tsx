@@ -1,3 +1,4 @@
+import { KeyboardContextProps } from "@/interface";
 import {
   createContext,
   useState,
@@ -8,17 +9,6 @@ import {
 } from "react";
 import Keyboard from "react-simple-keyboard";
 import "react-simple-keyboard/build/css/index.css";
-
-interface KeyboardContextProps {
-  showKeyboard: (
-    inputValue: string,
-    onChange: (value: string) => void,
-    maxLength?: number,
-    keyboardType?: "numeric" | "alphanumeric" | "email"
-  ) => void;
-  hideKeyboard: () => void;
-  isKeyboardVisible: boolean;
-}
 
 const KeyboardContext = createContext<KeyboardContextProps | undefined>(
   undefined

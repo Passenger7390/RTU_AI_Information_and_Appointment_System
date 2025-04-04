@@ -10,11 +10,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-
-interface CalendarComponentProps {
-  getDate?: (date: string) => void;
-  disabled?: boolean;
-}
+import { CalendarComponentProps } from "@/interface";
 
 export const MyCalendar = ({ getDate, disabled }: CalendarComponentProps) => {
   const [date, setDate] = useState<Date>();

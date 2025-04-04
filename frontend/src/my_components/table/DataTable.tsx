@@ -1,5 +1,4 @@
 import {
-  ColumnDef,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
@@ -16,23 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-  // Make these optional with defaults
-  onRowSelectionChange?: (value: any) => void;
-  rowSelection?: any;
-  // Add customization options
-  headerClassName?: string;
-  emptyMessage?: string;
-  caption?: React.ReactNode;
-  enableSelection?: boolean;
-  enablePagination?: boolean;
-  pageSize?: number;
-  actions?: React.ReactNode;
-  maxHeight?: string;
-}
+import { DataTableProps } from "@/interface";
 
 export function DataTable<TData, TValue>({
   columns,

@@ -12,11 +12,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-
-interface DateTimePickerProps {
-  getDate: (date: Date) => void;
-  disabled?: boolean;
-}
+import { DateTimePickerProps } from "@/interface";
 
 export function DateTimePicker({ getDate, disabled }: DateTimePickerProps) {
   const [date, setDate] = React.useState<Date>();
