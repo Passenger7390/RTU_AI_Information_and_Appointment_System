@@ -28,16 +28,16 @@ export interface Message {
 
 export interface PersonalInfoPageProps {
   setStudentInformation: (info: {
-    studentName: string;
-    studentID: string;
-    studentEmail: string;
+    student_name: string;
+    student_id: string;
+    student_email: string;
     concern: string;
     isEmailVerified: boolean;
   }) => void;
   initialData: {
-    studentName: string;
-    studentID: string;
-    studentEmail: string;
+    student_name: string;
+    student_id: string;
+    student_email: string;
     concern: string;
     isEmailVerified: boolean;
   };
@@ -46,28 +46,28 @@ export interface PersonalInfoPageProps {
 export interface ProfessorInfoPageProps {
   setStudentInformation: (info: {
     professor_uuid: string;
-    appointmentStart: string;
-    appointmentEnd: string;
+    start_time: string;
+    end_time: string;
     isDateValid: boolean;
     isTimeValid: boolean;
   }) => void;
   initialData: {
     professor_uuid: string;
-    appointmentStart: string;
-    appointmentEnd: string;
+    start_time: string;
+    end_time: string;
     isDateValid: boolean;
     isTimeValid: boolean;
   };
 }
 
 export interface Appointment {
-  studentName: string;
-  studentID: string;
-  studentEmail: string;
+  student_name: string;
+  student_id: string;
+  student_email: string;
   professor_uuid: string;
   concern: string;
-  appointmentStart: string;
-  appointmentEnd: string;
+  start_time: string;
+  end_time: string;
 }
 
 export interface CreateProfessorDialogProps {

@@ -22,7 +22,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import { getProfessors } from "@/api";
+import { createAppointment, getProfessors } from "@/api";
 import { MyCalendar } from "./myCalendar";
 import { TimePicker } from "./timePicker";
 import { IoMdClose } from "react-icons/io";
@@ -49,17 +49,17 @@ const CreateAppointmentComponent = ({ onBack }: { onBack: () => void }) => {
   const totalPages = 3;
 
   const [studentInfoPage, setStudentInfoPage] = useState({
-    studentName: "",
-    studentID: "",
-    studentEmail: "",
+    student_name: "",
+    student_id: "",
+    student_email: "",
     concern: "",
     isEmailVerified: false,
   });
 
   const [professorInfoPage, setProfessorInfoPage] = useState({
     professor_uuid: "",
-    appointmentStart: "",
-    appointmentEnd: "",
+    start_time: "",
+    end_time: "",
     isDateValid: false,
     isTimeValid: false,
   });
@@ -73,9 +73,9 @@ const CreateAppointmentComponent = ({ onBack }: { onBack: () => void }) => {
           <PersonalInfoPage
             setStudentInformation={setStudentInfoPage}
             initialData={{
-              studentName: studentInfoPage.studentName,
-              studentID: studentInfoPage.studentID,
-              studentEmail: studentInfoPage.studentEmail,
+              student_name: studentInfoPage.student_name,
+              student_id: studentInfoPage.student_id,
+              student_email: studentInfoPage.student_email,
               concern: studentInfoPage.concern,
               isEmailVerified: studentInfoPage.isEmailVerified,
             }}
@@ -87,8 +87,8 @@ const CreateAppointmentComponent = ({ onBack }: { onBack: () => void }) => {
             setStudentInformation={setProfessorInfoPage}
             initialData={{
               professor_uuid: professorInfoPage.professor_uuid,
-              appointmentStart: professorInfoPage.appointmentStart,
-              appointmentEnd: professorInfoPage.appointmentEnd,
+              start_time: professorInfoPage.start_time,
+              end_time: professorInfoPage.end_time,
               isDateValid: professorInfoPage.isDateValid,
               isTimeValid: professorInfoPage.isTimeValid,
             }}
@@ -101,9 +101,9 @@ const CreateAppointmentComponent = ({ onBack }: { onBack: () => void }) => {
           <PersonalInfoPage
             setStudentInformation={setStudentInfoPage}
             initialData={{
-              studentName: studentInfoPage.studentName,
-              studentID: studentInfoPage.studentID,
-              studentEmail: studentInfoPage.studentEmail,
+              student_name: studentInfoPage.student_name,
+              student_id: studentInfoPage.student_id,
+              student_email: studentInfoPage.student_email,
               concern: studentInfoPage.concern,
               isEmailVerified: studentInfoPage.isEmailVerified,
             }}
@@ -116,10 +116,10 @@ const CreateAppointmentComponent = ({ onBack }: { onBack: () => void }) => {
     if (currentPage === 0) {
       if (
         !studentInfoPage ||
-        !studentInfoPage.studentName ||
-        !studentInfoPage.studentID ||
+        !studentInfoPage.student_name ||
+        !studentInfoPage.student_id ||
         !studentInfoPage.concern ||
-        !studentInfoPage.studentEmail
+        !studentInfoPage.student_email
       ) {
         toast.error("Please fill out the form before proceeding.");
         return;
@@ -133,13 +133,13 @@ const CreateAppointmentComponent = ({ onBack }: { onBack: () => void }) => {
     if (currentPage === 1) {
       if (professorInfoPage.isDateValid && professorInfoPage.isTimeValid) {
         setVerifyInfoPage({
-          studentName: studentInfoPage.studentName,
-          studentID: studentInfoPage.studentID,
-          studentEmail: studentInfoPage.studentEmail,
+          student_name: studentInfoPage.student_name,
+          student_id: studentInfoPage.student_id,
+          student_email: studentInfoPage.student_email,
           professor_uuid: professorInfoPage.professor_uuid,
           concern: studentInfoPage.concern,
-          appointmentStart: professorInfoPage.appointmentStart,
-          appointmentEnd: professorInfoPage.appointmentEnd,
+          start_time: professorInfoPage.start_time,
+          end_time: professorInfoPage.end_time,
         });
       } else {
         toast.error("Please select a valid date and time.");
@@ -160,15 +160,25 @@ const CreateAppointmentComponent = ({ onBack }: { onBack: () => void }) => {
     }
   };
 
-  const submitForm = () => {
+  async function submitForm() {
     if (currentPage === totalPages - 1) {
       // Submit the form data
-      toast.success("Appointment created successfully!");
-      onBack();
-      // TODO: Send the data to the backend
-      // TODO: format the data to save in database
+      if (!verifyInfoPage) {
+        toast.error("Please fill out the form before proceeding.");
+        return;
+      }
+
+      try {
+        const res = await createAppointment(verifyInfoPage);
+        toast.success(`${res.message}`);
+        return res.reference;
+      } catch (error: any) {
+        toast.error(`${error}`);
+      } finally {
+        onBack();
+      }
     }
-  };
+  }
 
   return (
     <Card className="max-w-full max-h-full min-w-[fit-content] min-h-[fit-content] py-5">
@@ -212,8 +222,8 @@ const PersonalInfoPage = ({
   setStudentInformation,
   initialData,
 }: PersonalInfoPageProps) => {
-  const [studentID, setStudentID] = useState(initialData.studentID);
-  const [studentName, setStudentName] = useState(initialData.studentName);
+  const [studentID, setStudentID] = useState(initialData.student_id);
+  const [studentName, setStudentName] = useState(initialData.student_name);
   const [concern, setConcern] = useState(initialData.concern);
   const [emailVerified, setEmailVerified] = useState(
     initialData.isEmailVerified
@@ -230,9 +240,9 @@ const PersonalInfoPage = ({
       return;
     }
     setStudentInformation({
-      studentName,
-      studentID,
-      studentEmail: `${studentID}@rtu.edu.ph`,
+      student_name: studentName,
+      student_id: studentID,
+      student_email: `${studentID}@rtu.edu.ph`,
       concern,
       isEmailVerified: emailVerified,
     });
@@ -403,8 +413,8 @@ const ProfessorInfoPage = ({
   useEffect(() => {
     setStudentInformation({
       professor_uuid: professor?.professor_id || "test",
-      appointmentStart: `${date} ${hours.split("-")[0]}`,
-      appointmentEnd: `${date} ${hours.split("-")[1]}`,
+      start_time: `${date} ${hours.split("-")[0]}`,
+      end_time: `${date} ${hours.split("-")[1]}`,
       isDateValid: date !== "",
       isTimeValid: hours !== "",
     });
@@ -504,14 +514,14 @@ const VerifyInformationPage = ({ data }: { data: Appointment | undefined }) => {
   }
   return (
     <div className="flex flex-col items-center justify-center min-w-full min-h-full w-[1000px]">
-      <Label>{`${data.studentName}`}</Label>
-      <Label>{data.studentID}</Label>
-      <Label>{data.studentEmail}</Label>
+      <Label>{`${data.student_name}`}</Label>
+      <Label>{data.student_id}</Label>
+      <Label>{data.student_email}</Label>
       <Label>{data.concern}</Label>
       <Label>{data.professor_uuid}</Label>
-      <Label>{data.appointmentStart}</Label>
-      <Label>{data.appointmentEnd}</Label>
-      <Button>{data.studentName}</Button>
+      <Label>{data.start_time}</Label>
+      <Label>{data.end_time}</Label>
+      <Button>{data.student_name}</Button>
     </div>
   );
 };

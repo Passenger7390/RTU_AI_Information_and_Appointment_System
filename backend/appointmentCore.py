@@ -16,6 +16,10 @@ router = APIRouter(prefix='/appointment', tags=['appointment'])
 @router.post('/create-appointment')
 async def create_apointment(appointment: AppointmentCreate, db: Session = Depends(get_db)):
     """Kiosk users Create an appointment"""
+
+    formattedStartTime = convert_time_format(appointment.start_time)
+    formattedEndTime = convert_time_format(appointment.end_time)
+
     new_appointment = Appointment(
         uuid=uuid4(),
         student_name=appointment.student_name,
@@ -23,8 +27,8 @@ async def create_apointment(appointment: AppointmentCreate, db: Session = Depend
         student_email=appointment.student_email,
         professor_uuid=appointment.professor_uuid,
         concern=appointment.concern,
-        start_time=datetime.strptime(appointment.start_time, '%Y-%m-%d %H:%M:%S'),
-        end_time=datetime.strptime(appointment.end_time, '%Y-%m-%d %H:%M:%S'),
+        start_time=formattedStartTime,
+        end_time=formattedEndTime,
         status='pending'
     )
     db.add(new_appointment)
@@ -51,3 +55,12 @@ async def get_appointment_by_reference(appointment_reference: AppointmentGetByRe
     return AppointmentResponse(id=query.id, uuid=query.uuid, student_name=query.student_name, professor_name=query.professor_name, start_time=query.start_time, end_time=query.end_time, status=query.status)
 
 # TODO: Get the schedule of the professors so that the user can see the available time slots and can't schedule appointment in the same time slot
+
+def convert_time_format(datetime_str: str):
+    """
+        Convert datetime string to datetime object
+
+        Converts 2025-10-10 10:00 AM -> 2025-10-10 10:00:00
+    """
+
+    return datetime.strptime(datetime_str, '%Y-%m-%d %I:%M %p')

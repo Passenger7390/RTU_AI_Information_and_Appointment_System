@@ -1,6 +1,6 @@
 import axios from "axios";
 import { TableData } from "./my_components/table/Columns";
-import { FAQ, Professor } from "./interface";
+import { Appointment, FAQ, Professor } from "./interface";
 // Environment-aware API configuration
 const env = import.meta.env.VITE_ENV || "production";
 const isDev = env === "development";
@@ -260,4 +260,7 @@ export const getProfessorById = async (id: string) => {
 };
 
 // =============================================================== APPOINTMENT API ============================================================
-export const createAppointment = async () => {};
+export const createAppointment = async (data: Appointment) => {
+  const res = await axios.post(`${appointmentApi}/create-appointment`, data);
+  return res.data;
+};
