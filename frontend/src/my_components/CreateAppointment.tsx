@@ -31,20 +31,14 @@ import {
   PersonalInfoPageProps,
   ProfessorInfoPageProps,
   ProfessorList,
+  VerifyInfoDialogProps,
 } from "@/interface";
+import { set } from "date-fns";
 
 const CreateAppointmentComponent = ({ onBack }: { onBack: () => void }) => {
   const [currentPage, setCurrentPage] = useState(0);
-  // const [appointmentData, setAppointmentData] = useState<Appointment>({
-  //   studentName: "",
-  //   studentID: "",
-  //   studentEmail: "",
-  //   professor_uuid: "",
-  //   concern: "",
-  //   appointmentStart: new Date(),
-  //   appointmentEnd: new Date(),
-  //   isEmailVerified: false,
-  // });
+  const [referenceNumber, setReferenceNumber] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false); // State to track success
 
   const totalPages = 3;
 
@@ -62,6 +56,7 @@ const CreateAppointmentComponent = ({ onBack }: { onBack: () => void }) => {
     end_time: "",
     isDateValid: false,
     isTimeValid: false,
+    professorName: "",
   });
 
   const [verifyInfoPage, setVerifyInfoPage] = useState<Appointment>();
@@ -95,7 +90,12 @@ const CreateAppointmentComponent = ({ onBack }: { onBack: () => void }) => {
           />
         );
       case 2:
-        return <VerifyInformationPage data={verifyInfoPage} />;
+        return (
+          <VerifyInformationPage
+            data={verifyInfoPage}
+            professorName={professorInfoPage.professorName}
+          />
+        );
       default:
         return (
           <PersonalInfoPage
@@ -171,50 +171,57 @@ const CreateAppointmentComponent = ({ onBack }: { onBack: () => void }) => {
       try {
         const res = await createAppointment(verifyInfoPage);
         toast.success(`${res.message}`);
-        return res.reference;
+        setReferenceNumber(res.reference);
+        setIsSuccess(true); // Set success state to true
       } catch (error: any) {
         toast.error(`${error}`);
-      } finally {
-        onBack();
       }
     }
   }
 
   return (
-    <Card className="max-w-full max-h-full min-w-[fit-content] min-h-[fit-content] py-5">
-      <CardHeader className="flex-row items-center w-full">
-        <div className="flex-1 items-center">
-          <CardTitle className="flex text-5xl mx-auto justify-center flex-1 pl-18">
-            Create Appointment
-          </CardTitle>
-        </div>
-        <div className="flex items-center">
-          <Button
-            onClick={onBack}
-            variant={"ghost"}
-            className="hover:bg-transparent hover:shadow-none hover:text-current flex-1 size-20"
-          >
-            <IoMdClose className="size-18" />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-5">{renderPage()}</CardContent>
-      <CardFooter className="flex justify-end gap-2">
-        <Button
-          onClick={prevPage}
-          variant={"secondary"}
-          className="text-2xl h-full w-64"
-        >
-          {currentPage === 0 ? "Cancel" : "Back"}
-        </Button>
-        <Button
-          onClick={currentPage === totalPages - 1 ? submitForm : nextPage}
-          className="text-2xl h-full w-64"
-        >
-          {currentPage === totalPages - 1 ? "Submit" : "Next"}
-        </Button>
-      </CardFooter>
-    </Card>
+    <div>
+      {!isSuccess ? (
+        <Card className="max-w-full max-h-full min-w-[fit-content] min-h-[fit-content] py-5">
+          <CardHeader className="flex-row items-center w-full">
+            <div className="flex-1 items-center">
+              <CardTitle className="flex text-5xl mx-auto justify-center flex-1 pl-18">
+                Create Appointment
+              </CardTitle>
+            </div>
+            <div className="flex items-center">
+              <Button
+                onClick={onBack}
+                variant={"ghost"}
+                className="hover:bg-transparent hover:shadow-none hover:text-current flex-1 size-20"
+              >
+                <IoMdClose className="size-18" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-5">
+            {renderPage()}
+          </CardContent>
+          <CardFooter className="flex justify-end gap-2">
+            <Button
+              onClick={prevPage}
+              variant={"secondary"}
+              className="text-2xl h-full w-64"
+            >
+              {currentPage === 0 ? "Cancel" : "Back"}
+            </Button>
+            <Button
+              onClick={currentPage === totalPages - 1 ? submitForm : nextPage}
+              className="text-2xl h-full w-64"
+            >
+              {currentPage === totalPages - 1 ? "Submit" : "Next"}
+            </Button>
+          </CardFooter>
+        </Card>
+      ) : (
+        <ReferenceNumberCard referenceNumber={referenceNumber} />
+      )}
+    </div>
   );
 };
 
@@ -242,7 +249,7 @@ const PersonalInfoPage = ({
     setStudentInformation({
       student_name: studentName,
       student_id: studentID,
-      student_email: `${studentID}@rtu.edu.ph`,
+      student_email: `${studentID}`,
       concern,
       isEmailVerified: emailVerified,
     });
@@ -253,7 +260,6 @@ const PersonalInfoPage = ({
       <div className="p-10 space-y-5 grid gap-4 items-center w-[1000px]">
         <div className="grid gap-5 grid-cols-6">
           <Label className="text-3xl text-right">Name</Label>
-          {/* <Input className="!text-xl col-span-5" required type="text" /> */}
           <KeyboardInput
             type="text"
             value={studentName}
@@ -412,14 +418,13 @@ const ProfessorInfoPage = ({
 
   useEffect(() => {
     setStudentInformation({
-      professor_uuid: professor?.professor_id || "test",
+      professor_uuid: professor?.professor_id || "",
       start_time: `${date} ${hours.split("-")[0]}`,
       end_time: `${date} ${hours.split("-")[1]}`,
       isDateValid: date !== "",
       isTimeValid: hours !== "",
+      professorName: professor?.name || "",
     });
-
-    console.log("hours: ", hours);
   }, [professor, date, hours, setStudentInformation]);
 
   useEffect(() => {
@@ -505,7 +510,10 @@ const ProfessorInfoPage = ({
   );
 };
 
-const VerifyInformationPage = ({ data }: { data: Appointment | undefined }) => {
+const VerifyInformationPage = ({
+  data,
+  professorName,
+}: VerifyInfoDialogProps) => {
   useEffect(() => {
     console.log("Data to verify: ", data);
   }, [data]);
@@ -513,16 +521,68 @@ const VerifyInformationPage = ({ data }: { data: Appointment | undefined }) => {
     return <div>No appointment data available</div>;
   }
   return (
-    <div className="flex flex-col items-center justify-center min-w-full min-h-full w-[1000px]">
-      <Label>{`${data.student_name}`}</Label>
-      <Label>{data.student_id}</Label>
-      <Label>{data.student_email}</Label>
-      <Label>{data.concern}</Label>
-      <Label>{data.professor_uuid}</Label>
-      <Label>{data.start_time}</Label>
-      <Label>{data.end_time}</Label>
-      <Button>{data.student_name}</Button>
+    <div className="grid grid-cols-7 min-w-full min-h-full w-[1000px]">
+      <div className="flex-col flex justify-center px-10 col-span-2 space-y-4">
+        <Label className="text-2xl">Name: </Label>
+        <Label className="text-2xl">Student number: </Label>
+        <Label className="text-2xl">Student Email: </Label>
+        <Label className="text-2xl">Appointment with </Label>
+        <Label className="text-2xl">From: </Label>
+        <Label className="text-2xl">To: </Label>
+      </div>
+      <div className="flex-col flex justify-center col-span-5 space-y-4">
+        <Label className="text-2xl">{data.student_name}</Label>
+        <Label className="text-2xl">{data.student_id}</Label>
+        <Label className="text-2xl">{data.student_email}</Label>
+        <Label className="text-2xl">{professorName}</Label>
+        <Label className="text-2xl">{data.start_time}</Label>
+        <Label className="text-2xl">{data.end_time}</Label>
+      </div>
     </div>
+  );
+};
+
+export const ReferenceNumberCard = ({
+  referenceNumber,
+}: {
+  referenceNumber: string;
+}) => {
+  const [timer, setTimer] = useState(15); // 5 seconds countdown
+
+  useEffect(() => {
+    // This is a auto scroll timer, this will run according to the image duration set in the database
+    const interval = setInterval(() => {
+      if (timer <= 0) {
+        clearInterval(interval);
+        window.location.reload(); // Reload or navigate back
+        return;
+      }
+
+      setTimer((prev) => prev - 1);
+    }, 1000); // Use current image's duration
+
+    return () => clearInterval(interval);
+  }, [timer]);
+
+  return (
+    <Card className="w-full max-w-lg mx-auto mt-4 h-full flex flex-col items-center">
+      <CardHeader className="flex-row items-center justify-center">
+        <CardTitle>Appointment Created</CardTitle>
+      </CardHeader>
+      <CardContent className="flex-col flex justify-center items-center">
+        <Label className="text-2xl mb-8">Your reference number is:</Label>
+        <Label className="text-5xl font-bold mb-8">{referenceNumber}</Label>
+        <Label className="text-lg text-center">
+          Use this reference number to track your appointment.
+        </Label>
+        <Button
+          onClick={() => window.location.reload()} // Reload or navigate back
+          className="mt-4"
+        >
+          {`Close (${timer})`}
+        </Button>
+      </CardContent>
+    </Card>
   );
 };
 
