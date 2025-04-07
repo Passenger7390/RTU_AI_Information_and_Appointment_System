@@ -7,15 +7,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import toast from "react-hot-toast";
 import { TimePickerProps } from "@/interface";
 
 export function TimePicker({
   onChange,
   defaultStartHour = "9",
   defaultEndHour = "5",
-  defaultStartMinute = "00", // Default to 00 minutes
-  defaultEndMinute = "00", // Default to 00 minutes
   defaultStartPeriod = "AM",
   defaultEndPeriod = "PM",
   className,
@@ -24,9 +21,7 @@ export function TimePicker({
   maxHour = 23, // Default to full day
 }: TimePickerProps) {
   const [startHour, setStartHour] = useState(defaultStartHour);
-  const [startMinute, setStartMinute] = useState(defaultStartMinute); // New state
   const [endHour, setEndHour] = useState(defaultEndHour);
-  const [endMinute, setEndMinute] = useState(defaultEndMinute); // New state
   const [startPeriod, setStartPeriod] = useState(defaultStartPeriod);
   const [endPeriod, setEndPeriod] = useState(defaultEndPeriod);
 
@@ -37,14 +32,6 @@ export function TimePicker({
     if (period === "PM" && hourNum < 12) hourNum += 12;
     return hourNum;
   };
-
-  // Convert 24-hour format to 12-hour display format
-  // const convert12Hour = (hour24: number): [string, string] => {
-  //   let hour12 = hour24 % 12;
-  //   if (hour12 === 0) hour12 = 12;
-  //   const period = hour24 >= 12 ? "PM" : "AM";
-  //   return [hour12.toString(), period];
-  // };
 
   // Filter hours based on min/max
   const getAvailableHours = (periodFilter: string) => {
@@ -73,16 +60,12 @@ export function TimePicker({
   const amHours = getAvailableHours("AM");
   const pmHours = getAvailableHours("PM");
 
-  // Display logic based on selected period
-  // const displayHours = startPeriod === "AM" ? amHours : pmHours;
-  // const displayEndHours = endPeriod === "AM" ? amHours : pmHours;
-
-  const minutes = ["00", "15", "30", "45"]; // Common minute intervals
+  // Update parent component when time changes
   useEffect(() => {
     if (onChange) {
       onChange({
-        startTime: `${startHour}:${startMinute} ${startPeriod}`,
-        endTime: `${endHour}:${endMinute} ${endPeriod}`,
+        startTime: `${startHour}:00 ${startPeriod}`,
+        endTime: `${endHour}:00 ${endPeriod}`,
       });
     }
   }, [startHour, endHour, startPeriod, endPeriod, onChange]);
@@ -108,25 +91,6 @@ export function TimePicker({
                   className="flex justify-center items-center text-lg h-15"
                 >
                   <span className="mx-auto">{hour}</span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={startMinute} onValueChange={setStartMinute}>
-            <SelectTrigger
-              className="w-[80px] text-xl mx-1 h-15"
-              disabled={disabled}
-            >
-              <SelectValue placeholder="Min" />
-            </SelectTrigger>
-            <SelectContent>
-              {minutes.map((minute) => (
-                <SelectItem
-                  key={`start-minute-${minute}`}
-                  value={minute}
-                  className="flex justify-center items-center text-lg h-15"
-                >
-                  <span className="mx-auto">{minute}</span>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -178,25 +142,6 @@ export function TimePicker({
                   className="flex justify-center items-center text-lg h-15"
                 >
                   {hour}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={endMinute} onValueChange={setEndMinute}>
-            <SelectTrigger
-              className="w-[80px] text-xl mx-1 h-15"
-              disabled={disabled}
-            >
-              <SelectValue placeholder="Min" />
-            </SelectTrigger>
-            <SelectContent>
-              {minutes.map((minute) => (
-                <SelectItem
-                  key={`end-minute-${minute}`}
-                  value={minute}
-                  className="flex justify-center items-center text-lg h-15"
-                >
-                  <span className="mx-auto">{minute}</span>
                 </SelectItem>
               ))}
             </SelectContent>
