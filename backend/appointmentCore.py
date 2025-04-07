@@ -138,7 +138,7 @@ async def get_appointment_by_reference(appointment_reference: str, db: Session =
     professor_name = f"{professor.title} {professor.first_name} {professor.last_name}"
     if query is None:
         raise HTTPException(status_code=404, detail="Appointment not found")
-    return AppointmentResponse(id=query.id, uuid=query.uuid, student_name=query.student_name, student_id=query.student_id, student_email=query.student_email, professor_name=professor_name, start_time=query.start_time, end_time=query.end_time, status=query.status)
+    return AppointmentResponse(id=query.id, uuid=str(query.uuid), student_name=query.student_name, student_id=query.student_id, student_email=query.student_email, professor_name=professor_name, start_time=format_iso_date(query.start_time), end_time=format_iso_date(query.end_time), status=query.status)
 
 @router.put('/action-appointment/{appointment_reference}')
 async def action_appointment(appointment_reference: str, action: AppointmentUpdate, db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
@@ -161,6 +161,37 @@ async def action_appointment(appointment_reference: str, action: AppointmentUpda
     return {'message': f'Appointment {action}ed successfully', 'status': appointment.status}
 
 # TODO: Get the schedule of the professors so that the user can see the available time slots and can't schedule appointment in the same time slot
+
+@router.get('/professor-appointments/{professor_id}/{date}')
+async def get_professor_appointments(professor_id: str, date: str, db: Session = Depends(get_db)):
+    """Get all appointments for a professor on a specific date"""
+    
+    # Format the date for query comparison (add time bounds for the full day)
+    date_start = f"{date} 00:00:00"
+    date_end = f"{date} 23:59:59"
+    
+    appointments = db.query(Appointment).filter(
+        Appointment.professor_uuid == professor_id,
+        Appointment.start_time >= date_start,
+        Appointment.start_time <= date_end,
+        Appointment.status.in_(["pending", "Accepted"])  # Only consider pending or accepted appointments
+    ).all()
+    
+    result = []
+    for appointment in appointments:
+        start_time = format_iso_date(appointment.start_time)
+        end_time = format_iso_date(appointment.end_time)
+        
+        # Extract just the time portion for the frontend
+        start_time_only = start_time.split(' ')[1]
+        end_time_only = end_time.split(' ')[1]
+        
+        result.append({
+            "start_time": start_time_only,
+            "end_time": end_time_only
+        })
+    
+    return result
 
 def format_iso_date(date_value):
     """
@@ -186,3 +217,12 @@ def format_iso_date(date_value):
     
     # Remove any trailing or leading spaces
     return date_value.strip()
+
+def convert_time_format(datetime_str: str):
+    """
+         Convert datetime string to datetime object
+ 
+         Converts 2025-10-10 10:00 AM -> 2025-10-10 10:00:00
+    """
+ 
+    return datetime.strptime(datetime_str, '%Y-%m-%d %I:%M %p')
