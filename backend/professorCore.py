@@ -64,7 +64,7 @@ async def add_professor(professor: CreateProfessor, db: Session = Depends(get_db
 @router.put('/update-professor/{professor_uuid}')
 async def update_professor_information(professor_uuid: str, updated_data: UpdateProfessor, db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
     """This allows the admin to update the information of a professor"""
-    # TODO: Implement /update-professor function
+
     print("hello")
     if not professor_uuid:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No professor id provided")

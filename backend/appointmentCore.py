@@ -3,7 +3,7 @@ from uuid import UUID, uuid4
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from otp import get_gmail_service
-from schemas import AppointmentResponse, AppointmentCreate, AppointmentGet, AppointmentGetByReference
+from schemas import AppointmentResponse, AppointmentCreate, AppointmentGet
 from database import get_db
 from models import Appointment, ProfessorInformation
 from sqlalchemy.orm import Session
@@ -35,8 +35,9 @@ async def create_apointment(appointment: AppointmentCreate, db: Session = Depend
         concern=appointment.concern,
         start_time=formattedStartTime,
         end_time=formattedEndTime,
-        status='pending'
+        status='Pending'
     )
+    
     db.add(new_appointment)
     db.commit()
     db.refresh(new_appointment)
@@ -107,13 +108,19 @@ async def get_appointment(appointment_uuid: AppointmentGet, db: Session = Depend
     return AppointmentResponse(id=query.id, uuid=query.uuid, student_name=query.student_name, professor_name=query.professor_name, start_time=query.start_time, end_time=query.end_time, status=query.status)
 
 
-@router.get('/get-appointment-by-reference', response_model=AppointmentResponse)
-async def get_appointment_by_reference(appointment_reference: AppointmentGetByReference, db: Session = Depends(get_db)):
+@router.get('/get-appointment-by-reference/{appointment_reference}', response_model=AppointmentResponse)
+async def get_appointment_by_reference(appointment_reference: str, db: Session = Depends(get_db)):
     """Get a appointment information depending on the reference provided by the user"""
-    query = db.query(Appointment).filter(cast(Appointment.uuid, String).like(f"%{appointment_reference.reference}")).first()
+    query = db.query(Appointment).filter(cast(Appointment.uuid, String).like(f"%{appointment_reference}")).first()
+    professor = db.query(ProfessorInformation.first_name, 
+                         ProfessorInformation.last_name, 
+                         ProfessorInformation.title)\
+                    .filter(ProfessorInformation.professor_id == query.professor_uuid).first()
+    
+    professor_name = f"{professor.title} {professor.first_name} {professor.last_name}"
     if query is None:
         raise HTTPException(status_code=404, detail="Appointment not found")
-    return AppointmentResponse(id=query.id, uuid=query.uuid, student_name=query.student_name, professor_name=query.professor_name, start_time=query.start_time, end_time=query.end_time, status=query.status)
+    return AppointmentResponse(id=query.id, uuid=query.uuid, student_name=query.student_name, student_id=query.student_id, student_email=query.student_email, professor_name=professor_name, start_time=query.start_time, end_time=query.end_time, status=query.status)
 
 # TODO: Get the schedule of the professors so that the user can see the available time slots and can't schedule appointment in the same time slot
 

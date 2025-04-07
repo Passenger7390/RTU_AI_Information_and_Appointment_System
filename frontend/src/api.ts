@@ -285,3 +285,10 @@ export const createAppointment = async (data: Appointment) => {
   const res = await axios.post(`${appointmentApi}/create-appointment`, data);
   return res.data;
 };
+
+export const getAppointmentById = async (reference: string) => {
+  const res = await axios.get(
+    `${appointmentApi}/get-appointment-by-reference/${reference}`
+  );
+  return res.data;
+};
