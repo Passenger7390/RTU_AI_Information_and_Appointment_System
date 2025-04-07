@@ -19,13 +19,13 @@ export const professorApi = `${api}/professor`;
 export const otpApi = `${api}/otp`;
 
 // GET request to / to fetch iamge file name
-export const fetchImageFilename = async (): Promise<ImageData[]> => {
+export const fetchImageFilename = async () => {
   try {
     // In development: http://localhost:8000/api/images
     // In production: /api/images (relative URL that Nginx proxies)
     const endpoint = `${api}/api/images`;
 
-    const response = await axios.get<ImageData[]>(endpoint);
+    const response = await axios.get(endpoint);
     return response.data; // returns list of image URLs
   } catch (error) {
     console.error("Error fetching ads:", error);
@@ -255,6 +255,27 @@ export const getProfessorById = async (id: string) => {
       Authorization: `Bearer ${token}`,
     },
   });
+
+  return res.data;
+};
+
+export const updateProfessorAPI = async (
+  professor_uuid: string,
+  professor: Professor
+) => {
+  const token = localStorage.getItem("token");
+
+  if (!token) return;
+
+  const res = await axios.put(
+    `${professorApi}/update-professor/${professor_uuid}`,
+    professor,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
 
   return res.data;
 };

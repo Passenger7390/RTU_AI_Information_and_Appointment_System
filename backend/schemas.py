@@ -61,14 +61,14 @@ class CreateProfessor(BaseModel):
     first_name: str
     last_name: str
     email: str
-    office_hours: Optional[str] = None
+    office_hours: str
     title: Optional[str] = None
 
 class ProfessorResponse(BaseModel):
     id: int
     name: str
     professor_id: UUID
-    office_hours: Optional[str] = None
+    office_hours: str
     title: Optional[str] = None
 
 class AppointmentCreate(BaseModel):
@@ -104,3 +104,10 @@ class OTPVerify(BaseModel):
 
 class DeleteProfessors(BaseModel):
     ids: List[UUID]
+
+class UpdateProfessor(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+    office_hours: str
+    title: Optional[str] = None

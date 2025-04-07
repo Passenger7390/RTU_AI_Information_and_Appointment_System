@@ -6,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import CreateAppointmentComponent from "./CreateAppointment";
@@ -47,6 +46,8 @@ const AppointmentComponent = () => {
   );
 };
 
+// TODO: Implement the view appointment component, use the same structure in verifyInfoPage,
+// Get the data with getAppointmentsById and display it in the card
 export const ViewAppointmentComponent = ({
   onBack,
 }: {

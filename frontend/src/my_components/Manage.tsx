@@ -102,7 +102,7 @@ export const FAQComponent = () => {
   useEffect(() => {
     fetchFAQs();
   }, []);
-  // TODO: Implement EDIT functionality for Professors
+
   return (
     <div className="flex-row h-full w-full p-2 space-y-8">
       <div>
@@ -140,7 +140,6 @@ export const ProfessorComponent = () => {
 
   useEffect(() => {
     fetchTableData();
-    handleEditSelected();
   }, []);
 
   async function fetchTableData() {
@@ -175,7 +174,8 @@ export const ProfessorComponent = () => {
     const selectedIds = selectedRows.map(
       (index) => professorData[parseInt(index)].professor_id
     );
-    console.log("Selected IDs:", selectedRows);
+
+    return selectedIds[0];
   }
 
   return (
@@ -192,11 +192,12 @@ export const ProfessorComponent = () => {
           <>
             <CreateProfessorDialog onRefresh={fetchTableData} />
             <EditProfileDialog
-              professor_uuid={"72f397a3-9b58-4060-8c55-e7daa6420e26"}
+              professor_uuid={handleEditSelected() || ""}
               disabled={
                 Object.keys(rowSelection).length === 0 ||
                 Object.keys(rowSelection).length > 1
               }
+              onRefresh={fetchTableData}
             />
             <DeleteDialog
               onConfirm={handleDeleteSelected}

@@ -50,6 +50,7 @@ export interface ProfessorInfoPageProps {
     end_time: string;
     isDateValid: boolean;
     isTimeValid: boolean;
+    professorName: string;
   }) => void;
   initialData: {
     professor_uuid: string;
@@ -191,4 +192,10 @@ export interface buildingDialogProps {
 export interface EditProfileDialogProps {
   disabled?: boolean;
   professor_uuid: string;
+  onRefresh?: () => void;
+}
+
+export interface VerifyInfoDialogProps {
+  data: Appointment | undefined;
+  professorName: string;
 }

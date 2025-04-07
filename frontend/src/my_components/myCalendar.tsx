@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { format } from "date-fns";
+import { format, addDays } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -47,7 +47,7 @@ export const MyCalendar = ({ getDate, disabled }: CalendarComponentProps) => {
           selected={date}
           onSelect={onDateSelect}
           initialFocus
-          disabled={(date) => date < new Date()}
+          disabled={(date) => date < addDays(new Date(), 2)}
         />
       </PopoverContent>
     </Popover>

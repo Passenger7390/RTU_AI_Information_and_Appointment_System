@@ -2,7 +2,7 @@ from typing import List
 from database import get_db
 from auth import read_users_me
 from sqlalchemy.orm import Session
-from schemas import CreateProfessor, UserBase, DeleteProfessors
+from schemas import CreateProfessor, UpdateProfessor, UserBase, DeleteProfessors
 from fastapi import APIRouter, Depends, HTTPException, status
 from models import ProfessorInformation
 from uuid import uuid4
@@ -30,7 +30,6 @@ async def get_professors(db: Session = Depends(get_db)):
             'email': professor.email,
             'office_hours': professor.office_hours,
         })
-    print("professors_list: ",professors_list)
     return professors_list
 
 @router.get('/get-professor/{professor_id}', response_model=CreateProfessor)
@@ -62,10 +61,24 @@ async def add_professor(professor: CreateProfessor, db: Session = Depends(get_db
     db.refresh(new_professor)
     return {'message': 'Professor information added successfully'}
 
-@router.put('/update-professor')
-async def update_professor_information(db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
+@router.put('/update-professor/{professor_uuid}')
+async def update_professor_information(professor_uuid: str, updated_data: UpdateProfessor, db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
     """This allows the admin to update the information of a professor"""
     # TODO: Implement /update-professor function
+    print("hello")
+    if not professor_uuid:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No professor id provided")
+    
+    professor = db.query(ProfessorInformation).filter(ProfessorInformation.professor_id == professor_uuid).first()
+    if not professor:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Professor not found")
+    
+    for field, value in updated_data.model_dump(exclude_unset=True).items():
+        setattr(professor, field, value)
+
+    db.commit()
+    db.refresh(professor)
+
     return {'message': 'Professor information updated successfully'}
 
 @router.delete('/delete-professor')

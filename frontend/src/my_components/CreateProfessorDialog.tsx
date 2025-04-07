@@ -37,7 +37,7 @@ const CreateProfessorDialog = ({ onRefresh }: CreateProfessorDialogProps) => {
 
   async function saveForm() {
     // Save form logic here
-    if (!firstName || !lastName || !email) {
+    if (!firstName || !lastName || !email || !workingHours) {
       toast.error("Please fill in all required fields.");
       return;
     }
@@ -48,7 +48,7 @@ const CreateProfessorDialog = ({ onRefresh }: CreateProfessorDialogProps) => {
       office_hours: workingHours,
       title: title,
     };
-    console.log("params.working_hours", params.office_hours);
+
     try {
       await createProfessor(params);
       toast.success("Professor created successfully!");
@@ -120,7 +120,9 @@ const CreateProfessorDialog = ({ onRefresh }: CreateProfessorDialogProps) => {
             />
           </div>
           <div>
-            <Label className="text-lg font-semibold">Working Hours</Label>
+            <Label className="text-lg font-semibold">
+              Working Hours<span className="text-red-500">*</span>
+            </Label>
             <div className="flex justify-center items-center w-full">
               <TimeRangePicker
                 initialStartTime="06:00"

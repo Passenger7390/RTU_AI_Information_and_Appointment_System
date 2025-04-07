@@ -41,7 +41,7 @@ class ProfessorInformation(Base):
     first_name = Column(String, nullable=False)
     last_name = Column(String, unique=True, nullable=False)
     email = Column(String, unique=True, nullable=False)
-    office_hours = Column(String, nullable=True)
+    office_hours = Column(String, nullable=False)
     title = Column(String, nullable=True)
 
     appointments = relationship("Appointment", back_populates="professor")
