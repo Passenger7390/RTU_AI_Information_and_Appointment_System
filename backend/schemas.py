@@ -86,8 +86,8 @@ class AppointmentResponse(BaseModel):
     student_id: str
     student_email: str
     professor_name: str
-    start_time: datetime
-    end_time: datetime
+    start_time: str
+    end_time: str
     status: str
 
 # class AppointmentGet(BaseModel):
@@ -112,3 +112,6 @@ class UpdateProfessor(BaseModel):
     email: str
     office_hours: str
     title: Optional[str] = None
+
+class AppointmentUpdate(BaseModel):
+    status: str

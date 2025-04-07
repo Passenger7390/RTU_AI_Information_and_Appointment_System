@@ -8,6 +8,7 @@ import {
   getProfessors,
   deleteProfessors,
   getAppointments,
+  actionAppointment,
 } from "@/api";
 import {
   createAdColumns,
@@ -220,7 +221,6 @@ export const AppointmentComponent = () => {
     handleAcceptAppointment,
     handleRejectAppointment
   );
-  const [rowSelection, setRowSelection] = useState({});
 
   async function fetchAppointmentTableData() {
     try {
@@ -234,12 +234,11 @@ export const AppointmentComponent = () => {
     }
   }
 
-  async function confirmAppointment() {}
-
   async function handleAcceptAppointment(appointment: AppointmentData) {
+    console.log("accepting appointment", appointment.uuid);
     try {
       // Implement API call to accept appointment
-      await acceptAppointment(appointment); // You'll need to create this API function
+      await actionAppointment(appointment.uuid, "accept"); // You'll need to create this API function
       toast.success("Appointment accepted");
       fetchAppointmentTableData();
     } catch (error) {
@@ -248,11 +247,12 @@ export const AppointmentComponent = () => {
   }
 
   async function handleRejectAppointment(appointment: AppointmentData) {
+    console.log("rejecting appointment", appointment.uuid);
     try {
       // Implement API call to reject appointment
-      await rejectAppointment(appointment); // You'll need to create this API function
+      await actionAppointment(appointment.uuid, "reject"); // You'll need to create this API function
       toast.success("Appointment rejected");
-      fetchAppointmentData();
+      fetchAppointmentTableData();
     } catch (error) {
       toast.error("Failed to reject appointment");
     }
@@ -267,28 +267,10 @@ export const AppointmentComponent = () => {
         columns={columns}
         data={appointmentData}
         headerClassName="bg-green-900"
-        onRowSelectionChange={setRowSelection}
-        rowSelection={rowSelection}
+        // onRowSelectionChange={setRowSelection}
+        // rowSelection={rowSelection}
         emptyMessage="No appointments found."
         enablePagination={false}
-        actions={
-          <>
-            {/* <CreateProfessorDialog onRefresh={fetchProfessorTableData} />
-            <EditProfileDialog
-              professor_uuid={handleEditSelected() || ""}
-              disabled={
-                Object.keys(rowSelection).length === 0 ||
-                Object.keys(rowSelection).length > 1
-              }
-              onRefresh={fetchTableData}
-            />
-            <DeleteDialog
-              onConfirm={handleDeleteSelected}
-              isButtonDisabled={Object.keys(rowSelection).length === 0}
-            /> */}
-            <Button>Confirm</Button>
-          </>
-        }
       />
     </div>
   );

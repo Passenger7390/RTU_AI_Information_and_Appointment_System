@@ -306,5 +306,22 @@ export const getAppointments = async () => {
   return res.data;
 };
 
+export const actionAppointment = async (reference: string, action: string) => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+  console.log(action);
+  const res = await axios.put(
+    `${appointmentApi}/action-appointment/${reference}`,
+    { status: action },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return res.data;
+};
+
 // TODO: Implement acceptAppointment and rejectAppointment
 // TODO: Implement disable time button if the professor has an appointment on that time slot

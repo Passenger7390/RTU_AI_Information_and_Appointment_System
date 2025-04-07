@@ -141,6 +141,11 @@ export function createAppointmentColumns(
 ): ColumnDef<AppointmentData>[] {
   return [
     createSelectionColumn<AppointmentData>(),
+    // createDataColumn<AppointmentData>(
+    //   "uuid",
+    //   "Appointment ID",
+    //   headerClassName
+    // ),
     createDataColumn<AppointmentData>(
       "student_name",
       "Student Name",
@@ -166,7 +171,7 @@ export function createAppointmentColumns(
       "default",
       (row) => onAccept?.(row),
       headerClassName,
-      (row) => row.status === "pending" // Only show for pending appointments
+      (row) => row.status === "Pending" // Only show for pending appointments
     ),
     createButtonColumn<AppointmentData>(
       "reject",
@@ -175,13 +180,13 @@ export function createAppointmentColumns(
       "destructive",
       (row) => onReject?.(row),
       headerClassName,
-      (row) => row.status === "pending" // Only show for pending appointments
+      (row) => row.status === "Pending" // Only show for pending appointments
     ),
   ];
 }
 
 export type AppointmentData = {
-  appointment_id: string;
+  uuid: string;
   student_name: string;
   professor_name: string;
   start_time: string;

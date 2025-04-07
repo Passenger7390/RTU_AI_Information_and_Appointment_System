@@ -33,7 +33,6 @@ import {
   ProfessorList,
   VerifyInfoDialogProps,
 } from "@/interface";
-import { set } from "date-fns";
 
 const CreateAppointmentComponent = ({ onBack }: { onBack: () => void }) => {
   const [currentPage, setCurrentPage] = useState(0);

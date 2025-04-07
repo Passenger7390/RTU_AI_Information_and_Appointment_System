@@ -5,7 +5,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from auth import read_users_me
 from otp import get_gmail_service
-from schemas import AppointmentResponse, AppointmentCreate, UserBase
+from schemas import AppointmentResponse, AppointmentCreate, AppointmentUpdate, UserBase
 from database import get_db
 from models import Appointment, ProfessorInformation
 from sqlalchemy.orm import Session
@@ -119,8 +119,8 @@ async def get_appointment(db: Session = Depends(get_db), current_user: UserBase 
                             student_id=appointment.student_id,
                             student_email=appointment.student_email,
                             professor_name=professor_name, 
-                            start_time=appointment.start_time, 
-                            end_time=appointment.end_time, 
+                            start_time=format_iso_date(appointment.start_time),
+                            end_time=format_iso_date(appointment.end_time),
                             status=appointment.status))
         
     return appointments_list
@@ -140,13 +140,49 @@ async def get_appointment_by_reference(appointment_reference: str, db: Session =
         raise HTTPException(status_code=404, detail="Appointment not found")
     return AppointmentResponse(id=query.id, uuid=query.uuid, student_name=query.student_name, student_id=query.student_id, student_email=query.student_email, professor_name=professor_name, start_time=query.start_time, end_time=query.end_time, status=query.status)
 
+@router.put('/action-appointment/{appointment_reference}')
+async def action_appointment(appointment_reference: str, action: AppointmentUpdate, db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
+    """Accept or reject an appointment"""
+    print(f"appointment_reference: {appointment_reference}")
+    appointment = db.query(Appointment).filter(Appointment.uuid == appointment_reference).first()
+    if appointment is None:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+    
+    if action.status == 'accept':
+        appointment.status = 'Accepted'
+    elif action.status == 'reject':
+        appointment.status = 'Rejected'
+    else:
+        raise HTTPException(status_code=400, detail="Invalid action")
+
+    db.commit()
+    db.refresh(appointment)
+    
+    return {'message': f'Appointment {action}ed successfully', 'status': appointment.status}
+
 # TODO: Get the schedule of the professors so that the user can see the available time slots and can't schedule appointment in the same time slot
 
-def convert_time_format(datetime_str: str):
+def format_iso_date(date_value):
     """
-        Convert datetime string to datetime object
-
-        Converts 2025-10-10 10:00 AM -> 2025-10-10 10:00:00
+    Convert ISO format date string to a readable format
+    
+    Converts any ISO format (2025-04-11T21:00:00+00:00 or 2025-04-11T07:30:00Z)
+    to clean format: 2025-04-11 07:30:00
     """
-
-    return datetime.strptime(datetime_str, '%Y-%m-%d %I:%M %p')
+    if not isinstance(date_value, str):
+        date_value = str(date_value)
+    
+    # First replace T with space
+    date_value = date_value.replace('T', ' ')
+    
+    # Remove timezone offset (+00:00 or -00:00)
+    if '+' in date_value:
+        date_value = date_value.split('+')[0]
+    elif '-' in date_value[10:]:  # Only check for - after the date part
+        date_value = date_value.split('-', 1)[0]
+    
+    # Remove Z if present
+    date_value = date_value.replace('Z', '')
+    
+    # Remove any trailing or leading spaces
+    return date_value.strip()
