@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
 
@@ -44,6 +45,46 @@ export function createDataColumn<T>(
   };
 }
 
+export function createButtonColumn<T>(
+  id: string,
+  headerText: string,
+  buttonText: string,
+  buttonVariant:
+    | "default"
+    | "destructive"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | "link" = "default",
+  onClick: (row: T) => void,
+  headerClassName: string = "text-white flex justify-center",
+  conditionalRender?: (row: T) => boolean
+): ColumnDef<T> {
+  return {
+    id,
+    header: () => <div className={headerClassName}>{headerText}</div>,
+    cell: ({ row }) => {
+      // Don't render the button if the conditional function returns false
+      if (conditionalRender && !conditionalRender(row.original)) {
+        return null;
+      }
+
+      return (
+        <div className="flex justify-center">
+          <Button
+            variant={buttonVariant}
+            onClick={() => onClick(row.original)}
+            size="sm"
+          >
+            {buttonText}
+          </Button>
+        </div>
+      );
+    },
+    enableSorting: false,
+  };
+}
+
 // Example usage - create advertisement columns
 export function createAdColumns(
   headerClassName: string = "text-white flex justify-center"
@@ -75,7 +116,7 @@ export function createProfessorColumns(
 ): ColumnDef<ProfessorData>[] {
   return [
     createSelectionColumn<ProfessorData>(),
-    createDataColumn<ProfessorData>("professor_id", "ID", headerClassName),
+    // createDataColumn<ProfessorData>("professor_id", "ID", headerClassName),
     createDataColumn<ProfessorData>("name", "Name", headerClassName),
     createDataColumn<ProfessorData>("email", "Email", headerClassName),
     createDataColumn<ProfessorData>(
@@ -91,4 +132,59 @@ export type ProfessorData = {
   name: string;
   email: string;
   office_hours: string;
+};
+
+export function createAppointmentColumns(
+  headerClassName: string = "text-white flex justify-center",
+  onAccept?: (appointment: AppointmentData) => void,
+  onReject?: (appointment: AppointmentData) => void
+): ColumnDef<AppointmentData>[] {
+  return [
+    createSelectionColumn<AppointmentData>(),
+    createDataColumn<AppointmentData>(
+      "student_name",
+      "Student Name",
+      headerClassName
+    ),
+    createDataColumn<AppointmentData>(
+      "professor_name",
+      "Professor Name",
+      headerClassName
+    ),
+    createDataColumn<AppointmentData>(
+      "start_time",
+      "Start Time",
+      headerClassName
+    ),
+    createDataColumn<AppointmentData>("end_time", "End Time", headerClassName),
+    createDataColumn<AppointmentData>("status", "Status", headerClassName),
+    // Add button columns
+    createButtonColumn<AppointmentData>(
+      "accept",
+      "Actions",
+      "Accept",
+      "default",
+      (row) => onAccept?.(row),
+      headerClassName,
+      (row) => row.status === "pending" // Only show for pending appointments
+    ),
+    createButtonColumn<AppointmentData>(
+      "reject",
+      "", // Empty header for the second action button
+      "Reject",
+      "destructive",
+      (row) => onReject?.(row),
+      headerClassName,
+      (row) => row.status === "pending" // Only show for pending appointments
+    ),
+  ];
+}
+
+export type AppointmentData = {
+  appointment_id: string;
+  student_name: string;
+  professor_name: string;
+  start_time: string;
+  end_time: string;
+  status: string;
 };

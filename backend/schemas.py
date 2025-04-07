@@ -81,8 +81,7 @@ class AppointmentCreate(BaseModel):
     end_time: str
 
 class AppointmentResponse(BaseModel):
-    id: int
-    uuid: UUID
+    uuid: str
     student_name: str
     student_id: str
     student_email: str
@@ -91,8 +90,8 @@ class AppointmentResponse(BaseModel):
     end_time: datetime
     status: str
 
-class AppointmentGet(BaseModel):
-    uuid: UUID
+# class AppointmentGet(BaseModel):
+#     uuid: UUID
 
 # class AppointmentGetByReference(BaseModel):
 #     reference: str

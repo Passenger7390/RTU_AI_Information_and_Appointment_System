@@ -2,7 +2,12 @@ import { getUser } from "@/api";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { AdComponent, FAQComponent, ProfessorComponent } from "@/my_components/Manage";
+import {
+  AdComponent,
+  AppointmentComponent,
+  FAQComponent,
+  ProfessorComponent,
+} from "@/my_components/Manage";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -70,6 +75,8 @@ const Dashboard = () => {
             return <FAQComponent />;
           case "manage-professor":
             return <ProfessorComponent />; // Placeholder for Professor management
+          case "manage-appointments":
+            return <AppointmentComponent />; // Placeholder for Appointment management
           default:
             return <AdComponent />; // Fallback view
         }

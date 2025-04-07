@@ -7,12 +7,15 @@ import {
   getFAQs,
   getProfessors,
   deleteProfessors,
+  getAppointments,
 } from "@/api";
 import {
   createAdColumns,
   TableData,
   ProfessorData,
   createProfessorColumns,
+  AppointmentData,
+  createAppointmentColumns,
 } from "@/my_components/table/Columns";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
@@ -203,6 +206,87 @@ export const ProfessorComponent = () => {
               onConfirm={handleDeleteSelected}
               isButtonDisabled={Object.keys(rowSelection).length === 0}
             />
+          </>
+        }
+      />
+    </div>
+  );
+};
+
+export const AppointmentComponent = () => {
+  const [appointmentData, setAppointmentData] = useState<AppointmentData[]>([]);
+  const columns = createAppointmentColumns(
+    "bg-green-900 text-white flex justify-center",
+    handleAcceptAppointment,
+    handleRejectAppointment
+  );
+  const [rowSelection, setRowSelection] = useState({});
+
+  async function fetchAppointmentTableData() {
+    try {
+      const tableData = await getAppointments();
+      if (tableData) {
+        setAppointmentData(tableData);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch appointment data");
+      console.error("Error fetching appointment data:", error);
+    }
+  }
+
+  async function confirmAppointment() {}
+
+  async function handleAcceptAppointment(appointment: AppointmentData) {
+    try {
+      // Implement API call to accept appointment
+      await acceptAppointment(appointment); // You'll need to create this API function
+      toast.success("Appointment accepted");
+      fetchAppointmentTableData();
+    } catch (error) {
+      toast.error("Failed to accept appointment");
+    }
+  }
+
+  async function handleRejectAppointment(appointment: AppointmentData) {
+    try {
+      // Implement API call to reject appointment
+      await rejectAppointment(appointment); // You'll need to create this API function
+      toast.success("Appointment rejected");
+      fetchAppointmentData();
+    } catch (error) {
+      toast.error("Failed to reject appointment");
+    }
+  }
+
+  useEffect(() => {
+    fetchAppointmentTableData();
+  }, []);
+  return (
+    <div>
+      <DataTable
+        columns={columns}
+        data={appointmentData}
+        headerClassName="bg-green-900"
+        onRowSelectionChange={setRowSelection}
+        rowSelection={rowSelection}
+        emptyMessage="No appointments found."
+        enablePagination={false}
+        actions={
+          <>
+            {/* <CreateProfessorDialog onRefresh={fetchProfessorTableData} />
+            <EditProfileDialog
+              professor_uuid={handleEditSelected() || ""}
+              disabled={
+                Object.keys(rowSelection).length === 0 ||
+                Object.keys(rowSelection).length > 1
+              }
+              onRefresh={fetchTableData}
+            />
+            <DeleteDialog
+              onConfirm={handleDeleteSelected}
+              isButtonDisabled={Object.keys(rowSelection).length === 0}
+            /> */}
+            <Button>Confirm</Button>
           </>
         }
       />

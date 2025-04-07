@@ -19,8 +19,6 @@ import { sendOTP, verifyOTP } from "@/api";
 import toast from "react-hot-toast";
 import { OTPDialogProps } from "@/interface";
 
-
-
 const OTPDialog = ({ email, onVerified }: OTPDialogProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [otp, setOtp] = useState("");
@@ -41,7 +39,7 @@ const OTPDialog = ({ email, onVerified }: OTPDialogProps) => {
     // TODO: FIx the bug in the dialog
 
     const res = await verifyOTP(email, otp);
-    console.log(res);
+    // console.log(res);
     if (res) {
       toast.success("Email verified successfully!");
       setLabel("Verified");

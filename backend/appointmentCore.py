@@ -1,9 +1,11 @@
 
+from typing import List
 from uuid import UUID, uuid4
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
+from auth import read_users_me
 from otp import get_gmail_service
-from schemas import AppointmentResponse, AppointmentCreate, AppointmentGet
+from schemas import AppointmentResponse, AppointmentCreate, UserBase
 from database import get_db
 from models import Appointment, ProfessorInformation
 from sqlalchemy.orm import Session
@@ -99,13 +101,29 @@ async def create_apointment(appointment: AppointmentCreate, db: Session = Depend
     except HttpError as error:
         raise HTTPException(status_code=500, detail=str(error))
 
-@router.get('/get-appointment', response_model=AppointmentResponse)
-async def get_appointment(appointment_uuid: AppointmentGet, db: Session = Depends(get_db)):
+@router.get('/get-appointments', response_model=List[AppointmentResponse])
+async def get_appointment(db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
     """Get a appointment information depending on the uid provided by the user"""
-    query = db.query(Appointment).filter(Appointment.uuid == appointment_uuid.uuid).first()
-    if query is None:
-        raise HTTPException(status_code=404, detail="Appointment not found")
-    return AppointmentResponse(id=query.id, uuid=query.uuid, student_name=query.student_name, professor_name=query.professor_name, start_time=query.start_time, end_time=query.end_time, status=query.status)
+    appointments = db.query(Appointment).all()
+    appointments_list = []
+    for appointment in appointments:
+        print(f"Appointments: {appointment}")
+        professor = db.query(ProfessorInformation.first_name, 
+                             ProfessorInformation.last_name, 
+                             ProfessorInformation.title)\
+                        .filter(ProfessorInformation.professor_id == appointment.professor_uuid).first()
+        professor_name = f"{professor.title} {professor.first_name} {professor.last_name}"
+        appointments_list.append(AppointmentResponse(
+                            uuid=str(appointment.uuid), 
+                            student_name=appointment.student_name, 
+                            student_id=appointment.student_id,
+                            student_email=appointment.student_email,
+                            professor_name=professor_name, 
+                            start_time=appointment.start_time, 
+                            end_time=appointment.end_time, 
+                            status=appointment.status))
+        
+    return appointments_list
 
 
 @router.get('/get-appointment-by-reference/{appointment_reference}', response_model=AppointmentResponse)

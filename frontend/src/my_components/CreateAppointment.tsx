@@ -514,9 +514,9 @@ const VerifyInformationPage = ({
   data,
   professorName,
 }: VerifyInfoDialogProps) => {
-  useEffect(() => {
-    console.log("Data to verify: ", data);
-  }, [data]);
+  // useEffect(() => {
+  //   console.log("Data to verify: ", data);
+  // }, [data]);
   if (!data) {
     return <div>No appointment data available</div>;
   }

@@ -23,7 +23,7 @@ const AdCarousel = () => {
       const res = await fetchImageFilename();
 
       setImages(res);
-      console.log(images); // Store complete ImageData objects
+      // console.log(images); // Store complete ImageData objects
       if (res.length > 0) {
         setCurrentDuration(res[0].duration);
       }
