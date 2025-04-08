@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { TimePickerProps } from "@/interface";
+import toast from "react-hot-toast";
 
 export function TimePicker({
   onChange,
@@ -60,9 +61,42 @@ export function TimePicker({
   const amHours = getAvailableHours("AM");
   const pmHours = getAvailableHours("PM");
 
+  const isStartTimeBeforeEndTime = (): boolean => {
+    // Convert both times to 24-hour format for comparison
+    const start24 = convert24Hour(startHour, startPeriod);
+    const end24 = convert24Hour(endHour, endPeriod);
+
+    // Return true if start time is before end time
+    return start24 < end24;
+  };
+
   // Update parent component when time changes
   useEffect(() => {
     if (onChange) {
+      // Check if time is valid
+      if (!isStartTimeBeforeEndTime()) {
+        // Option 1: Show error message
+        toast.error("End time must be after start time");
+
+        // Option 2: Auto-correct by adjusting end time
+        // If in same period, make end hour later
+        if (
+          startPeriod === endPeriod &&
+          parseInt(startHour) >= parseInt(endHour)
+        ) {
+          const newHour = Math.min(12, parseInt(startHour) + 1).toString();
+          setEndHour(newHour);
+          return; // Wait for next render cycle
+        }
+        // If AM to PM transition, this is fine
+        // If PM to AM, adjust to same day PM
+        else if (startPeriod === "PM" && endPeriod === "AM") {
+          setEndPeriod("PM");
+          return; // Wait for next render cycle
+        }
+      }
+
+      // If we get here, times are valid
       onChange({
         startTime: `${startHour}:00 ${startPeriod}`,
         endTime: `${endHour}:00 ${endPeriod}`,

@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { getAppointmentById } from "@/api";
 import { KeyboardInput } from "./KeyboardInput";
 import { Skeleton } from "@/components/ui/skeleton";
+import toast from "react-hot-toast";
 
 const AppointmentComponent = () => {
   const [activeView, setActiveView] = useState("none");
@@ -70,27 +71,60 @@ export const ViewAppointmentComponent = ({
   const [reference, setReferenceNumber] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [searched, setSearched] = useState(false);
-
+  const [found, setFound] = useState(false);
   async function getAppointmentData() {
     setSearched(true);
     try {
       setIsLoading(true);
       const res = await getAppointmentById(reference);
-      setData({
-        student_name: res.student_name,
-        student_id: res.student_id,
-        student_email: res.student_email,
-        professor_name: res.professor_name,
-        start_time: res.start_time,
-        end_time: res.end_time,
-        status: res.status,
-      });
-    } catch (error) {
+      if (res && res.student_name) {
+        setData({
+          student_name: res.student_name,
+          student_id: res.student_id,
+          student_email: res.student_email,
+          professor_name: res.professor_name,
+          start_time: res.start_time,
+          end_time: res.end_time,
+          status: res.status,
+        });
+        setFound(true);
+      } else {
+        setFound(false);
+      }
+    } catch (error: any) {
       console.error("Error fetching appointment data:", error);
+      toast.error(
+        "Error fetching appointment data. Please check the reference number."
+      );
+      setFound(false);
     } finally {
       setIsLoading(false);
     }
   }
+
+  function formatDate() {
+    if (data) {
+      const start = new Date(data.start_time);
+      const end = new Date(data.end_time);
+
+      const options = {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      } as const;
+
+      return {
+        start: start.toLocaleString("en-US", options),
+        end: end.toLocaleString("en-US", options),
+      };
+    }
+    return { start: "", end: "" };
+  }
+
+  const formattedStartTime = formatDate();
   return (
     <Card className="w-[80vh] min-h-[fit-content] p-5">
       <CardHeader className="flex-row items-center w-full pb-20">
@@ -100,12 +134,12 @@ export const ViewAppointmentComponent = ({
       </CardHeader>
       <CardContent className="pb-20">
         {searched ? (
-          <div className="grid grid-cols-7 min-w-full min-h-full w-[1000px]">
+          <div className="flex min-w-full min-h-full w-full">
             {isLoading ? (
               <Skeleton className="min-h-full min-w-full" />
-            ) : (
+            ) : found ? (
               <>
-                <div className="flex-col flex justify-center px-10 col-span-2 space-y-4">
+                <div className="flex-col flex justify-center px-10 space-y-4">
                   <Label className="text-2xl">Name: </Label>
                   <Label className="text-2xl">Student number: </Label>
                   <Label className="text-2xl">Student Email: </Label>
@@ -114,16 +148,21 @@ export const ViewAppointmentComponent = ({
                   <Label className="text-2xl">To: </Label>
                   <Label className="text-2xl">Status: </Label>
                 </div>
-                <div className="flex-col flex justify-center col-span-5 space-y-4">
+                <div className="flex-col flex justify-center space-y-4">
                   <Label className="text-2xl">{data.student_name}</Label>
                   <Label className="text-2xl">{data.student_id}</Label>
                   <Label className="text-2xl">{data.student_email}</Label>
                   <Label className="text-2xl">{data.professor_name}</Label>
-                  <Label className="text-2xl">{data.start_time}</Label>
-                  <Label className="text-2xl">{data.end_time}</Label>
+                  <Label className="text-2xl">{formattedStartTime.start}</Label>
+                  <Label className="text-2xl">{formattedStartTime.end}</Label>
                   <Label className="text-2xl">{data.status}</Label>
                 </div>
               </>
+            ) : (
+              <div className="flex-col flex items-center justify-center mx-auto">
+                <Label className="text-2xl">No appointment found</Label>
+                <IoMdClose className="w-20 h-20 text-red-500" />
+              </div>
             )}
           </div>
         ) : (
@@ -141,7 +180,11 @@ export const ViewAppointmentComponent = ({
         )}
       </CardContent>
       <CardFooter className="flex justify-center space-x-10">
-        <Button size={"lg"} onClick={getAppointmentData} disabled={searched}>
+        <Button
+          size={"lg"}
+          onClick={getAppointmentData}
+          disabled={searched || !reference.trim()}
+        >
           Search
         </Button>
         <Button size={"lg"} onClick={onBack}>

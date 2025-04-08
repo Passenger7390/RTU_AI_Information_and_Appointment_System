@@ -483,7 +483,7 @@ const ProfessorInfoPage = ({
         <Label className="text-2xl font-semibold">
           Professer's Available Schedule
         </Label>
-        <div className="w-full flex items-center justify-end gap-4 ">
+        <div className="w-full flex items-center justify-center gap-10 ">
           <MyCalendar
             getDate={setDate}
             disabled={title === "Select Professor" ? true : false}
@@ -519,6 +519,31 @@ const VerifyInformationPage = ({
   if (!data) {
     return <div>No appointment data available</div>;
   }
+
+  function formatDate() {
+    if (data) {
+      const start = new Date(data.start_time);
+      const end = new Date(data.end_time);
+
+      const options = {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      } as const;
+
+      return {
+        start: start.toLocaleString("en-US", options),
+        end: end.toLocaleString("en-US", options),
+      };
+    }
+    return { start: "", end: "" };
+  }
+
+  const formattedStartTime = formatDate();
+
   return (
     <div className="grid grid-cols-7 min-w-full min-h-full w-[1000px]">
       <div className="flex-col flex justify-center px-10 col-span-2 space-y-4">
@@ -534,8 +559,8 @@ const VerifyInformationPage = ({
         <Label className="text-2xl">{data.student_id}</Label>
         <Label className="text-2xl">{data.student_email}</Label>
         <Label className="text-2xl">{professorName}</Label>
-        <Label className="text-2xl">{data.start_time}</Label>
-        <Label className="text-2xl">{data.end_time}</Label>
+        <Label className="text-2xl">{formattedStartTime.start}</Label>
+        <Label className="text-2xl">{formattedStartTime.end}</Label>
       </div>
     </div>
   );
