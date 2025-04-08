@@ -114,9 +114,34 @@ export function TimePicker({
     });
   };
 
+  const getAvailableStartHours = (periodFilter: string) => {
+    const baseHours = [
+      "12",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+    ];
+
+    return baseHours.filter((hour) => {
+      const hour24 = convert24Hour(hour, periodFilter);
+      // Exclude the max hour from available start times
+      return hour24 >= minHour && hour24 < maxHour;
+    });
+  };
+
   // Available hours for each period
-  const amHours = getAvailableHours("AM");
-  const pmHours = getAvailableHours("PM");
+  const amStartHours = getAvailableStartHours("AM");
+  const pmStartHours = getAvailableStartHours("PM");
+  const amEndHours = getAvailableHours("AM");
+  const pmEndHours = getAvailableHours("PM");
 
   const isStartTimeBeforeEndTime = (): boolean => {
     // Convert both times to 24-hour format for comparison
@@ -158,6 +183,8 @@ export function TimePicker({
         startTime: `${startHour}:00 ${startPeriod}`,
         endTime: `${endHour}:00 ${endPeriod}`,
       });
+      console.log("startHour", startHour);
+      console.log("endHour", endHour);
     }
   }, [startHour, endHour, startPeriod, endPeriod, onChange]);
 
@@ -175,21 +202,23 @@ export function TimePicker({
               <SelectValue placeholder="Hour" />
             </SelectTrigger>
             <SelectContent className="h-[400px] flex flex-col">
-              {(startPeriod === "AM" ? amHours : pmHours).map((hour) => {
-                const isBooked = isTimeSlotBooked(hour, startPeriod);
-                return (
-                  <SelectItem
-                    key={`start-${hour}`}
-                    value={hour}
-                    className={`flex justify-center items-center text-lg h-15 ${
-                      isBooked ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                    disabled={isBooked}
-                  >
-                    <span className="mx-auto">{hour}</span>
-                  </SelectItem>
-                );
-              })}
+              {(startPeriod === "AM" ? amStartHours : pmStartHours).map(
+                (hour) => {
+                  const isBooked = isTimeSlotBooked(hour, startPeriod);
+                  return (
+                    <SelectItem
+                      key={`start-${hour}`}
+                      value={hour}
+                      className={`flex justify-center items-center text-lg h-15 ${
+                        isBooked ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                      disabled={isBooked}
+                    >
+                      <span className="mx-auto">{hour}</span>
+                    </SelectItem>
+                  );
+                }
+              )}
             </SelectContent>
           </Select>
           <Select
@@ -232,7 +261,7 @@ export function TimePicker({
               <SelectValue placeholder="Hour" />
             </SelectTrigger>
             <SelectContent className="h-[400px] flex flex-col">
-              {(endPeriod === "AM" ? amHours : pmHours).map((hour) => {
+              {(endPeriod === "AM" ? amEndHours : pmEndHours).map((hour) => {
                 const isBooked = isTimeSlotBooked(hour, endPeriod);
                 const wouldOverlap = wouldOverlapAppointment(hour, endPeriod);
                 return (
