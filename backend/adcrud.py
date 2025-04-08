@@ -8,6 +8,7 @@ from auth import read_users_me
 from database import create_session, db_connect, get_db
 from schemas import DeleteRequest, UserBase
 from models import Image
+import logging
 import os
 
 router = APIRouter(prefix="/ad", tags=["ad"]) # Create a router for authentication
@@ -15,6 +16,8 @@ UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 engine, connection = db_connect()
 session = create_session(engine)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 @router.post("/upload")
 async def upload_file(file: UploadFile = File(...), duration: int = Form(...), title: str = Form(...), expires_in: str = Form(...), current_user: UserBase = Depends(read_users_me) ,db: Session = Depends(get_db)):
@@ -93,5 +96,6 @@ async def delete_expired_images(db: Session):   # Delete expired images
 async def periodic_cleanup():
     while True:
         with session as db:
+            # logging.info(f"Deleting expired images at {datetime.now()}")
             await delete_expired_images(db)
         await asyncio.sleep(30)  # Run every 30 seconds

@@ -7,16 +7,12 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getChatbotResponse } from "@/api";
 import MarkdownResponse from "@/my_components/MarkdownResponse";
-
-export interface Message {
-  sender: "user" | "bot";
-  text: string;
-}
+import { KeyboardInput } from "./KeyboardInput";
+import { Message } from "@/interface";
 
 const Chatbot: React.FC = () => {
   const [query, setQuery] = useState("");
@@ -164,12 +160,20 @@ const Chatbot: React.FC = () => {
         </CardContent>
         <CardFooter className="p-5">
           <form onSubmit={handleSubmit} className="flex gap-2 w-full">
-            <Input
+            {/* <Input
               type="text"
               value={query}
               onChange={handleInputChange}
               placeholder="Type your message..."
               className="flex-1"
+            /> */}
+            <KeyboardInput
+              type="text"
+              value={query}
+              onChange={handleInputChange}
+              placeholder="Type your message..."
+              className="flex-1 !text-xl"
+              keyboardType="alphanumeric"
             />
             <Button type="submit" disabled={loading}>
               Send

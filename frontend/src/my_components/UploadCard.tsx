@@ -30,6 +30,7 @@ import {
 import toast from "react-hot-toast";
 import axios from "axios";
 import { IoCloudUploadOutline } from "react-icons/io5";
+import { UploadCardProps } from "@/interface";
 
 type Status = {
   value: number;
@@ -50,10 +51,6 @@ const statuses: Status[] = [
     label: "45",
   },
 ];
-
-interface UploadCardProps {
-  onUploadComplete?: () => void;
-}
 
 const UploadCard = ({ onUploadComplete }: UploadCardProps) => {
   const [file, setFile] = useState<File | null>(null);

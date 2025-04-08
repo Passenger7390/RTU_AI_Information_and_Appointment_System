@@ -17,21 +17,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { IoAddSharp } from "react-icons/io5";
-
-export interface FAQCardProps {
-  idProp: number;
-  questionProp: string;
-  synonymsProp: string[];
-  answerProp: string;
-  onRefresh?: () => void;
-}
-
-export interface FAQ {
-  id: number;
-  question: string;
-  synonyms: string[];
-  answer: string;
-}
+import { FAQCardProps, FAQDialogProps } from "@/interface";
 
 export const FAQCard = ({
   idProp,
@@ -178,10 +164,6 @@ export const FAQCard = ({
     </Card>
   );
 };
-
-interface FAQDialogProps {
-  onRefresh?: () => void;
-}
 
 export const FAQDialog = ({ onRefresh }: FAQDialogProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);

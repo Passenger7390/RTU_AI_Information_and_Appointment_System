@@ -12,11 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import toast from "react-hot-toast";
 import { MdOutlineDeleteForever } from "react-icons/md";
-
-interface DeleteDialogProps {
-  onConfirm?: () => void;
-  isButtonDisabled?: boolean;
-}
+import { DeleteDialogProps } from "@/interface";
 
 const DeleteDialog = ({ onConfirm, isButtonDisabled }: DeleteDialogProps) => {
   const [open, setOpen] = useState(false);

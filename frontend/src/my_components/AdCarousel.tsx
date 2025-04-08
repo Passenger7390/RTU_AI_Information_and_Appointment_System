@@ -5,8 +5,9 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import { fetchImageFilename, getImage, ImageData } from "@/api";
+import { fetchImageFilename, getImage } from "@/api";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { ImageData } from "@/interface";
 
 const REFRESH_INTERVAL = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
 // const REFRESH_INTERVAL = 30000; // 30s econds in milliseconds
@@ -19,8 +20,10 @@ const AdCarousel = () => {
 
   const loadImage = async () => {
     try {
-      const res: ImageData[] = await fetchImageFilename();
-      setImages(res); // Store complete ImageData objects
+      const res = await fetchImageFilename();
+
+      setImages(res);
+      // console.log(images); // Store complete ImageData objects
       if (res.length > 0) {
         setCurrentDuration(res[0].duration);
       }

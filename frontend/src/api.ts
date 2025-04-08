@@ -1,7 +1,6 @@
 import axios from "axios";
 import { TableData } from "./my_components/table/Columns";
-import { FAQ } from "./my_components/FAQ";
-
+import { Appointment, FAQ, Professor } from "./interface";
 // Environment-aware API configuration
 const env = import.meta.env.VITE_ENV || "production";
 const isDev = env === "development";
@@ -15,20 +14,18 @@ const api = isDev
 export const adApi = `${api}/ad`;
 export const authApi = `${api}/auth`;
 export const chatApi = `${api}/ray`;
-
-export interface ImageData {
-  filename: string;
-  duration: number;
-}
+export const appointmentApi = `${api}/appointment`;
+export const professorApi = `${api}/professor`;
+export const otpApi = `${api}/otp`;
 
 // GET request to / to fetch iamge file name
-export const fetchImageFilename = async (): Promise<ImageData[]> => {
+export const fetchImageFilename = async () => {
   try {
     // In development: http://localhost:8000/api/images
     // In production: /api/images (relative URL that Nginx proxies)
     const endpoint = `${api}/api/images`;
 
-    const response = await axios.get<ImageData[]>(endpoint);
+    const response = await axios.get(endpoint);
     return response.data; // returns list of image URLs
   } catch (error) {
     console.error("Error fetching ads:", error);
@@ -198,5 +195,141 @@ export const deleteFAQ = async (id: number) => {
       Authorization: `Bearer ${token}`,
     },
   });
+  return res.data;
+};
+
+// ======================================================= CHAT API END ========================================================
+// ========================================================= OTP API ========================================================
+export const sendOTP = async (email: string) => {
+  const res = await axios.post(`${otpApi}/send-otp`, { email });
+  return res.data;
+};
+
+export const verifyOTP = async (email: string, otp: string) => {
+  const res = await axios.post(`${otpApi}/verify-otp`, { email, otp });
+  return res.data;
+};
+
+// ======================================================= OTP API END ========================================================
+// ========================================================= PROFESSOR API ========================================================
+
+export const createProfessor = async (professor: Professor) => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  const res = await axios.post(`${professorApi}/add-professor`, professor, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+};
+
+export const getProfessors = async () => {
+  const res = await axios.get(`${professorApi}/get-professors`);
+  return res.data;
+};
+
+export const deleteProfessors = async (ids: string[]) => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  const res = await axios.delete(`${professorApi}/delete-professor`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    data: {
+      ids,
+    },
+  });
+
+  return res.data;
+};
+
+export const getProfessorById = async (id: string) => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  const res = await axios.get(`${professorApi}/get-professor/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.data;
+};
+
+export const updateProfessorAPI = async (
+  professor_uuid: string,
+  professor: Professor
+) => {
+  const token = localStorage.getItem("token");
+
+  if (!token) return;
+
+  const res = await axios.put(
+    `${professorApi}/update-professor/${professor_uuid}`,
+    professor,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return res.data;
+};
+
+// =============================================================== APPOINTMENT API ============================================================
+export const createAppointment = async (data: Appointment) => {
+  const res = await axios.post(`${appointmentApi}/create-appointment`, data);
+  return res.data;
+};
+
+export const getAppointmentById = async (reference: string) => {
+  const res = await axios.get(
+    `${appointmentApi}/get-appointment-by-reference/${reference}`
+  );
+  return res.data;
+};
+
+export const getAppointments = async () => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  const res = await axios.get(`${appointmentApi}/get-appointments`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.data;
+};
+
+export const actionAppointment = async (reference: string, action: string) => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+  console.log(action);
+  const res = await axios.put(
+    `${appointmentApi}/action-appointment/${reference}`,
+    { status: action },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return res.data;
+};
+
+export const getAppointmentSchedule = async (
+  professor_uuid: string,
+  date: string
+) => {
+  const res = await axios.get(
+    `${appointmentApi}/professor-appointments/${professor_uuid}/${date}`
+  );
+  console.log(res.data);
   return res.data;
 };
