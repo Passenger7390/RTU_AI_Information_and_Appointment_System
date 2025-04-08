@@ -252,7 +252,7 @@ const PersonalInfoPage = ({
     setStudentInformation({
       student_name: studentName,
       student_id: studentID,
-      student_email: `${studentID}`,
+      student_email: `${studentID}@rtu.edu.ph`,
       concern,
       isEmailVerified: emailVerified,
     });
@@ -288,7 +288,7 @@ const PersonalInfoPage = ({
             <Label className="text-xl">@rtu.edu.ph</Label>
           </div>
           <OTPDialog
-            email={`${studentID}`}
+            email={`${studentID}@rtu.edu.ph`}
             onVerified={onEmailVerified}
             key={studentID}
           />
@@ -326,7 +326,6 @@ const ProfessorInfoPage = ({
   const [date, setDate] = useState("");
   const [hours, setHours] = useState("");
   const [bookedSlots, setBookedSlots] = useState([]);
-
 
   async function fetchProfessors() {
     try {

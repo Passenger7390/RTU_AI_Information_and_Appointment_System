@@ -183,8 +183,6 @@ export function TimePicker({
         startTime: `${startHour}:00 ${startPeriod}`,
         endTime: `${endHour}:00 ${endPeriod}`,
       });
-      console.log("startHour", startHour);
-      console.log("endHour", endHour);
     }
   }, [startHour, endHour, startPeriod, endPeriod, onChange]);
 
