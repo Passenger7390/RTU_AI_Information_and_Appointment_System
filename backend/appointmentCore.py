@@ -50,6 +50,10 @@ async def create_apointment(appointment: AppointmentCreate, db: Session = Depend
                          ProfessorInformation.last_name,
                          ProfessorInformation.title
                         ).filter(ProfessorInformation.professor_id == appointment.professor_uuid).first()
+    
+    # TODO: Uncomment this after testing
+    # TODO: Make sure to delete the tests in contents in email
+
     # try:
     #     service = get_gmail_service()
 
@@ -164,8 +168,6 @@ async def action_appointment(appointment_reference: str, action: AppointmentUpda
     db.refresh(appointment)
     
     return {'message': f'Appointment {action}ed successfully', 'status': appointment.status}
-
-# TODO: Get the schedule of the professors so that the user can see the available time slots and can't schedule appointment in the same time slot
 
 @router.get('/professor-appointments/{professor_id}/{date}')
 async def get_professor_appointments(professor_id: str, date: str, db: Session = Depends(get_db)):

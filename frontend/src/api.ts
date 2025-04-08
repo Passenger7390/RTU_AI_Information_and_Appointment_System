@@ -333,4 +333,3 @@ export const getAppointmentSchedule = async (
   console.log(res.data);
   return res.data;
 };
-// TODO: Implement disable time button if the professor has an appointment on that time slot

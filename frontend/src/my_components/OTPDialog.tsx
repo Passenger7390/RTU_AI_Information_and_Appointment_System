@@ -36,10 +36,7 @@ const OTPDialog = ({ email, onVerified }: OTPDialogProps) => {
   };
 
   const handleVerifyEmail = async () => {
-    // TODO: FIx the bug in the dialog
-
     const res = await verifyOTP(email, otp);
-    // console.log(res);
     if (res) {
       toast.success("Email verified successfully!");
       setLabel("Verified");

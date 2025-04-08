@@ -327,7 +327,6 @@ const ProfessorInfoPage = ({
   const [hours, setHours] = useState("");
   const [bookedSlots, setBookedSlots] = useState([]);
 
-  // TODO: disabled the hours if professor has appointment already
 
   async function fetchProfessors() {
     try {
