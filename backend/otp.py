@@ -90,23 +90,28 @@ async def send_otp(request: OTPRequest, db: Session = Depends(get_db)):
         message = EmailMessage()
 
         # Create email content
-        message.set_content(f"Your verification code is: {otp_code}\n\nThis code will expire in 5 minutes.")
+        message.set_content(f"THIS IS A TEST! Your verification code is: {otp_code}\n\nThis code will expire in 5 minutes.")
 
         message["To"] = email
-        message["From"] = "jaycyivanbanaga@gmail.com"
-        message["Subject"] = "Your Verification Code"
+        message["From"] = "2021-101043@rtu.edu.ph"
+        message["Subject"] = "Your Verification Code THIS IS A TEST"
 
         # Encode and send message
         encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
         create_message = {"raw": encoded_message}
+
+        # TODO: Uncomment this after testing
+        # TODO: Make sure to delete the tests in contents in email
         
-        send_message = (
-            service.users()
-            .messages()
-            .send(userId="me", body=create_message)
-            .execute()
-        )
-        return {"message_id": send_message["id"], "status": "sent"}
+        # send_message = (
+        #     service.users()
+        #     .messages()
+        #     .send(userId="me", body=create_message)
+        #     .execute()
+        # )
+        # return {"message_id": send_message["id"], "status": "sent", "otp": otp_code}
+        print("test")
+        return {"status": "sent", "otp": otp_code}
     except HttpError as error:
         raise HTTPException(status_code=500, detail=str(error))
     
@@ -136,6 +141,7 @@ async def verify_otp(request: OTPVerify, db: Session = Depends(get_db)):
         return {"message": "OTP verification successful"}
     else:
         raise HTTPException(status_code=400, detail="Invalid OTP")
+
     
 def create_otp_secret(email: str, secret: str, db: Session = Depends(get_db)):
     """This function will create otp when the user request for it"""
