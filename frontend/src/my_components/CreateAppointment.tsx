@@ -326,7 +326,6 @@ const ProfessorInfoPage = ({
   const [date, setDate] = useState("");
   const [hours, setHours] = useState("");
   const [bookedSlots, setBookedSlots] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   // TODO: disabled the hours if professor has appointment already
 
@@ -450,7 +449,6 @@ const ProfessorInfoPage = ({
   useEffect(() => {
     async function getAppointmentScheduleOfProfessor() {
       if (professor) {
-        setLoading(true);
         try {
           const res = await getAppointmentSchedule(
             professor.professor_id,
@@ -459,8 +457,6 @@ const ProfessorInfoPage = ({
           setBookedSlots(res);
         } catch (error) {
           console.error("Error fetching professors:", error);
-        } finally {
-          setLoading(false);
         }
       }
     }
