@@ -22,7 +22,6 @@ import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { FAQCard, FAQDialog } from "@/my_components/FAQ";
 import CreateProfessorDialog from "./CreateProfessorDialog";
-import { Button } from "@/components/ui/button";
 import { FAQ } from "@/interface";
 import EditProfileDialog from "./EditProfileDialog";
 
