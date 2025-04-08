@@ -174,7 +174,7 @@ async def get_professor_appointments(professor_id: str, date: str, db: Session =
     # Format the date for query comparison (add time bounds for the full day)
     date_start = f"{date} 00:00:00"
     date_end = f"{date} 23:59:59"
-    
+    print("This is executed")
     appointments = db.query(Appointment).filter(
         Appointment.professor_uuid == professor_id,
         Appointment.start_time >= date_start,

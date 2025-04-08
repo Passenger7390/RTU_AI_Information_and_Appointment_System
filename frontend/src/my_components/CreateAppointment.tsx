@@ -22,7 +22,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import { createAppointment, getProfessors } from "@/api";
+import {
+  createAppointment,
+  getAppointmentSchedule,
+  getProfessors,
+} from "@/api";
 import { MyCalendar } from "./myCalendar";
 import { TimePicker } from "./timePicker";
 import { IoMdClose } from "react-icons/io";
@@ -321,6 +325,8 @@ const ProfessorInfoPage = ({
   const [professorList, setProfessorList] = useState<ProfessorList[]>([]);
   const [date, setDate] = useState("");
   const [hours, setHours] = useState("");
+  const [bookedSlots, setBookedSlots] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // TODO: disabled the hours if professor has appointment already
 
@@ -441,6 +447,26 @@ const ProfessorInfoPage = ({
     }
   }, [initialData.professor_uuid, professorList]);
 
+  useEffect(() => {
+    async function getAppointmentScheduleOfProfessor() {
+      if (professor) {
+        setLoading(true);
+        try {
+          const res = await getAppointmentSchedule(
+            professor.professor_id,
+            date
+          );
+          setBookedSlots(res);
+        } catch (error) {
+          console.error("Error fetching professors:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    }
+    getAppointmentScheduleOfProfessor();
+  }, [professor, date]);
+
   return (
     <div className="flex flex-col items-center justify-center min-w-full min-h-full w-[1000px]">
       <div className="w-full px-5 mb-10">
@@ -488,6 +514,7 @@ const ProfessorInfoPage = ({
             getDate={setDate}
             disabled={title === "Select Professor" ? true : false}
           />
+
           <TimePicker
             key={professor?.professor_id}
             defaultStartHour={getStartHour()[0]}
@@ -502,6 +529,7 @@ const ProfessorInfoPage = ({
               setHours(`${timeRange.startTime}-${timeRange.endTime}`)
             }
             disabled={title === "Select Professor" ? true : false}
+            scheduled={bookedSlots}
           />
         </div>
       </div>

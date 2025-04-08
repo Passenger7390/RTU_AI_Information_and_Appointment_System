@@ -157,8 +157,13 @@ export interface TimePickerProps {
   // New props for limiting hours
   minHour?: number; // 0-23, 24-hour format
   maxHour?: number; // 0-23, 24-hour format
+  scheduled?: BookedTimeSlot[];
 }
 
+export interface BookedTimeSlot {
+  start_time: string;
+  end_time: string;
+}
 export interface UploadCardProps {
   onUploadComplete?: () => void;
 }

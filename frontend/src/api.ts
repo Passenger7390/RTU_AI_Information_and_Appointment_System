@@ -323,5 +323,14 @@ export const actionAppointment = async (reference: string, action: string) => {
   return res.data;
 };
 
-// TODO: Implement acceptAppointment and rejectAppointment
+export const getAppointmentSchedule = async (
+  professor_uuid: string,
+  date: string
+) => {
+  const res = await axios.get(
+    `${appointmentApi}/professor-appointments/${professor_uuid}/${date}`
+  );
+  console.log(res.data);
+  return res.data;
+};
 // TODO: Implement disable time button if the professor has an appointment on that time slot
