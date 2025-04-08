@@ -16,6 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useState } from "react";
+import { buildingDialogProps } from "@/interface";
 
 const MapPage = () => {
   const [title, setTitle] = useState("Rizal Technological University Map");
@@ -101,15 +102,6 @@ const MapPage = () => {
     </div>
   );
 };
-
-interface buildingDialogProps {
-  props: string;
-  setTitle: (title: string) => void;
-  setOpen: (open: boolean) => void;
-  open: boolean;
-  trigger: boolean;
-  setTrigger: (trigger: boolean) => void;
-}
 
 const BuildingDialog = ({
   props,

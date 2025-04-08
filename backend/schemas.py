@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional
-
+from uuid import UUID
 class UserBase(BaseModel):
     username: str
 
@@ -56,3 +56,62 @@ class QueryRequest(BaseModel):
 class QueryResponse(BaseModel):
     response: Optional[str] = None
     suggestions: Optional[List[str]] = None
+
+class CreateProfessor(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+    office_hours: str
+    title: Optional[str] = None
+
+class ProfessorResponse(BaseModel):
+    id: int
+    name: str
+    professor_id: UUID
+    office_hours: str
+    title: Optional[str] = None
+
+class AppointmentCreate(BaseModel):
+    student_name: str
+    student_id: str
+    student_email: str
+    professor_uuid: UUID
+    concern: str
+    start_time: str
+    end_time: str
+
+class AppointmentResponse(BaseModel):
+    uuid: str
+    student_name: str
+    student_id: str
+    student_email: str
+    professor_name: str
+    start_time: str
+    end_time: str
+    status: str
+
+# class AppointmentGet(BaseModel):
+#     uuid: UUID
+
+# class AppointmentGetByReference(BaseModel):
+#     reference: str
+
+class OTPRequest(BaseModel):
+    email: str
+
+class OTPVerify(BaseModel):
+    email: str
+    otp: str
+
+class DeleteProfessors(BaseModel):
+    ids: List[UUID]
+
+class UpdateProfessor(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+    office_hours: str
+    title: Optional[str] = None
+
+class AppointmentUpdate(BaseModel):
+    status: str

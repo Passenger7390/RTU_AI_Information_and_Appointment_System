@@ -1,7 +1,9 @@
-from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, Integer, String, DateTime, func
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, func, ForeignKey
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from database import create_session, create_table, db_connect
+from datetime import datetime, timedelta
+
 Base = declarative_base()
 
 
@@ -10,6 +12,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True,nullable=False)
     hashed_password = Column(String,nullable=False)    
+
 
 class Image(Base):
     __tablename__ = "images"
@@ -20,6 +23,7 @@ class Image(Base):
     duration = Column(Integer,nullable=False)
     expires_in = Column(DateTime(timezone=True),nullable=False)
 
+
 class FAQ(Base):
     __tablename__ = "faq"
 
@@ -27,7 +31,59 @@ class FAQ(Base):
     question = Column(String, unique=True, index=True ,nullable=False)
     synonyms = Column(JSONB, nullable=True)
     answer = Column(String, nullable=False)
+
+
+class ProfessorInformation(Base):
+    __tablename__ = "professor_information"
+
+    id = Column(Integer, primary_key=True, index=True)
+    professor_id = Column(UUID, unique=True, nullable=False)
+    first_name = Column(String, nullable=False)
+    last_name = Column(String, unique=True, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    office_hours = Column(String, nullable=False)
+    title = Column(String, nullable=True)
+
+    appointments = relationship("Appointment", back_populates="professor")
+
+class Appointment(Base):
+    __tablename__ = "appointments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    uuid = Column(UUID, unique=True, nullable=False)
+    student_name = Column(String, nullable=False)
+    student_id = Column(String, nullable=False)
+    student_email = Column(String, nullable=False)
+    professor_uuid = Column(UUID, ForeignKey("professor_information.professor_id", ondelete="CASCADE"), nullable=False)
+    concern = Column(String, nullable=False)
+    start_time = Column(DateTime(timezone=True), nullable=False)
+    end_time = Column(DateTime(timezone=True), nullable=False)
+    status = Column(String, nullable=False)
+
+    professor = relationship("ProfessorInformation", back_populates="appointments")
+
     
+class OTPSecret(Base):
+    __tablename__ = "otp_secret"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, nullable=False)
+    secret = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    is_used = Column(Boolean, nullable=False)
+
+    def is_expired(self):
+        current_time = datetime.now(self.expires_at.tzinfo)
+        is_expired = self.expires_at < current_time
+        return is_expired  
+      
+    @classmethod
+    def create(cls, email, secret, expiry_minutes=5):
+        expires_at = datetime.now() + timedelta(minutes=expiry_minutes)
+        return cls(email=email, secret=secret, expires_at=expires_at, is_used=False)
+        
+
 engine, _ = db_connect()
 session = create_session(engine)
 create_table(engine)

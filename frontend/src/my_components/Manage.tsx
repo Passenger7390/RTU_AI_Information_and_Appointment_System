@@ -1,25 +1,35 @@
 import UploadCard from "@/my_components/UploadCard";
 import DeleteDialog from "@/my_components/DeleteDialog";
 import { DataTable } from "@/my_components/table/DataTable";
-import { getTableData, deleteRows, getFAQs } from "@/api";
-import { columns } from "@/my_components/table/Columns";
+import {
+  getTableData,
+  deleteRows,
+  getFAQs,
+  getProfessors,
+  deleteProfessors,
+  getAppointments,
+  actionAppointment,
+} from "@/api";
+import {
+  createAdColumns,
+  TableData,
+  ProfessorData,
+  createProfessorColumns,
+  AppointmentData,
+  createAppointmentColumns,
+} from "@/my_components/table/Columns";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
-import { FAQ, FAQCard, FAQDialog } from "@/my_components/FAQ";
-
-interface TableData {
-  id: number;
-  created_at: string;
-  filename: string;
-  title: string;
-  duration: number;
-  expiration: string;
-}
+import { FAQCard, FAQDialog } from "@/my_components/FAQ";
+import CreateProfessorDialog from "./CreateProfessorDialog";
+import { FAQ } from "@/interface";
+import EditProfileDialog from "./EditProfileDialog";
 
 export const AdComponent = () => {
   const [tableData, setTableData] = useState<TableData[]>([]);
   const [rowSelection, setRowSelection] = useState({});
 
+  const columns = createAdColumns();
   useEffect(() => {
     fetchTableData();
   }, []);
@@ -50,7 +60,7 @@ export const AdComponent = () => {
       setRowSelection({});
       await fetchTableData(); // Refresh the table after deletion
     } catch (error) {
-      console.error("Failed to delete rows:", error);
+      toast.error("Failed to delete rows");
     }
   };
   return (
@@ -73,6 +83,8 @@ export const AdComponent = () => {
         data={tableData}
         onRowSelectionChange={setRowSelection}
         rowSelection={rowSelection}
+        emptyMessage="No advertisements available. Upload a new one."
+        enableSelection={true}
       />
     </div>
   );
@@ -119,6 +131,146 @@ export const FAQComponent = () => {
         </div>
       )}
       {}
+    </div>
+  );
+};
+
+export const ProfessorComponent = () => {
+  const [professorData, setProfessorData] = useState<ProfessorData[]>([]);
+  const [rowSelection, setRowSelection] = useState({});
+
+  const columns = createProfessorColumns();
+
+  useEffect(() => {
+    fetchTableData();
+  }, []);
+
+  async function fetchTableData() {
+    try {
+      const data = await getProfessors();
+      setProfessorData(data);
+    } catch (error) {
+      toast.error("Failed to fetch table data");
+    }
+  }
+
+  async function handleDeleteSelected() {
+    try {
+      const selectedRows = Object.keys(rowSelection);
+      if (selectedRows.length === 0) return;
+
+      const selectedIds = selectedRows.map(
+        (index) => professorData[parseInt(index)].professor_id
+      );
+      await deleteProfessors(selectedIds);
+      setRowSelection({});
+      await fetchTableData(); // Refresh the table after deletion
+    } catch (error) {
+      toast.error("Failed to delete rows");
+    }
+  }
+
+  function handleEditSelected() {
+    const selectedRows = Object.keys(rowSelection);
+    if (selectedRows.length === 0) return;
+
+    const selectedIds = selectedRows.map(
+      (index) => professorData[parseInt(index)].professor_id
+    );
+
+    return selectedIds[0];
+  }
+
+  return (
+    <div>
+      <DataTable
+        columns={columns}
+        data={professorData}
+        headerClassName="bg-green-900"
+        onRowSelectionChange={setRowSelection}
+        rowSelection={rowSelection}
+        emptyMessage="No professors found. Add a new professor."
+        enablePagination={false}
+        actions={
+          <>
+            <CreateProfessorDialog onRefresh={fetchTableData} />
+            <EditProfileDialog
+              professor_uuid={handleEditSelected() || ""}
+              disabled={
+                Object.keys(rowSelection).length === 0 ||
+                Object.keys(rowSelection).length > 1
+              }
+              onRefresh={fetchTableData}
+            />
+            <DeleteDialog
+              onConfirm={handleDeleteSelected}
+              isButtonDisabled={Object.keys(rowSelection).length === 0}
+            />
+          </>
+        }
+      />
+    </div>
+  );
+};
+
+export const AppointmentComponent = () => {
+  const [appointmentData, setAppointmentData] = useState<AppointmentData[]>([]);
+  const columns = createAppointmentColumns(
+    "bg-green-900 text-white flex justify-center",
+    handleAcceptAppointment,
+    handleRejectAppointment
+  );
+
+  async function fetchAppointmentTableData() {
+    try {
+      const tableData = await getAppointments();
+      if (tableData) {
+        setAppointmentData(tableData);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch appointment data");
+      console.error("Error fetching appointment data:", error);
+    }
+  }
+
+  async function handleAcceptAppointment(appointment: AppointmentData) {
+    console.log("accepting appointment", appointment.uuid);
+    try {
+      // Implement API call to accept appointment
+      await actionAppointment(appointment.uuid, "accept"); // You'll need to create this API function
+      toast.success("Appointment accepted");
+      fetchAppointmentTableData();
+    } catch (error) {
+      toast.error("Failed to accept appointment");
+    }
+  }
+
+  async function handleRejectAppointment(appointment: AppointmentData) {
+    console.log("rejecting appointment", appointment.uuid);
+    try {
+      // Implement API call to reject appointment
+      await actionAppointment(appointment.uuid, "reject"); // You'll need to create this API function
+      toast.success("Appointment rejected");
+      fetchAppointmentTableData();
+    } catch (error) {
+      toast.error("Failed to reject appointment");
+    }
+  }
+
+  useEffect(() => {
+    fetchAppointmentTableData();
+  }, []);
+  return (
+    <div>
+      <DataTable
+        columns={columns}
+        data={appointmentData}
+        headerClassName="bg-green-900"
+        // onRowSelectionChange={setRowSelection}
+        // rowSelection={rowSelection}
+        emptyMessage="No appointments found."
+        enablePagination={false}
+      />
     </div>
   );
 };
