@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Annotated
+from typing import Annotated, Optional
 from fastapi import Depends, HTTPException, status, APIRouter
 from starlette import status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -11,7 +11,7 @@ import jwt
 import bcrypt
 import os
 from schemas import Token, UserBase, CreateUser
-
+from uuid import UUID, uuid4
 
 load_dotenv()   # Load environment variables
 
@@ -43,10 +43,18 @@ def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depen
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token = create_access_token(data={"sub": user.username}, expires_delta=timedelta(minutes=15))
+    access_token = create_access_token(
+        data={
+            "sub": user.username,
+            "role": user.role,
+            "id": user.id,
+            # "professor_id": user.professor_id
+        }, 
+        expires_delta=timedelta(minutes=15)
+    )
     return Token(access_token=access_token, token_type="bearer")
 
-@router.get("/users/me", response_model=UserBase)
+
 def read_users_me(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     try:
         payload = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=os.getenv('ALGORITHM'))
@@ -59,11 +67,20 @@ def read_users_me(token: str = Depends(oauth2_scheme), db: Session = Depends(get
     user = db.query(User).filter(User.username == username).first()
     if user is None:    
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-    return UserBase(username=username)
+    
+    return UserBase(
+        username=user.username,
+        role=user.role,
+        id=user.id,
+        professor_id=user.professor_id
+    )
 
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
-async def register(user: CreateUser, db: db_dependency):
+async def register_user(user: CreateUser, db: Session = Depends(db_dependency)):
+    return await register(user, db)
+
+async def register(user: CreateUser, db: db_dependency, professor_uuid: Optional[UUID] = None):
     # Generate a salt and hash the user's password
     salt = bcrypt.gensalt()
     hashed_bytes = bcrypt.hashpw(user.password.encode('utf-8'), salt)
@@ -72,9 +89,51 @@ async def register(user: CreateUser, db: db_dependency):
     
     create_user_model = User(
         username=user.username,
-        hashed_password=hashed_password
+        hashed_password=hashed_password,
+        role=user.role,
+        professor_id=professor_uuid
     )
     db.add(create_user_model)
     db.commit()
+    db.refresh(create_user_model)
+    return {'msg': 'User Created Successfully'}
 
-user_dependency = Annotated[dict, Depends(read_users_me)]
+# Role-based Dependencies for Authentication
+@router.get("/users/me", response_model=UserBase)
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    try:
+        payload = jwt.decode(token, os.getenv('SECRET_KEY'), algorithms=os.getenv('ALGORITHM'))
+        username: str = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication")
+    except jwt.PyJWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
+    user = db.query(User).filter(User.username == username).first()
+    if user is None:    
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+    
+    return UserBase(
+        username=user.username,
+        role=user.role,
+        id=user.id,
+        # professor_id=user.professor_id
+    )
+
+def superuser_required(current_user: User = Depends(get_current_user)):
+    if current_user.role != "superuser":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient permissions"
+        )
+    return current_user
+
+def professor_or_superuser_required(current_user: User = Depends(get_current_user)):
+    if current_user.role not in ["professor", "superuser"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient permissions"
+        )
+    return current_user
+
+user_dependency = Annotated[dict, Depends(get_current_user)]

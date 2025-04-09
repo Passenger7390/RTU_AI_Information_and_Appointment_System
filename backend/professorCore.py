@@ -1,14 +1,14 @@
 from typing import List
 from database import get_db
-from auth import read_users_me
+from auth import register, superuser_required
 from sqlalchemy.orm import Session
-from schemas import CreateProfessor, UpdateProfessor, UserBase, DeleteProfessors
+from schemas import CreateProfessor, CreateUser, RegisterProfessor, UpdateProfessor, UserBase, DeleteProfessors
 from fastapi import APIRouter, Depends, HTTPException, status
-from models import ProfessorInformation
+from models import ProfessorInformation, User
 from uuid import uuid4
 
 router = APIRouter(prefix='/professor', tags=['professor'])
-
+# TODO: Modify the create professor and in frontend also
 @router.get('/get-professors')
 async def get_professors(db: Session = Depends(get_db)):
     """
@@ -33,7 +33,7 @@ async def get_professors(db: Session = Depends(get_db)):
     return professors_list
 
 @router.get('/get-professor/{professor_id}', response_model=CreateProfessor)
-async def getProfessorById(professor_id: str, db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
+async def getProfessorById(professor_id: str, db: Session = Depends(get_db), current_user: UserBase = Depends(superuser_required)):
     """
         Get a professor by id
 
@@ -47,25 +47,28 @@ async def getProfessorById(professor_id: str, db: Session = Depends(get_db), cur
     return professor
 
 @router.post('/add-professor')
-async def add_professor(professor: CreateProfessor, db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
+async def add_professor(professor: RegisterProfessor, db: Session = Depends(get_db), current_user: UserBase = Depends(superuser_required)):
     """This allows the admin to add new professors"""
-
-    new_professor = ProfessorInformation(professor_id=uuid4(), 
+    professor_id=uuid4()
+    new_professor = ProfessorInformation(professor_id=professor_id, 
                                          first_name=professor.first_name, 
                                          last_name=professor.last_name, 
                                          email=professor.email, 
                                          office_hours=professor.office_hours, 
                                          title=professor.title)
+    
     db.add(new_professor)
     db.commit()
     db.refresh(new_professor)
+    
+    await register(CreateUser(username=professor.username, password=professor.password, role='professor'), db, professor_id)
+
     return {'message': 'Professor information added successfully'}
 
 @router.put('/update-professor/{professor_uuid}')
-async def update_professor_information(professor_uuid: str, updated_data: UpdateProfessor, db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
+async def update_professor_information(professor_uuid: str, updated_data: UpdateProfessor, db: Session = Depends(get_db), current_user: UserBase = Depends(superuser_required)):
     """This allows the admin to update the information of a professor"""
 
-    print("hello")
     if not professor_uuid:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No professor id provided")
     
@@ -82,11 +85,13 @@ async def update_professor_information(professor_uuid: str, updated_data: Update
     return {'message': 'Professor information updated successfully'}
 
 @router.delete('/delete-professor')
-async def delete_professor(professor_id: DeleteProfessors, db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
+async def delete_professor(professor_id: DeleteProfessors, db: Session = Depends(get_db), current_user: UserBase = Depends(superuser_required)):
     """This allows the admin to delete the information of a professor"""
 
     if not professor_id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No professor id provided")
+
+    db.query(User).filter(User.professor_id.in_(professor_id.ids)).delete(synchronize_session=False)
 
     professors = db.query(ProfessorInformation).filter(ProfessorInformation.professor_id.in_(professor_id.ids)).all()
     for professor in professors:

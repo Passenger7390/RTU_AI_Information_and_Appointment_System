@@ -1,6 +1,6 @@
 import axios from "axios";
 import { TableData } from "./my_components/table/Columns";
-import { Appointment, FAQ, Professor } from "./interface";
+import { Appointment, CreateProfessor, FAQ, Professor } from "./interface";
 // Environment-aware API configuration
 const env = import.meta.env.VITE_ENV || "production";
 const isDev = env === "development";
@@ -213,7 +213,7 @@ export const verifyOTP = async (email: string, otp: string) => {
 // ======================================================= OTP API END ========================================================
 // ========================================================= PROFESSOR API ========================================================
 
-export const createProfessor = async (professor: Professor) => {
+export const createProfessor = async (professor: CreateProfessor) => {
   const token = localStorage.getItem("token");
   if (!token) return;
 

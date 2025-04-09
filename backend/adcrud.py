@@ -4,7 +4,7 @@ import shutil
 from fastapi import Depends, File, Form, HTTPException, APIRouter, UploadFile
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-from auth import read_users_me
+from auth import get_current_user, read_users_me
 from database import create_session, db_connect, get_db
 from schemas import DeleteRequest, UserBase
 from models import Image
@@ -20,7 +20,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 @router.post("/upload")
-async def upload_file(file: UploadFile = File(...), duration: int = Form(...), title: str = Form(...), expires_in: str = Form(...), current_user: UserBase = Depends(read_users_me) ,db: Session = Depends(get_db)):
+async def upload_file(file: UploadFile = File(...), duration: int = Form(...), title: str = Form(...), expires_in: str = Form(...), current_user: UserBase = Depends(get_current_user) ,db: Session = Depends(get_db)):
     if not file:
         raise HTTPException(status_code=400, detail="No file uploaded")
     
@@ -62,7 +62,7 @@ async def getTableData(db: Session = Depends(get_db)):
 @router.post("/delete")
 async def delete_images(
     request: DeleteRequest,
-    current_user: UserBase = Depends(read_users_me),
+    current_user: UserBase = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     for image_id in request.ids:

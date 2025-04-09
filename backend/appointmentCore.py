@@ -3,7 +3,7 @@ from typing import List
 from uuid import UUID, uuid4
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
-from auth import read_users_me
+from auth import get_current_user, read_users_me
 from otp import get_gmail_service
 from schemas import AppointmentResponse, AppointmentCreate, AppointmentUpdate, UserBase
 from database import get_db
@@ -110,7 +110,7 @@ async def create_apointment(appointment: AppointmentCreate, db: Session = Depend
     return {'message': 'Appointment created successfully', 'reference': uuid[-6:], "status": "sent"}
 
 @router.get('/get-appointments', response_model=List[AppointmentResponse])
-async def get_appointment(db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
+async def get_appointment(db: Session = Depends(get_db), current_user: UserBase = Depends(get_current_user)):
     """Get a appointment information depending on the uid provided by the user"""
     appointments = db.query(Appointment).all()
     appointments_list = []
