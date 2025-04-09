@@ -6,7 +6,7 @@ class UserBase(BaseModel):
     username: str
     id: int
     role: str
-    professor_id: Optional[str] = None
+    professor_id: Optional[UUID] = None
 
 class CreateUser(BaseModel):    # Create User model
     username: str
@@ -98,6 +98,11 @@ class AppointmentResponse(BaseModel):
     start_time: str
     end_time: str
     status: str
+
+class AppointmentResponseForTable(AppointmentResponse):
+    professor_id: UUID
+    class Config:
+        from_attributes = True
 
 # class AppointmentGet(BaseModel):
 #     uuid: UUID

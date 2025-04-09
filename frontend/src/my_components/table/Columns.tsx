@@ -192,4 +192,5 @@ export type AppointmentData = {
   start_time: string;
   end_time: string;
   status: string;
+  professor_id: string;
 };

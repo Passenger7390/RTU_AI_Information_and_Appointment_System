@@ -117,7 +117,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         username=user.username,
         role=user.role,
         id=user.id,
-        # professor_id=user.professor_id
+        professor_id=user.professor_id
     )
 
 def superuser_required(current_user: User = Depends(get_current_user)):

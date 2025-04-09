@@ -5,7 +5,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from auth import get_current_user, read_users_me
 from otp import get_gmail_service
-from schemas import AppointmentResponse, AppointmentCreate, AppointmentUpdate, UserBase
+from schemas import AppointmentResponse, AppointmentCreate, AppointmentResponseForTable, AppointmentUpdate, UserBase
 from database import get_db
 from models import Appointment, ProfessorInformation
 from sqlalchemy.orm import Session
@@ -109,7 +109,7 @@ async def create_apointment(appointment: AppointmentCreate, db: Session = Depend
 
     return {'message': 'Appointment created successfully', 'reference': uuid[-6:], "status": "sent"}
 
-@router.get('/get-appointments', response_model=List[AppointmentResponse])
+@router.get('/get-appointments', response_model=List[AppointmentResponseForTable])
 async def get_appointment(db: Session = Depends(get_db), current_user: UserBase = Depends(get_current_user)):
     """Get a appointment information depending on the uid provided by the user"""
     appointments = db.query(Appointment).all()
@@ -118,10 +118,11 @@ async def get_appointment(db: Session = Depends(get_db), current_user: UserBase 
         print(f"Appointments: {appointment}")
         professor = db.query(ProfessorInformation.first_name, 
                              ProfessorInformation.last_name, 
-                             ProfessorInformation.title)\
+                             ProfessorInformation.title,
+                             ProfessorInformation.professor_id)\
                         .filter(ProfessorInformation.professor_id == appointment.professor_uuid).first()
         professor_name = f"{professor.title} {professor.first_name} {professor.last_name}"
-        appointments_list.append(AppointmentResponse(
+        appointments_list.append(AppointmentResponseForTable(
                             uuid=str(appointment.uuid), 
                             student_name=appointment.student_name, 
                             student_id=appointment.student_id,
@@ -129,7 +130,8 @@ async def get_appointment(db: Session = Depends(get_db), current_user: UserBase 
                             professor_name=professor_name, 
                             start_time=format_iso_date(appointment.start_time),
                             end_time=format_iso_date(appointment.end_time),
-                            status=appointment.status))
+                            status=appointment.status,
+                            professor_id=professor.professor_id))
         
     return appointments_list
 

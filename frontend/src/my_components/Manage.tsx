@@ -9,6 +9,7 @@ import {
   deleteProfessors,
   getAppointments,
   actionAppointment,
+  getUser,
 } from "@/api";
 import {
   createAdColumns,
@@ -24,6 +25,7 @@ import { FAQCard, FAQDialog } from "@/my_components/FAQ";
 import CreateProfessorDialog from "./CreateProfessorDialog";
 import { FAQ } from "@/interface";
 import EditProfileDialog from "./EditProfileDialog";
+import { useNavigate } from "react-router-dom";
 
 export const AdComponent = () => {
   const [tableData, setTableData] = useState<TableData[]>([]);
@@ -215,17 +217,46 @@ export const ProfessorComponent = () => {
 
 export const AppointmentComponent = () => {
   const [appointmentData, setAppointmentData] = useState<AppointmentData[]>([]);
+  const navigate = useNavigate();
   const columns = createAppointmentColumns(
     "bg-green-900 text-white flex justify-center",
     handleAcceptAppointment,
     handleRejectAppointment
   );
 
+  const [role, setRole] = useState("");
+  const [profID, setProfID] = useState("");
+  async function fetchUser() {
+    try {
+      const response = await getUser();
+      setRole(response.data.role);
+      setProfID(response.data.professor_id);
+      console.log("res", response.data);
+    } catch (error) {
+      console.error(error);
+      localStorage.removeItem("token");
+      navigate("/login");
+    }
+  }
+
   async function fetchAppointmentTableData() {
     try {
-      const tableData = await getAppointments();
-      if (tableData) {
-        setAppointmentData(tableData);
+      if (role === "superuser" || role === "professor") {
+        const tableData = await getAppointments();
+        console.log("tableData", tableData);
+        console.log("profID", profID);
+        if (tableData) {
+          if (role === "professor") {
+            // Filter appointments for professor
+            const filteredData = tableData.filter(
+              (appointment: any) => appointment.professor_id === profID
+            );
+            setAppointmentData(filteredData);
+          } else {
+            // For superuser, show all appointments
+            setAppointmentData(tableData);
+          }
+        }
       }
     } catch (error) {
       toast.error("Failed to fetch appointment data");
@@ -258,8 +289,13 @@ export const AppointmentComponent = () => {
   }
 
   useEffect(() => {
-    fetchAppointmentTableData();
+    fetchUser();
   }, []);
+
+  useEffect(() => {
+    fetchAppointmentTableData();
+  }, [role]);
+
   return (
     <div>
       <DataTable
