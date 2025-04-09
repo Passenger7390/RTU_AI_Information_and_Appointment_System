@@ -39,9 +39,6 @@ const Dashboard = () => {
   return (
     <div className="flex-col h-full p-8 space-y-8 w-full justify-center">
       <div className="flex items-center justify-between h-20">
-        {/* <div className="flex w-[500px]">
-          <h1 className="text-5xl font-extrabold">Hello {user}!</h1>
-        </div> */}
         <div className="flex-1 flex items-center justify-center h-full space-x-4">
           <ToggleGroup
             type="single"
@@ -67,7 +64,6 @@ const Dashboard = () => {
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
-        <div className="flex w-[100px]"></div>
       </div>
       {(() => {
         switch (currentView) {
