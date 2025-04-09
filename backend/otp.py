@@ -110,7 +110,6 @@ async def send_otp(request: OTPRequest, db: Session = Depends(get_db)):
         #     .execute()
         # )
         # return {"message_id": send_message["id"], "status": "sent", "otp": otp_code}
-        print("test")
         return {"status": "sent", "otp": otp_code}
     except HttpError as error:
         raise HTTPException(status_code=500, detail=str(error))
@@ -122,7 +121,6 @@ async def verify_otp(request: OTPVerify, db: Session = Depends(get_db)):
     """
     email = request.email
     provided_otp = request.otp
-    print("provided_otp", provided_otp)
     otp_record = get_otp_secret(db, email)
 
     if not otp_record:

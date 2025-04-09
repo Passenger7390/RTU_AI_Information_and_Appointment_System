@@ -1,3 +1,4 @@
+import base64
 from datetime import datetime, timedelta
 from typing import Annotated, Optional
 from fastapi import Depends, HTTPException, status, APIRouter
@@ -5,13 +6,17 @@ from starlette import status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from dotenv import load_dotenv
-from models import User
+from otp import create_otp_secret, get_gmail_service
+from models import ProfessorInformation, User
 from database import get_db, db_dependency
 import jwt
 import bcrypt
 import os
-from schemas import Token, UserBase, CreateUser
+from schemas import OTPRequest, Token, UserBase, CreateUser
 from uuid import UUID, uuid4
+import pyotp
+from email.message import EmailMessage
+
 
 load_dotenv()   # Load environment variables
 
@@ -97,6 +102,47 @@ async def register(user: CreateUser, db: db_dependency, professor_uuid: Optional
     db.commit()
     db.refresh(create_user_model)
     return {'msg': 'User Created Successfully'}
+
+@router.post("/reset-password")
+async def resetPassword(request: OTPRequest, db: db_dependency):
+    user = db.query(ProfessorInformation).filter(ProfessorInformation.email == request.email).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    secret = pyotp.random_base32()
+    totp = pyotp.TOTP(secret, interval=300, digits=6)
+    otp_code = totp.now()
+
+    create_otp_secret(request.email, secret, db)
+
+    try:
+        service = get_gmail_service()
+        message = EmailMessage()
+
+         # Create email content
+        message.set_content(f"THIS IS A TEST! Your verification code is: {otp_code}\n\nThis code will expire in 5 minutes.")
+
+        message["To"] = request.email
+        message["From"] = "2021-101043@rtu.edu.ph"
+        message["Subject"] = "Your Verification Code to reset your password"
+
+        # Encode and send message
+        encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+        create_message = {"raw": encoded_message}
+
+        # TODO: Uncomment this after testing
+        # TODO: Make sure to delete the tests in contents in email
+        
+        # send_message = (
+        #     service.users()
+        #     .messages()
+        #     .send(userId="me", body=create_message)
+        #     .execute()
+        # )
+        # return {"message_id": send_message["id"], "status": "sent", "otp": otp_code}
+        return {"status": "sent", "otp": otp_code}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to create Gmail service")
 
 # Role-based Dependencies for Authentication
 @router.get("/users/me", response_model=UserBase)

@@ -59,6 +59,11 @@ export const getUser = async () => {
   });
 };
 
+export const resetPasswordAPI = async (email: string) => {
+  const res = await axios.post(`${authApi}/reset-password`, { email });
+  return res.data;
+};
+
 // ====================================================== AUTH API END =======================================================
 
 // ========================================================= AD API ==========================================================
