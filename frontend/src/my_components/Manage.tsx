@@ -231,7 +231,6 @@ export const AppointmentComponent = () => {
       const response = await getUser();
       setRole(response.data.role);
       setProfID(response.data.professor_id);
-      console.log("res", response.data);
     } catch (error) {
       console.error(error);
       localStorage.removeItem("token");
@@ -243,8 +242,6 @@ export const AppointmentComponent = () => {
     try {
       if (role === "superuser" || role === "professor") {
         const tableData = await getAppointments();
-        console.log("tableData", tableData);
-        console.log("profID", profID);
         if (tableData) {
           if (role === "professor") {
             // Filter appointments for professor
@@ -265,7 +262,6 @@ export const AppointmentComponent = () => {
   }
 
   async function handleAcceptAppointment(appointment: AppointmentData) {
-    console.log("accepting appointment", appointment.uuid);
     try {
       // Implement API call to accept appointment
       await actionAppointment(appointment.uuid, "accept"); // You'll need to create this API function
@@ -277,7 +273,6 @@ export const AppointmentComponent = () => {
   }
 
   async function handleRejectAppointment(appointment: AppointmentData) {
-    console.log("rejecting appointment", appointment.uuid);
     try {
       // Implement API call to reject appointment
       await actionAppointment(appointment.uuid, "reject"); // You'll need to create this API function

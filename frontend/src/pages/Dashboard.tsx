@@ -11,7 +11,6 @@ import {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState("");
   const [role, setRole] = useState("");
   const [currentView, setCurrentView] = useState("manage-advertisement");
   const token = localStorage.getItem("token");
@@ -28,7 +27,6 @@ const Dashboard = () => {
   const fetchUser = async () => {
     try {
       const response = await getUser();
-      setUser(response.data.role);
       setRole(response.data.role);
       console.log(role);
     } catch (error) {

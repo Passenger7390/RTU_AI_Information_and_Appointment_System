@@ -115,7 +115,6 @@ async def get_appointment(db: Session = Depends(get_db), current_user: UserBase 
     appointments = db.query(Appointment).all()
     appointments_list = []
     for appointment in appointments:
-        print(f"Appointments: {appointment}")
         professor = db.query(ProfessorInformation.first_name, 
                              ProfessorInformation.last_name, 
                              ProfessorInformation.title,
