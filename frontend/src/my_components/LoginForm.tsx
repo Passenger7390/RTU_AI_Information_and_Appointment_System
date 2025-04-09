@@ -10,7 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
-import { login, resetPasswordAPI, verifyOTP } from "@/api";
+import {
+  login,
+  sendOTPToResetPassword,
+  verifyOTP,
+  resetPasswordAPI,
+} from "@/api";
 import { useNavigate } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import toast from "react-hot-toast";
@@ -20,6 +25,7 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { Eye, EyeOff } from "lucide-react";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -38,10 +44,27 @@ const LoginForm = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  function verifyPassword() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  async function verifyPassword() {
     if (newPassword !== confirmPassword) {
       toast.error("Passwords do not match");
       return false;
+    }
+
+    try {
+      await resetPasswordAPI(resetEmail, newPassword);
+      toast.success("Password reset successfully");
+      setResetPassword(false);
+      setEnterOTP(false);
+      setIsVerified(false);
+      setOtp("");
+      setResetEmail("");
+    } catch (error) {
+      toast.error("Failed to reset password");
+      console.error(error);
     }
     return true;
   }
@@ -79,7 +102,7 @@ const LoginForm = () => {
       setLoading(true);
       // Call the API to send the OTP
       // await sendOtp(resetEmail);
-      await resetPasswordAPI(resetEmail);
+      await sendOTPToResetPassword(resetEmail);
       setResetPassword(false);
       toast.success("OTP sent to your email");
       setEnterOTP(true);
@@ -144,15 +167,31 @@ const LoginForm = () => {
         {isVerified ? (
           <div className="space-y-4 flex-col flex">
             <Label>New Password</Label>
-            <Input
-              type="password"
-              onChange={(e) => setNewPassword(e.target.value)}
-            ></Input>
+            <div className="flex">
+              <Input
+                type={showNewPassword ? "text" : "password"}
+                onChange={(e) => setNewPassword(e.target.value)}
+              ></Input>
+              <Button
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                variant={"ghost"}
+              >
+                {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </Button>
+            </div>
             <Label>Confirm Password</Label>
-            <Input
-              type="password"
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            ></Input>
+            <div className="flex">
+              <Input
+                type={showConfirmPassword ? "text" : "password"}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              ></Input>
+              <Button
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                variant={"ghost"}
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </Button>
+            </div>
           </div>
         ) : resetPassword ? (
           <>
@@ -195,13 +234,21 @@ const LoginForm = () => {
               </div>
               <div className="space-y-1">
                 <Label htmlFor="password-label">Password</Label>
-                <Input
-                  id="password"
-                  value={password}
-                  type="password"
-                  required
-                  onChange={(e) => setPassword(e.target.value)}
-                ></Input>
+                <div className="flex">
+                  <Input
+                    id="password"
+                    value={password}
+                    type={showPassword ? "text" : "password"}
+                    required
+                    onChange={(e) => setPassword(e.target.value)}
+                  ></Input>
+                  <Button
+                    onClick={() => setShowPassword(!showPassword)}
+                    variant={"ghost"}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </Button>
+                </div>
               </div>
             </div>
             {error && <Label className="text-red-600">{error}</Label>}

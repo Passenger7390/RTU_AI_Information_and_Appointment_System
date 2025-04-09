@@ -1,7 +1,7 @@
 import base64
 from datetime import datetime, timedelta
 from typing import Annotated, Optional
-from fastapi import Depends, HTTPException, status, APIRouter
+from fastapi import Body, Depends, HTTPException, Request, status, APIRouter
 from starlette import status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -103,8 +103,8 @@ async def register(user: CreateUser, db: db_dependency, professor_uuid: Optional
     db.refresh(create_user_model)
     return {'msg': 'User Created Successfully'}
 
-@router.post("/reset-password")
-async def resetPassword(request: OTPRequest, db: db_dependency):
+@router.post("/send-otp-to-reset-password")
+async def sendOTPTOResetPassword(request: OTPRequest, db: db_dependency):
     user = db.query(ProfessorInformation).filter(ProfessorInformation.email == request.email).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
@@ -165,6 +165,28 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         id=user.id,
         professor_id=user.professor_id
     )
+
+@router.post("/reset-password")
+async def reset_password(request: Request, db: db_dependency):
+    body = await request.json()
+    email = body.get("email")
+    new_password = body.get("new_password")
+
+    professor = db.query(ProfessorInformation).filter(ProfessorInformation.email == email).first()
+    if not professor:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    user = db.query(User).filter(User.professor_id == professor.professor_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    # Generate a salt and hash the new password
+    salt = bcrypt.gensalt()
+    hashed_bytes = bcrypt.hashpw(new_password.encode('utf-8'), salt)
+    hashed_password = hashed_bytes.decode('utf-8')
+
+    user.hashed_password = hashed_password
+    db.commit()
+    return {"msg": "Password reset successfully"}
 
 def superuser_required(current_user: User = Depends(get_current_user)):
     if current_user.role != "superuser":

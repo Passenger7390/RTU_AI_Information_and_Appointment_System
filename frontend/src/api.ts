@@ -59,8 +59,18 @@ export const getUser = async () => {
   });
 };
 
-export const resetPasswordAPI = async (email: string) => {
-  const res = await axios.post(`${authApi}/reset-password`, { email });
+export const sendOTPToResetPassword = async (email: string) => {
+  const res = await axios.post(`${authApi}/send-otp-to-reset-password`, {
+    email,
+  });
+  return res.data;
+};
+
+export const resetPasswordAPI = async (email: string, new_password: string) => {
+  const res = await axios.post(`${authApi}/reset-password`, {
+    email,
+    new_password,
+  });
   return res.data;
 };
 
