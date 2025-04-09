@@ -4,10 +4,14 @@ from typing import List, Optional
 from uuid import UUID
 class UserBase(BaseModel):
     username: str
+    id: int
+    role: str
+    professor_id: Optional[UUID] = None
 
 class CreateUser(BaseModel):    # Create User model
     username: str
     password: str
+    role: str = "professor"
 
 class Token(BaseModel): # Token model
     access_token: str
@@ -64,6 +68,11 @@ class CreateProfessor(BaseModel):
     office_hours: str
     title: Optional[str] = None
 
+class RegisterProfessor(CreateProfessor):
+    username: str
+    password: str
+    class Config:
+        from_attributes = True
 class ProfessorResponse(BaseModel):
     id: int
     name: str
@@ -89,6 +98,11 @@ class AppointmentResponse(BaseModel):
     start_time: str
     end_time: str
     status: str
+
+class AppointmentResponseForTable(AppointmentResponse):
+    professor_id: UUID
+    class Config:
+        from_attributes = True
 
 # class AppointmentGet(BaseModel):
 #     uuid: UUID

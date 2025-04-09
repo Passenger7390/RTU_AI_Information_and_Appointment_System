@@ -21,6 +21,16 @@ export interface Professor {
   title: string;
 }
 
+export interface CreateProfessor {
+  first_name: string;
+  last_name: string;
+  email: string;
+  office_hours: string;
+  title: string;
+  username: string;
+  password: string;
+}
+
 export interface Message {
   sender: "user" | "bot";
   text: string;

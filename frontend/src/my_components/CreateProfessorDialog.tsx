@@ -16,7 +16,7 @@ import { useState } from "react";
 import { createProfessor } from "@/api";
 import toast from "react-hot-toast";
 import { IoAddSharp } from "react-icons/io5";
-import { CreateProfessorDialogProps, Professor } from "@/interface";
+import { CreateProfessor, CreateProfessorDialogProps } from "@/interface";
 
 const CreateProfessorDialog = ({ onRefresh }: CreateProfessorDialogProps) => {
   const [firstName, setFirstName] = useState("");
@@ -24,6 +24,9 @@ const CreateProfessorDialog = ({ onRefresh }: CreateProfessorDialogProps) => {
   const [email, setEmail] = useState("");
   const [title, setTitle] = useState("");
   const [workingHours, setWorkingHours] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   function closeForm() {
@@ -33,20 +36,31 @@ const CreateProfessorDialog = ({ onRefresh }: CreateProfessorDialogProps) => {
     setEmail("");
     setLastName("");
     setTitle("");
+    setUsername("");
+    setPassword("");
   }
 
   async function saveForm() {
     // Save form logic here
-    if (!firstName || !lastName || !email || !workingHours) {
+    if (
+      !firstName ||
+      !lastName ||
+      !email ||
+      !workingHours ||
+      !username ||
+      !password
+    ) {
       toast.error("Please fill in all required fields.");
       return;
     }
-    const params: Professor = {
+    const params: CreateProfessor = {
       first_name: firstName,
       last_name: lastName,
       email: email,
       office_hours: workingHours,
       title: title,
+      username: username,
+      password: password,
     };
 
     try {
@@ -78,7 +92,6 @@ const CreateProfessorDialog = ({ onRefresh }: CreateProfessorDialogProps) => {
         <div>
           <div className="pb-4">
             <Label className="text-lg font-semibold">Name</Label>
-            <Separator />
             <div className="grid grid-cols-5 gap-4">
               <div>
                 <Label>Title</Label>
@@ -119,7 +132,8 @@ const CreateProfessorDialog = ({ onRefresh }: CreateProfessorDialogProps) => {
               required
             />
           </div>
-          <div>
+          <Separator />
+          <div className="pb-4 pt-4">
             <Label className="text-lg font-semibold">
               Working Hours<span className="text-red-500">*</span>
             </Label>
@@ -135,6 +149,31 @@ const CreateProfessorDialog = ({ onRefresh }: CreateProfessorDialogProps) => {
                 endTimeLabel="To"
                 step={15}
               />
+            </div>
+          </div>
+          <Separator />
+          <div className="pt-4">
+            <Label className="text-lg font-semibold">Login Credentials</Label>
+            <div className="grid grid-cols-2 gap-4 pt-4">
+              <div>
+                <Label>
+                  Username<span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                ></Input>
+              </div>
+              <div>
+                <Label>
+                  Password<span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                ></Input>
+              </div>
             </div>
           </div>
         </div>

@@ -11,8 +11,7 @@ import {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState("");
-
+  const [role, setRole] = useState("");
   const [currentView, setCurrentView] = useState("manage-advertisement");
   const token = localStorage.getItem("token");
 
@@ -28,7 +27,8 @@ const Dashboard = () => {
   const fetchUser = async () => {
     try {
       const response = await getUser();
-      setUser(response.data.username);
+      setRole(response.data.role);
+      console.log(role);
     } catch (error) {
       console.error(error);
       localStorage.removeItem("token");
@@ -39,9 +39,6 @@ const Dashboard = () => {
   return (
     <div className="flex-col h-full p-8 space-y-8 w-full justify-center">
       <div className="flex items-center justify-between h-20">
-        <div className="flex w-[500px]">
-          <h1 className="text-5xl font-extrabold">Hello {user}!</h1>
-        </div>
         <div className="flex-1 flex items-center justify-center h-full space-x-4">
           <ToggleGroup
             type="single"
@@ -57,15 +54,16 @@ const Dashboard = () => {
             <ToggleGroupItem value="manage-faq">
               <p className="font-bold text-xl">Manage FAQs</p>
             </ToggleGroupItem>
-            <ToggleGroupItem value="manage-professor">
-              <p className="font-bold text-xl">Manage Professors</p>
-            </ToggleGroupItem>
+            {role === "superuser" && (
+              <ToggleGroupItem value="manage-professor">
+                <p className="font-bold text-xl">Manage Professors</p>
+              </ToggleGroupItem>
+            )}
             <ToggleGroupItem value="manage-appointments">
               <p className="font-bold text-xl">Manage Appointments</p>
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
-        <div className="flex w-[100px]"></div>
       </div>
       {(() => {
         switch (currentView) {

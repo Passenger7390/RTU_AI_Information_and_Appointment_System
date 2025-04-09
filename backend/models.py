@@ -10,8 +10,11 @@ class User(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True,nullable=False)
-    hashed_password = Column(String,nullable=False)    
+    hashed_password = Column(String,nullable=False)
+    role = Column(String, nullable=False, default='professor') 
+    professor_id = Column(UUID, ForeignKey("professor_information.professor_id", ondelete="CASCADE"), nullable=True)  # Link to professor if applicable  
 
+    professor_info = relationship("ProfessorInformation", back_populates="users")  # Add relationship
 class Image(Base):
     __tablename__ = "images"
 
@@ -42,6 +45,7 @@ class ProfessorInformation(Base):
     title = Column(String, nullable=True)
 
     appointments = relationship("Appointment", back_populates="professor")
+    users = relationship("User", back_populates="professor_info")  # Add back-relationship
 
 class Appointment(Base):
     __tablename__ = "appointments"
