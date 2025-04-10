@@ -34,7 +34,7 @@ echo "PostgreSQL is up - continuing"
 
 # Run database initialization
 # echo "Creating database tables..."
-python createDb.py
+# python createDb.py
 
 echo "Running database migrations..."
 
