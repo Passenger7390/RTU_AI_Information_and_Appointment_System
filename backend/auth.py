@@ -82,10 +82,10 @@ def read_users_me(token: str = Depends(oauth2_scheme), db: Session = Depends(get
 
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
-async def register_user(user: CreateUser, db: Session = Depends(db_dependency)):
+async def register_user(user: CreateUser, db: Session = Depends(get_db)):
     return await register(user, db)
 
-async def register(user: CreateUser, db: db_dependency, professor_uuid: Optional[UUID] = None):
+async def register(user: CreateUser, db: Session, professor_uuid: Optional[UUID] = None):
     # Generate a salt and hash the user's password
     salt = bcrypt.gensalt()
     hashed_bytes = bcrypt.hashpw(user.password.encode('utf-8'), salt)
