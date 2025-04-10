@@ -37,6 +37,9 @@ echo "PostgreSQL is up - continuing"
 # python createDb.py
 
 echo "Running database migrations..."
+
+alembic init alembic
+alembic revision --autogenerate -m "Initial migration"
 alembic upgrade head
 
 # Start the application
