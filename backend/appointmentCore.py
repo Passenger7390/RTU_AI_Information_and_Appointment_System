@@ -54,58 +54,58 @@ async def create_apointment(appointment: AppointmentCreate, db: Session = Depend
     # TODO: Uncomment this after testing
     # TODO: Make sure to delete the tests in contents in email
 
-    # try:
-    #     service = get_gmail_service()
+    try:
+        service = get_gmail_service()
 
-    #     messageForStudent = EmailMessage()
-    #     messageForProfessor = EmailMessage()
+        messageForStudent = EmailMessage()
+        messageForProfessor = EmailMessage()
 
-    #     # Create email content
-    #     messageForStudent.set_content(f"Dear {appointment.student_name},\n\n"
-    #                                   f"Good day!\n\n"
-    #                                   f"Your appointment with {f"{professor.title} {professor.first_name} {professor.last_name}"} has been created.\n"
-    #                                   f"You can view your appointment in our kiosk using the reference number.\n\n"
-    #                                   f"Reference Number: {uuid[-6:]}\n\n"
-    #                                   f"We also notified {f"{professor.title} {professor.first_name} {professor.last_name}"} about your appointment.\n\n"
-    #                                   f"THIS IS ONLY A TEST")
+        # Create email content
+        messageForStudent.set_content(f"Dear {appointment.student_name},\n\n"
+                                      f"Good day!\n\n"
+                                      f"Your appointment with {f"{professor.title} {professor.first_name} {professor.last_name}"} has been created.\n"
+                                      f"You can view your appointment in our kiosk using the reference number.\n\n"
+                                      f"Reference Number: {uuid[-6:]}\n\n"
+                                      f"We also notified {f"{professor.title} {professor.first_name} {professor.last_name}"} about your appointment.\n\n"
+                                      f"THIS IS ONLY A TEST")
         
-    #     messageForProfessor.set_content(f"Dear {f"{professor.title} {professor.first_name} {professor.last_name}"},\n\n"
-    #                                   f"Good day!\n\n"
-    #                                   f"{appointment.student_name} made an appointment request to you. Please see the appointment information in the kiosk admin page.\n"
-    #                                   f"Confirm the appointment in the admin page once you are okay with it. Confirmation is required to finalize the appointment.\n\n"
-    #                                   f"Thank you!\n\n"
-    #                                   f"THIS IS ONLY A TEST")
+        messageForProfessor.set_content(f"Dear {f"{professor.title} {professor.first_name} {professor.last_name}"},\n\n"
+                                      f"Good day!\n\n"
+                                      f"{appointment.student_name} made an appointment request to you. Please see the appointment information in the kiosk admin page.\n"
+                                      f"Confirm the appointment in the admin page once you are okay with it. Confirmation is required to finalize the appointment.\n\n"
+                                      f"Thank you!\n\n"
+                                      f"THIS IS ONLY A TEST")
 
-    #     messageForStudent["To"] = appointment.student_email
-    #     messageForStudent["From"] = "2021-101043@rtu.edu.ph"
-    #     messageForStudent["Subject"] = "Your Appointment has been created"
+        messageForStudent["To"] = appointment.student_email
+        messageForStudent["From"] = "2021-101043@rtu.edu.ph"
+        messageForStudent["Subject"] = "Your Appointment has been created"
 
-    #     messageForProfessor["To"] = professor.email
-    #     messageForProfessor["From"] = "2021-101043@rtu.edu.ph"
-    #     messageForProfessor["Subject"] = f"{appointment.student_name} has created an appointment"
+        messageForProfessor["To"] = professor.email
+        messageForProfessor["From"] = "2021-101043@rtu.edu.ph"
+        messageForProfessor["Subject"] = f"{appointment.student_name} has created an appointment"
 
-    #     # Encode and send message
-    #     encoded_student_message = base64.urlsafe_b64encode(messageForStudent.as_bytes()).decode()
-    #     encoded_professor_message = base64.urlsafe_b64encode(messageForProfessor.as_bytes()).decode()
+        # Encode and send message
+        encoded_student_message = base64.urlsafe_b64encode(messageForStudent.as_bytes()).decode()
+        encoded_professor_message = base64.urlsafe_b64encode(messageForProfessor.as_bytes()).decode()
 
-    #     create_message_for_student = {"raw": encoded_student_message}
-    #     create_message_for_professor = {"raw": encoded_professor_message}
+        create_message_for_student = {"raw": encoded_student_message}
+        create_message_for_professor = {"raw": encoded_professor_message}
 
-    #     send_message_for_student = (
-    #         service.users()
-    #         .messages()
-    #         .send(userId="me", body=create_message_for_student)
-    #         .execute()
-    #     )
+        send_message_for_student = (
+            service.users()
+            .messages()
+            .send(userId="me", body=create_message_for_student)
+            .execute()
+        )
         
-    #     service.users()\
-    #     .messages()\
-    #     .send(userId="me", body=create_message_for_professor)\
-    #     .execute()
+        # service.users()\
+        # .messages()\
+        # .send(userId="me", body=create_message_for_professor)\
+        # .execute()
 
-    #     return {'message': 'Appointment created successfully', 'reference': uuid[-6:], "message_id": send_message_for_student["id"], "status": "sent"}
-    # except HttpError as error:
-    #     raise HTTPException(status_code=500, detail=str(error))
+        return {'message': 'Appointment created successfully', 'reference': uuid[-6:], "message_id": send_message_for_student["id"], "status": "sent"}
+    except HttpError as error:
+        raise HTTPException(status_code=500, detail=str(error))
 
     return {'message': 'Appointment created successfully', 'reference': uuid[-6:], "status": "sent"}
 
@@ -153,15 +153,33 @@ async def get_appointment_by_reference(appointment_reference: str, db: Session =
 @router.put('/action-appointment/{appointment_reference}')
 async def action_appointment(appointment_reference: str, action: AppointmentUpdate, db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
     """Accept or reject an appointment"""
-    print(f"appointment_reference: {appointment_reference}")
     appointment = db.query(Appointment).filter(Appointment.uuid == appointment_reference).first()
+    professor = db.query(ProfessorInformation.title,
+                         ProfessorInformation.first_name,
+                         ProfessorInformation.last_name
+                         )\
+                         .filter(ProfessorInformation.professor_id == appointment.professor_uuid).first()
+    
+    appointment_details = {
+        "student_name": appointment.student_name,
+        "student_email": appointment.student_email,
+        "professor_name": f"{professor.title} {professor.first_name} {professor.last_name}", 
+        "uuid": str(appointment.uuid)[-6:],
+        "date": format_iso_date(appointment.start_time).split(' ')[0],
+        "start_time": format_iso_date(appointment.start_time).split(' ')[1],
+        "end_time": format_iso_date(appointment.end_time).split(' ')[1],
+
+    }
+
     if appointment is None:
         raise HTTPException(status_code=404, detail="Appointment not found")
     
     if action.status == 'accept':
         appointment.status = 'Accepted'
+        await send_email(action.status, appointment_details)
     elif action.status == 'reject':
         appointment.status = 'Rejected'
+        await send_email(action.status, appointment_details)
     else:
         raise HTTPException(status_code=400, detail="Invalid action")
 
@@ -200,6 +218,61 @@ async def get_professor_appointments(professor_id: str, date: str, db: Session =
         })
     
     return result
+
+async def send_email(status: str, appointment_details: dict):
+    """Send email to the user"""
+    print(f"status: {status}")
+    try:
+        service = get_gmail_service()
+        confirmationEmail = EmailMessage()
+
+        if status == "accept":
+            # Acceptance email template
+        
+            confirmationEmail.set_content(f"Dear {appointment_details['student_name']},\n\n"
+                                          f"Good day!\n"
+                                          f"We're pleased to inform you that {appointment_details["professor_name"]} has accepted your appointment request.\n\n"
+                                          f"Appointment Details:\n"
+                                          f"- Date: {appointment_details['date']}\n"
+                                          f"- Time: {appointment_details['start_time']} to {appointment_details['end_time']}\n"
+                                          f"- Reference Number: {appointment_details['uuid']}\n\n"
+                                          f"Please arrive 5 minutes before your scheduled time. If you need to reschedule or cancel, please do so at least 24 hours in advance.\n\n"
+                                          f"Thank you for using our appointment system.\n\n"
+                                          f"Best regards,\n"
+                                          f"RTU Kiosk Appointment System")
+            confirmationEmail["Subject"] = "Appointment Accepted - Reference #" + appointment_details['uuid']
+            
+        elif status == "reject":
+            # Rejection email template
+            confirmationEmail.set_content(f"Dear {appointment_details['student_name']},\n\n"
+                                        f"Good day!\n"
+                                        f"We regret to inform you that {appointment_details["professor_name"]} is unable to accommodate your appointment request at the requested time.\n\n"
+                                        f"Your Reference Number: {appointment_details['uuid']}\n\n"
+                                        f"This could be due to scheduling conflicts or prior commitments. You are welcome to schedule a new appointment at a different time that might better fit the professor's schedule.\n\n"
+                                        f"If you have any urgent matters to discuss, you may email the professor directly or visit during their regular office hours.\n\n"
+                                        f"Thank you for your understanding.\n\n"
+                                        f"Best regards,\n"
+                                        f"RTU Kiosk Appointment System")
+            confirmationEmail["Subject"] = "Appointment Request Update - Reference #" + appointment_details['uuid']
+            
+        confirmationEmail["To"] = appointment_details['student_email']
+        confirmationEmail["From"] = "2021-101043@rtu.edu.ph"
+        
+        # Encode and send message
+        encoded_message = base64.urlsafe_b64encode(confirmationEmail.as_bytes()).decode()
+        create_message = {"raw": encoded_message}
+        
+
+        send_message = (
+            service.users()
+            .messages()
+            .send(userId="me", body=create_message)
+            .execute()
+        )
+        
+        return {"message": send_message["id"], "status": status}
+    except HttpError as error:
+        raise HTTPException(status_code=500, detail=str(error))
 
 def format_iso_date(date_value):
     """

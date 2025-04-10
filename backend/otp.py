@@ -103,14 +103,14 @@ async def send_otp(request: OTPRequest, db: Session = Depends(get_db)):
         # TODO: Uncomment this after testing
         # TODO: Make sure to delete the tests in contents in email
         
-        # send_message = (
-        #     service.users()
-        #     .messages()
-        #     .send(userId="me", body=create_message)
-        #     .execute()
-        # )
-        # return {"message_id": send_message["id"], "status": "sent", "otp": otp_code}
-        return {"status": "sent", "otp": otp_code}
+        send_message = (
+            service.users()
+            .messages()
+            .send(userId="me", body=create_message)
+            .execute()
+        )
+        return {"message_id": send_message["id"], "status": "sent", "otp": otp_code}
+        # return {"status": "sent", "otp": otp_code}
     except HttpError as error:
         raise HTTPException(status_code=500, detail=str(error))
     
