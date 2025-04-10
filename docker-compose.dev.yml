@@ -5,6 +5,10 @@ services:
     restart: always
     env_file:
       - .env
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_PASSWORD=adminAdmin
+      - POSTGRES_DB=addb
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
