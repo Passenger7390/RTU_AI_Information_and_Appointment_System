@@ -38,8 +38,6 @@ echo "PostgreSQL is up - continuing"
 
 echo "Running database migrations..."
 
-alembic init alembic
-alembic revision --autogenerate -m "Initial migration"
 alembic upgrade head
 
 # Start the application
