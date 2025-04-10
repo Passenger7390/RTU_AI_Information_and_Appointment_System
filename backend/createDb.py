@@ -9,21 +9,24 @@ Base = declarative_base()
 
 class User(Base):
     __tablename__ = "users"
+    
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True,nullable=False)
-    hashed_password = Column(String,nullable=False)    
+    hashed_password = Column(String,nullable=False)
+    role = Column(String, nullable=False, default='professor') 
+    professor_id = Column(UUID, ForeignKey("professor_information.professor_id", ondelete="CASCADE"), nullable=True)  # Link to professor if applicable  
 
-
+    professor_info = relationship("ProfessorInformation", back_populates="users")  # Add relationship
 class Image(Base):
     __tablename__ = "images"
+
     id = Column(Integer, primary_key=True, index=True)
     created_at = Column(DateTime(timezone=True),nullable=False, server_default=func.now())
     filename = Column(String, nullable=False)
     title = Column(String, nullable=False)
     duration = Column(Integer,nullable=False)
     expires_in = Column(DateTime(timezone=True),nullable=False)
-
-
+    
 class FAQ(Base):
     __tablename__ = "faq"
 
@@ -31,7 +34,6 @@ class FAQ(Base):
     question = Column(String, unique=True, index=True ,nullable=False)
     synonyms = Column(JSONB, nullable=True)
     answer = Column(String, nullable=False)
-
 
 class ProfessorInformation(Base):
     __tablename__ = "professor_information"
@@ -45,6 +47,7 @@ class ProfessorInformation(Base):
     title = Column(String, nullable=True)
 
     appointments = relationship("Appointment", back_populates="professor")
+    users = relationship("User", back_populates="professor_info")  # Add back-relationship
 
 class Appointment(Base):
     __tablename__ = "appointments"
@@ -62,7 +65,6 @@ class Appointment(Base):
 
     professor = relationship("ProfessorInformation", back_populates="appointments")
 
-    
 class OTPSecret(Base):
     __tablename__ = "otp_secret"
 
