@@ -36,6 +36,10 @@ echo "PostgreSQL is up - continuing"
 # echo "Creating database tables..."
 # python createDb.py
 
+echo "Running database migrations..."
+
+alembic upgrade head
+
 # Start the application
 echo "Starting application..."
 exec gunicorn main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000

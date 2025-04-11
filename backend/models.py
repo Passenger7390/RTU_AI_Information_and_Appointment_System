@@ -82,3 +82,11 @@ class OTPSecret(Base):
     def create(cls, email, secret, expiry_minutes=5):
         expires_at = datetime.now() + timedelta(minutes=expiry_minutes)
         return cls(email=email, secret=secret, expires_at=expires_at, is_used=False)
+    
+class Map(Base):
+    __tablename__ = "map_images"
+
+    id = Column(Integer, primary_key=True, index=True)
+    building = Column(String, nullable=False)
+    floor_level = Column(Integer, nullable=False)
+    image_path = Column(String, nullable=False)
