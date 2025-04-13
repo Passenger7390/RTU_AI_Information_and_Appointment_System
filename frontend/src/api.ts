@@ -357,17 +357,13 @@ export const getMapImage = (folder: string, filename: string) => {
   const env = import.meta.env.VITE_ENV || "production";
   const isDev = env === "development";
 
-  // Check if filename already includes extension
-  const hasExtension = filename.toLowerCase().endsWith(".jpg");
-  const filenameFinal = hasExtension ? filename : `${filename}.jpg`;
-
   if (isDev) {
     const baseApi = import.meta.env.VITE_DEV_API || "http://localhost:8000";
-    return `${baseApi}/map/get-image/${folder}/${filenameFinal}`;
+    return `${baseApi}/map/get-image/${folder}/${filename}`;
   }
 
   // Production: use relative URL for Nginx proxying
-  return `/map/get-image/${folder}/${filenameFinal}`;
+  return `/map/get-image/${folder}/${filename}`;
 };
 
 export const getBuildingFloors = async (building: string) => {

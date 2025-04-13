@@ -26,7 +26,7 @@ async def list_map_images(folder: str, ):
         return {"error": "Folder does not exist"}
     
     files = os.listdir(folder_path)
-    image_files = sorted([f for f in files if f.lower().endswith('.jpg')], 
+    image_files = sorted([f for f in files if f.lower().endswith(('.jpg', '.png'))], 
                          key=natural_sort_key)
 
     return {"building_name": folder, "images": image_files}

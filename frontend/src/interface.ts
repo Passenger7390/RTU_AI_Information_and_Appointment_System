@@ -9,6 +9,7 @@ export const MAB = "MAB";
 export const OB = "OB";
 export const RND = "R&D";
 export const SNAGAH = "SNAGAH";
+export const JVE = "JVE";
 
 export interface ImageData {
   filename: string;
