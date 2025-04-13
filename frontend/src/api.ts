@@ -351,7 +351,7 @@ export const getAppointmentSchedule = async (
 
 // MAP API
 
-export const getMapImage = async (folder: string, filename: string) => {
+export const getMapImage = (folder: string, filename: string) => {
   if (!filename || !folder) return "";
 
   const env = import.meta.env.VITE_ENV || "production";

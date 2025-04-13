@@ -224,3 +224,13 @@ export interface VerifyInfoDialogProps {
   data: Appointment | undefined;
   professorName: string;
 }
+
+export interface BuildingComponentProps {
+  folder: string;
+  className: string;
+}
+
+export interface BuildingInfo {
+  building_name: string;
+  image_files: string[];
+}

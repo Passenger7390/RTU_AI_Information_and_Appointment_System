@@ -1,6 +1,7 @@
 import os
 from fastapi import APIRouter
 from fastapi.responses import FileResponse
+import re
 
 router = APIRouter(prefix="/map", tags=["maps"]) 
 MAP_DIR = "MAP_RTU"
@@ -25,7 +26,12 @@ async def list_map_images(folder: str, ):
         return {"error": "Folder does not exist"}
     
     files = os.listdir(folder_path)
-    image_files = [f for f in files if f.lower().endswith('.jpg')]
+    image_files = sorted([f for f in files if f.lower().endswith('.jpg')], 
+                         key=natural_sort_key)
 
     return {"building_name": folder, "images": image_files}
+
+def natural_sort_key(s):
+    """Sort strings with numbers in a natural way (1, 2, 10 instead of 1, 10, 2)"""
+    return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', s)]
 

@@ -16,7 +16,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useState } from "react";
-import { buildingDialogProps } from "@/interface";
+import {
+  buildingDialogProps,
+  ITB,
+  MAB,
+  OB,
+  SNAGAH,
+  WELLNESS,
+} from "@/interface";
+import BuildingComponent from "@/my_components/BuildingComponent";
 
 const MapPage = () => {
   const [title, setTitle] = useState("Rizal Technological University Map");
@@ -79,6 +87,39 @@ const MapPage = () => {
                     setTrigger={setTrigger}
                     trigger={trigger}
                   />
+                  <BuildingComponent
+                    folder={ITB}
+                    className="top-[180px] left-[641px] w-[240px] h-[170px] opacity-0"
+                  />
+                  <BuildingComponent
+                    folder={WELLNESS}
+                    className="top-[82.5%] left-[48.5%] w-[180px] h-[100px] opacity-40"
+                  />
+                  <BuildingComponent
+                    folder={SNAGAH}
+                    className="top-[10.5%] left-[78%] w-[147px] h-[225px] opacity-0"
+                  />
+                  {/* OB Building */}
+                  <BuildingComponent
+                    folder={OB}
+                    className="top-[67%] left-[32%] w-[543px] h-[63px] opacity-0"
+                  />
+                  <BuildingComponent
+                    folder={OB}
+                    className="top-[45%] left-[68.25%] w-[61px] h-[333px] opacity-0"
+                  />
+                  <BuildingComponent
+                    folder={OB}
+                    className="top-[16%] left-[67%] w-[79px] h-[252px] opacity-0"
+                  />
+                  <BuildingComponent
+                    folder={MAB}
+                    className="top-[75%] left-[47%] w-[315px] h-[58.5px] opacity-50"
+                  />
+                  <BuildingComponent
+                    folder={MAB}
+                    className="top-[82%] left-[65.3%] w-[315px] h-[58.5px] opacity-50"
+                  />
                 </div>
               </TransformComponent>
               <Button
@@ -113,7 +154,7 @@ const BuildingDialog = ({
 }: buildingDialogProps) => {
   return (
     <Dialog onOpenChange={setOpen} open={open}>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <Button
           className={`${props} disabled:opacity-0`}
           onClick={() => setOpen(true)}
