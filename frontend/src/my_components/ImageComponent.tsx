@@ -1,4 +1,4 @@
-import rtuMapImg from "/rtuMap.png";
+import rtuMapImg from "/RTU_MAP.jpg";
 import groundFloorImg from "/groundFloor.png";
 import secondFloorImg from "/secondFloor.png";
 import thirdFloorImg from "/thirdFloor.png";

@@ -1,5 +1,15 @@
 import { ColumnDef } from "@tanstack/react-table";
 
+// CONSTANTS
+
+export const ENGR_BLDG = "ENGR_LAB_BUILDING";
+export const WELLNESS = "HEALTH_AND_WELLNESS";
+export const ITB = "ITB";
+export const MAB = "MAB";
+export const OB = "OB";
+export const RND = "R&D";
+export const SNAGAH = "SNAGAH";
+
 export interface ImageData {
   filename: string;
   duration: number;
