@@ -10,8 +10,11 @@ import {
 import { BuildingComponentProps } from "@/interface";
 import { useEffect, useState } from "react";
 
-const BuildingComponent = ({ folder, className }: BuildingComponentProps) => {
-  const [buildingName, setBuildingName] = useState("");
+const BuildingComponent = ({
+  folder,
+  className,
+  title,
+}: BuildingComponentProps) => {
   const [floors, setFloors] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,7 +23,6 @@ const BuildingComponent = ({ folder, className }: BuildingComponentProps) => {
       setLoading(true);
       const res = await getBuildingFloors(folder);
 
-      setBuildingName(res.building_name);
       // Safely handle the response data
       if (res && Array.isArray(res.images)) {
         setFloors(res.images);
@@ -47,7 +49,7 @@ const BuildingComponent = ({ folder, className }: BuildingComponentProps) => {
       </DialogTrigger>
       <DialogContent className="min-w-[fit-content] min-h-[fit-content] w-full max-w-[1900px]">
         <DialogHeader>
-          <DialogTitle className="text-3xl mx-auto">{buildingName}</DialogTitle>
+          <DialogTitle className="text-3xl mx-auto">{title}</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-y-5 gap-x-5 p-5">
           {loading ? (

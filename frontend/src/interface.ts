@@ -229,6 +229,7 @@ export interface VerifyInfoDialogProps {
 export interface BuildingComponentProps {
   folder: string;
   className: string;
+  title: string;
 }
 
 export interface BuildingInfo {
