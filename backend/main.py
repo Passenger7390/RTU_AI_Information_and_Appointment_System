@@ -9,6 +9,7 @@ from chatcrud import router as chat_router
 from appointmentCore import router as appointment_router
 from professorCore import router as professor_router
 from otp import router as otp_router, cleanup_expired_otp
+from mapCore import router as map_router
 import asyncio
 import os
 env = os.getenv("ENV")
@@ -26,6 +27,8 @@ app.include_router(chat_router)
 app.include_router(appointment_router)
 app.include_router(professor_router)
 app.include_router(otp_router)
+app.include_router(map_router)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
