@@ -3,7 +3,16 @@ import { Button } from "@/components/ui/button";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 import { useState } from "react";
-import { ITB, JVE, MAB, OB, RND, SNAGAH, WELLNESS } from "@/interface";
+import {
+  ENGR_BLDG,
+  ITB,
+  JVE,
+  MAB,
+  OB,
+  RND,
+  SNAGAH,
+  WELLNESS,
+} from "@/interface";
 import BuildingComponent from "@/my_components/BuildingComponent";
 import { getMapImage } from "@/api";
 import RTU_MAP from "/RTU_MAP.jpg";
@@ -63,6 +72,7 @@ const MapPage = () => {
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
                   />
                   <BuildingComponent
                     folder={ITB}
@@ -70,6 +80,7 @@ const MapPage = () => {
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
                   />
                   <BuildingComponent
                     folder={WELLNESS}
@@ -77,6 +88,7 @@ const MapPage = () => {
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
                   />
                   <BuildingComponent
                     folder={SNAGAH}
@@ -84,6 +96,7 @@ const MapPage = () => {
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
                   />
                   <BuildingComponent
                     folder={OB}
@@ -91,6 +104,7 @@ const MapPage = () => {
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
                   />
                   <BuildingComponent
                     folder={OB}
@@ -98,6 +112,7 @@ const MapPage = () => {
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
                   />
                   <BuildingComponent
                     folder={OB}
@@ -105,6 +120,7 @@ const MapPage = () => {
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
                   />
                   <BuildingComponent
                     folder={MAB}
@@ -112,6 +128,7 @@ const MapPage = () => {
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
                   />
                   <BuildingComponent
                     folder={MAB}
@@ -119,6 +136,7 @@ const MapPage = () => {
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
                   />
                   <BuildingComponent
                     folder={MAB}
@@ -126,13 +144,23 @@ const MapPage = () => {
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
                   />
                   <BuildingComponent
                     folder={RND}
-                    className="top-[10.5%] left-[73%] w-[75px] h-[344px] opacity-0"
+                    className="top-[15.5%] left-[73%] w-[75px] h-[344px] opacity-0"
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
+                  />
+                  <BuildingComponent
+                    folder={ENGR_BLDG}
+                    className="top-[4%] left-[34%] w-[125px] h-[90px] opacity-0"
+                    setIsFloorSelected={(e) => setIsFloorSelected(e)}
+                    getFolder={(folder) => setFolder(folder)}
+                    getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
                   />
                   {/* TODO: Add RND Building */}
                 </div>

@@ -232,6 +232,7 @@ export interface BuildingComponentProps {
   getFolder: (folder: string) => void;
   getFloor: (floor: string) => void;
   setIsFloorSelected: (e: boolean) => void;
+  disabled?: boolean;
 }
 
 export interface BuildingInfo {

@@ -17,6 +17,7 @@ const BuildingComponent = ({
   getFolder,
   getFloor,
   setIsFloorSelected,
+  disabled,
 }: BuildingComponentProps) => {
   const [floors, setFloors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +62,10 @@ const BuildingComponent = ({
       onOpenChange={(open) => setDialogVisible(open)}
     >
       <DialogTrigger asChild>
-        <Button className={`absolute ${className}`} />
+        <Button
+          className={`absolute ${className} disabled:opacity-0`}
+          disabled={disabled}
+        />
       </DialogTrigger>
       <DialogContent className="min-w-[fit-content] min-h-[fit-content] w-full max-w-[1900px]">
         <DialogHeader>
