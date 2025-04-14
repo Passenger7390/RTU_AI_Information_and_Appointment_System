@@ -36,7 +36,7 @@ async def list_map_images(folder: str, ):
         "OB": "Old Building",
         "MAB": "Main Academic Building",
         "SNAGAH": "Sen. Neptali A. Gonzales Academic Hall",
-        "ENGR_LAB_BUILDING": "TEST",
+        "ENGR_LAB_BUILDING": "Engineering Laboratory Building",
         "R&D": "Research and Development Building",
     }
 
