@@ -229,7 +229,9 @@ export interface VerifyInfoDialogProps {
 export interface BuildingComponentProps {
   folder: string;
   className: string;
-  title: string;
+  getFolder: (folder: string) => void;
+  getFloor: (floor: string) => void;
+  setIsFloorSelected: (e: boolean) => void;
 }
 
 export interface BuildingInfo {

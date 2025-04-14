@@ -29,7 +29,18 @@ async def list_map_images(folder: str, ):
     image_files = sorted([f for f in files if f.lower().endswith(('.jpg', '.png'))], 
                          key=natural_sort_key)
 
-    return {"building_name": folder, "images": image_files}
+    building_names = {
+        "JVE": "Dr. Josefina V. Estolas Building",
+        "HEALTH_AND_WELLNESS": "Wellness Building",
+        "ITB": "Dr. Lydia M. Profeta Building",
+        "OB": "Old Building",
+        "MAB": "Main Academic Building",
+        "SNAGAH": "Sen. Neptali A. Gonzales Academic Hall",
+        "ENGR_LAB_BUILDING": "TEST",
+        "R&D": "Research and Development Building",
+    }
+
+    return {"building_name": building_names[folder], "images": image_files}
 
 def natural_sort_key(s):
     """Sort strings with numbers in a natural way (1, 2, 10 instead of 1, 10, 2)"""
