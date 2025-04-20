@@ -4,14 +4,25 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 import { useState } from "react";
 import {
+  CASHIER,
+  CEIT_DEAN_OFFICE,
+  COE,
+  COOP,
+  CPE_DEPT,
+  CULTURAL_AFFAIRS_OFFICE,
   ENGR_BLDG,
   HighlightsProps,
   ITB,
   JVE,
   MAB,
+  MIC,
   OB,
+  OFFICE_PRESIDENT,
+  REGISTRAR,
   RND,
+  SCHOLARSHIP_AND_FINANCIAL_ASSISTANCE_UNIT,
   SNAGAH,
+  STUDENT_AND_ALUMNI_AFFAIRS_SERVICES,
   WELLNESS,
 } from "@/interface";
 import BuildingComponent from "@/my_components/BuildingComponent";
@@ -166,7 +177,12 @@ const MapPage = () => {
 
                   {/* Highlights */}
                   {!isFloorSelected && (
-                    <Highlights className="top-[21%] left-[1%]" />
+                    <Highlights
+                      className="top-[21%] left-[1%]"
+                      setIsFloorSelected={(e) => setIsFloorSelected(e)}
+                      getFolder={(folder) => setFolder(folder)}
+                      getFloor={(floor) => setFloor(floor)}
+                    />
                   )}
                 </div>
               </TransformComponent>
@@ -191,7 +207,18 @@ const MapPage = () => {
   );
 };
 
-const Highlights = ({ className }: HighlightsProps) => {
+const Highlights = ({
+  className,
+  getFloor,
+  getFolder,
+  setIsFloorSelected,
+}: HighlightsProps) => {
+  function handleClick(file: any) {
+    setIsFloorSelected(true);
+    getFolder(file.folder);
+    getFloor(file.floor);
+  }
+
   return (
     <div
       className={`absolute disabled:opacity-0 ${className} flex-col flex space-y-2`}
@@ -199,36 +226,74 @@ const Highlights = ({ className }: HighlightsProps) => {
       <Button
         variant={"outline"}
         className="h-13"
+        onClick={() => handleClick(MIC)}
       >{`Management Information Center (MIC)`}</Button>
-      <Button variant={"outline"} className="h-13">
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(CASHIER)}
+      >
         Cashier
       </Button>
-      <Button variant={"outline"} className="h-13">
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(CPE_DEPT)}
+      >
         Computer Engineering Department
       </Button>
-      <Button variant={"outline"} className="h-13">
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(COOP)}
+      >
         COOP
       </Button>
-      <Button variant={"outline"} className="h-13">
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(OFFICE_PRESIDENT)}
+      >
         Office of the President
       </Button>
-      <Button variant={"outline"} className="h-13">
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(REGISTRAR)}
+      >
         Registrar's Office
       </Button>
-      <Button variant={"outline"} className="h-13">
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(SCHOLARSHIP_AND_FINANCIAL_ASSISTANCE_UNIT)}
+      >
         Scholarship and Financial Assistance Unit
       </Button>
-      <Button variant={"outline"} className="h-13">
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(STUDENT_AND_ALUMNI_AFFAIRS_SERVICES)}
+      >
         Student and Alumni Affairs Services Unit
       </Button>
-      <Button variant={"outline"} className="h-13">
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(CEIT_DEAN_OFFICE)}
+      >
         CEIT Dean's Office
       </Button>
       <Button
         variant={"outline"}
         className="h-13"
+        onClick={() => handleClick(COE)}
       >{`Cooperative Education Office (COE)`}</Button>
-      <Button variant={"outline"} className="h-13">
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(CULTURAL_AFFAIRS_OFFICE)}
+      >
         Cultural Affairs Office
       </Button>
     </div>

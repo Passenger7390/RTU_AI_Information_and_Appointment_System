@@ -296,4 +296,7 @@ export interface BuildingInfo {
 
 export interface HighlightsProps {
   className?: string;
+  getFolder: (folder: string) => void;
+  getFloor: (floor: string) => void;
+  setIsFloorSelected: (e: boolean) => void;
 }
