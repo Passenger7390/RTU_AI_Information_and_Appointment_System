@@ -29,7 +29,6 @@ import {
 import BuildingComponent from "@/my_components/BuildingComponent";
 import { getMapImage } from "@/api";
 import RTU_MAP from "/RTU_MAP.jpg";
-import { Divide } from "lucide-react";
 
 const MapPage = () => {
   const [title, setTitle] = useState("Rizal Technological University Map");
