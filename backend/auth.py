@@ -120,7 +120,7 @@ async def sendOTPTOResetPassword(request: OTPRequest, db: db_dependency):
         message = EmailMessage()
 
          # Create email content
-        message.set_content(f"THIS IS A TEST! Your verification code is: {otp_code}\n\nThis code will expire in 5 minutes.")
+        message.set_content(f"Your verification code is: {otp_code}\n\nThis code will expire in 5 minutes.")
 
         message["To"] = request.email
         message["From"] = "2021-101043@rtu.edu.ph"
@@ -129,20 +129,17 @@ async def sendOTPTOResetPassword(request: OTPRequest, db: db_dependency):
         # Encode and send message
         encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
         create_message = {"raw": encoded_message}
-
-        # TODO: Uncomment this after testing
-        # TODO: Make sure to delete the tests in contents in email
         
-        # send_message = (
-        #     service.users()
-        #     .messages()
-        #     .send(userId="me", body=create_message)
-        #     .execute()
-        # )
-        # return {"message_id": send_message["id"], "status": "sent", "otp": otp_code}
-        return {"status": "sent", "otp": otp_code}
+        send_message = (
+            service.users()
+            .messages()
+            .send(userId="me", body=create_message)
+            .execute()
+        )
+        return {"message_id": send_message["id"], "status": "sent"}
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to create Gmail service")
+    
 
 # Role-based Dependencies for Authentication
 @router.get("/users/me", response_model=UserBase)

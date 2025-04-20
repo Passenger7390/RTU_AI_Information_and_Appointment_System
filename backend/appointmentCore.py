@@ -50,9 +50,6 @@ async def create_apointment(appointment: AppointmentCreate, db: Session = Depend
                          ProfessorInformation.last_name,
                          ProfessorInformation.title
                         ).filter(ProfessorInformation.professor_id == appointment.professor_uuid).first()
-    
-    # TODO: Uncomment this after testing
-    # TODO: Make sure to delete the tests in contents in email
 
     try:
         service = get_gmail_service()
@@ -66,15 +63,13 @@ async def create_apointment(appointment: AppointmentCreate, db: Session = Depend
                                       f"Your appointment with {f"{professor.title} {professor.first_name} {professor.last_name}"} has been created.\n"
                                       f"You can view your appointment in our kiosk using the reference number.\n\n"
                                       f"Reference Number: {uuid[-6:]}\n\n"
-                                      f"We also notified {f"{professor.title} {professor.first_name} {professor.last_name}"} about your appointment.\n\n"
-                                      f"THIS IS ONLY A TEST")
+                                      f"We also notified {f"{professor.title} {professor.first_name} {professor.last_name}"} about your appointment.\n\n")
         
         messageForProfessor.set_content(f"Dear {f"{professor.title} {professor.first_name} {professor.last_name}"},\n\n"
                                       f"Good day!\n\n"
                                       f"{appointment.student_name} made an appointment request to you. Please see the appointment information in the kiosk admin page.\n"
                                       f"Confirm the appointment in the admin page once you are okay with it. Confirmation is required to finalize the appointment.\n\n"
-                                      f"Thank you!\n\n"
-                                      f"THIS IS ONLY A TEST")
+                                      f"Thank you!\n\n")
 
         messageForStudent["To"] = appointment.student_email
         messageForStudent["From"] = "2021-101043@rtu.edu.ph"
@@ -98,16 +93,15 @@ async def create_apointment(appointment: AppointmentCreate, db: Session = Depend
             .execute()
         )
         
-        # service.users()\
-        # .messages()\
-        # .send(userId="me", body=create_message_for_professor)\
-        # .execute()
+        service.users()\
+            .messages()\
+            .send(userId="me", body=create_message_for_professor)\
+            .execute()
 
         return {'message': 'Appointment created successfully', 'reference': uuid[-6:], "message_id": send_message_for_student["id"], "status": "sent"}
     except HttpError as error:
         raise HTTPException(status_code=500, detail=str(error))
-
-    return {'message': 'Appointment created successfully', 'reference': uuid[-6:], "status": "sent"}
+    
 
 @router.get('/get-appointments', response_model=List[AppointmentResponseForTable])
 async def get_appointment(db: Session = Depends(get_db), current_user: UserBase = Depends(get_current_user)):

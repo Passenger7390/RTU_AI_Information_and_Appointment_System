@@ -71,7 +71,6 @@ const MapPage = () => {
                 <div className="flex justify-center items-center h-full w-full">
                   {/* Your map content */}
                   {/* {title === "Rizal Technological University Map" && <RtuMap />} */}
-                  {/* TODO: Handle change background to show the floor plan */}
 
                   <img
                     src={isFloorSelected ? getMapImage(folder, floor) : RTU_MAP}

@@ -8,7 +8,7 @@ from models import ProfessorInformation, User
 from uuid import uuid4
 
 router = APIRouter(prefix='/professor', tags=['professor'])
-# TODO: Modify the create professor and in frontend also
+
 @router.get('/get-professors')
 async def get_professors(db: Session = Depends(get_db)):
     """
