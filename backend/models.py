@@ -82,3 +82,4 @@ class OTPSecret(Base):
     def create(cls, email, secret, expiry_minutes=5):
         expires_at = datetime.now() + timedelta(minutes=expiry_minutes)
         return cls(email=email, secret=secret, expires_at=expires_at, is_used=False)
+    

@@ -8,6 +8,7 @@ import {
   FAQComponent,
   ProfessorComponent,
 } from "@/my_components/Manage";
+import { Button } from "@/components/ui/button";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -35,6 +36,11 @@ const Dashboard = () => {
       navigate("/login");
     }
   };
+
+  function handleLogOut() {
+    localStorage.removeItem("token");
+    navigate("/login");
+  }
 
   return (
     <div className="flex-col h-full p-8 space-y-8 w-full justify-center">
@@ -64,6 +70,9 @@ const Dashboard = () => {
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
+        <Button className="p-5 mx-5" onClick={handleLogOut}>
+          Logout
+        </Button>
       </div>
       {(() => {
         switch (currentView) {

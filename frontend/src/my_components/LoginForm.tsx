@@ -241,6 +241,11 @@ const LoginForm = () => {
                     type={showPassword ? "text" : "password"}
                     required
                     onChange={(e) => setPassword(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handleSubmit();
+                      }
+                    }}
                   ></Input>
                   <Button
                     onClick={() => setShowPassword(!showPassword)}

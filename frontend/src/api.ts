@@ -348,3 +348,25 @@ export const getAppointmentSchedule = async (
   console.log(res.data);
   return res.data;
 };
+
+// MAP API
+
+export const getMapImage = (folder: string, filename: string) => {
+  if (!filename || !folder) return "";
+
+  const env = import.meta.env.VITE_ENV || "production";
+  const isDev = env === "development";
+
+  if (isDev) {
+    const baseApi = import.meta.env.VITE_DEV_API || "http://localhost:8000";
+    return `${baseApi}/map/get-image/${folder}/${filename}`;
+  }
+
+  // Production: use relative URL for Nginx proxying
+  return `/map/get-image/${folder}/${filename}`;
+};
+
+export const getBuildingFloors = async (building: string) => {
+  const res = await axios.get(`${api}/map/list-images/${building}`);
+  return res.data;
+};

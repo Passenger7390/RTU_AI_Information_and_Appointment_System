@@ -1,27 +1,41 @@
 import { FaHome } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
-import {
-  RtuMap,
-  GroundFloor,
-  SecondFloor,
-  ThirdFloor,
-  FourthFloor,
-} from "@/my_components/ImageComponent";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+
 import { useState } from "react";
-import { buildingDialogProps } from "@/interface";
+import {
+  CASHIER,
+  CEIT_DEAN_OFFICE,
+  COE,
+  COOP,
+  CPE_DEPT,
+  CULTURAL_AFFAIRS_OFFICE,
+  ECE_DEPT,
+  ENGR_BLDG,
+  HighlightsProps,
+  ITB,
+  JVE,
+  MAB,
+  MIC,
+  OB,
+  OFFICE_PRESIDENT,
+  REGISTRAR,
+  RND,
+  SCHOLARSHIP_AND_FINANCIAL_ASSISTANCE_UNIT,
+  SNAGAH,
+  STUDENT_AND_ALUMNI_AFFAIRS_SERVICES,
+  WELLNESS,
+} from "@/interface";
+import BuildingComponent from "@/my_components/BuildingComponent";
+import { getMapImage } from "@/api";
+import RTU_MAP from "/RTU_MAP.jpg";
+import { Divide } from "lucide-react";
 
 const MapPage = () => {
   const [title, setTitle] = useState("Rizal Technological University Map");
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [trigger, setTrigger] = useState(false);
+  const [isFloorSelected, setIsFloorSelected] = useState<boolean>(false);
+  const [floor, setFloor] = useState<string>("");
+  const [folder, setFolder] = useState("");
   return (
     <div className="flex-col justify-center items-center mx-auto p-5 bg-sky-950 container min-h-screen p-y-5">
       {/* <Button>Building A</Button> */}
@@ -57,36 +71,136 @@ const MapPage = () => {
               >
                 <div className="flex justify-center items-center h-full w-full">
                   {/* Your map content */}
-                  {title === "Rizal Technological University Map" ? (
-                    <RtuMap />
-                  ) : title === "JVE ITC Ground Floor" ? (
-                    <GroundFloor />
-                  ) : title === "JVE ITC Second Floor" ? (
-                    <SecondFloor />
-                  ) : title === "JVE ITC Third Floor" ? (
-                    <ThirdFloor />
-                  ) : title === "JVE ITC Fourth Floor" ? (
-                    <FourthFloor />
-                  ) : (
-                    <RtuMap />
-                  )}
+                  {/* {title === "Rizal Technological University Map" && <RtuMap />} */}
+                  {/* TODO: Handle change background to show the floor plan */}
 
-                  <BuildingDialog
-                    props="absolute top-[140px] left-[465px] opacity-0 w-[165px] h-[370px]"
-                    setTitle={setTitle}
-                    open={dialogOpen}
-                    setOpen={setDialogOpen}
-                    setTrigger={setTrigger}
-                    trigger={trigger}
+                  <img
+                    src={isFloorSelected ? getMapImage(folder, floor) : RTU_MAP}
+                    alt="Floor Plan"
+                    className="object-contain h-full w-full"
                   />
+
+                  <BuildingComponent
+                    folder={JVE}
+                    className="top-[140px] left-[465px] w-[165px] h-[370px]"
+                    setIsFloorSelected={(e) => setIsFloorSelected(e)}
+                    getFolder={(folder) => setFolder(folder)}
+                    getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
+                  />
+                  <BuildingComponent
+                    folder={ITB}
+                    className="top-[180px] left-[641px] w-[240px] h-[170px]"
+                    setIsFloorSelected={(e) => setIsFloorSelected(e)}
+                    getFolder={(folder) => setFolder(folder)}
+                    getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
+                  />
+                  <BuildingComponent
+                    folder={WELLNESS}
+                    className="top-[82.5%] left-[48.5%] w-[180px] h-[100px]"
+                    setIsFloorSelected={(e) => setIsFloorSelected(e)}
+                    getFolder={(folder) => setFolder(folder)}
+                    getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
+                  />
+                  <BuildingComponent
+                    folder={SNAGAH}
+                    className="top-[10.5%] left-[78%] w-[147px] h-[225px]"
+                    setIsFloorSelected={(e) => setIsFloorSelected(e)}
+                    getFolder={(folder) => setFolder(folder)}
+                    getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
+                  />
+                  <BuildingComponent
+                    folder={OB}
+                    className="top-[67%] left-[32%] w-[543px] h-[63px]"
+                    setIsFloorSelected={(e) => setIsFloorSelected(e)}
+                    getFolder={(folder) => setFolder(folder)}
+                    getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
+                  />
+                  <BuildingComponent
+                    folder={OB}
+                    className="top-[45%] left-[68.25%] w-[61px] h-[333px]"
+                    setIsFloorSelected={(e) => setIsFloorSelected(e)}
+                    getFolder={(folder) => setFolder(folder)}
+                    getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
+                  />
+                  <BuildingComponent
+                    folder={OB}
+                    className="top-[16%] left-[67%] w-[79px] h-[252px]"
+                    setIsFloorSelected={(e) => setIsFloorSelected(e)}
+                    getFolder={(folder) => setFolder(folder)}
+                    getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
+                  />
+                  <BuildingComponent
+                    folder={MAB}
+                    className="top-[75%] left-[47%] w-[315px] h-[58.5px]"
+                    setIsFloorSelected={(e) => setIsFloorSelected(e)}
+                    getFolder={(folder) => setFolder(folder)}
+                    getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
+                  />
+                  <BuildingComponent
+                    folder={MAB}
+                    className="top-[82%] left-[65.1%] w-[47px] h-[138px]"
+                    setIsFloorSelected={(e) => setIsFloorSelected(e)}
+                    getFolder={(folder) => setFolder(folder)}
+                    getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
+                  />
+                  <BuildingComponent
+                    folder={MAB}
+                    className="top-[86%] left-[68.25%] w-[55px] h-[60px]"
+                    setIsFloorSelected={(e) => setIsFloorSelected(e)}
+                    getFolder={(folder) => setFolder(folder)}
+                    getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
+                  />
+                  <BuildingComponent
+                    folder={RND}
+                    className="top-[15.5%] left-[73%] w-[75px] h-[344px]"
+                    setIsFloorSelected={(e) => setIsFloorSelected(e)}
+                    getFolder={(folder) => setFolder(folder)}
+                    getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
+                  />
+                  <BuildingComponent
+                    folder={ENGR_BLDG}
+                    className="top-[4%] left-[34%] w-[125px] h-[90px]"
+                    setIsFloorSelected={(e) => setIsFloorSelected(e)}
+                    getFolder={(folder) => setFolder(folder)}
+                    getFloor={(floor) => setFloor(floor)}
+                    disabled={isFloorSelected}
+                  />
+
+                  {/* Highlights */}
+                  {!isFloorSelected && (
+                    <>
+                      <Highlights
+                        className="top-[30%] left-[1%]"
+                        setIsFloorSelected={(e) => setIsFloorSelected(e)}
+                        getFolder={(folder) => setFolder(folder)}
+                        getFloor={(floor) => setFloor(floor)}
+                      />
+                      <Highlights1
+                        className="top-[60%] left-[80%]"
+                        setIsFloorSelected={(e) => setIsFloorSelected(e)}
+                        getFolder={(folder) => setFolder(folder)}
+                        getFloor={(floor) => setFloor(floor)}
+                      />
+                    </>
+                  )}
                 </div>
               </TransformComponent>
               <Button
                 onClick={() => {
                   setTitle("Rizal Technological University Map");
-                  setDialogOpen(false);
-                  setTrigger(false);
                   resetTransform();
+                  setIsFloorSelected(false);
                 }}
                 className="mx-auto size-24 flex"
                 size="icon"
@@ -103,71 +217,123 @@ const MapPage = () => {
   );
 };
 
-const BuildingDialog = ({
-  props,
-  setTitle,
-  setOpen,
-  open,
-  setTrigger,
-  trigger,
-}: buildingDialogProps) => {
+const Highlights = ({
+  className,
+  getFloor,
+  getFolder,
+  setIsFloorSelected,
+}: HighlightsProps) => {
+  function handleClick(file: any) {
+    setIsFloorSelected(true);
+    getFolder(file.folder);
+    getFloor(file.floor);
+  }
+
   return (
-    <Dialog onOpenChange={setOpen} open={open}>
-      <DialogTrigger>
-        <Button
-          className={`${props} disabled:opacity-0`}
-          onClick={() => setOpen(true)}
-          disabled={trigger}
-        />
-      </DialogTrigger>
-      <DialogContent className="min-w-[fit-content] min-h-[fit-content] w-full max-w-[1900px]">
-        <DialogHeader>
-          <DialogTitle className="text-3xl mx-auto">Choose floor</DialogTitle>
-        </DialogHeader>
-        <div className="grid grid-cols-2 gap-y-5 gap-x-5 p-5">
-          <Button
-            className="w-[425px] h-[200px] min-w-[fit-content] min-h-[fit-content]"
-            onClick={() => {
-              setTitle("JVE ITC Ground Floor");
-              setOpen(false);
-              setTrigger(true);
-            }}
-          >
-            <GroundFloor />
-          </Button>
-          <Button
-            className="w-[425px] h-[200px] min-w-[fit-content] min-h-[fit-content]"
-            onClick={() => {
-              setTitle("JVE ITC Second Floor");
-              setOpen(false);
-              setTrigger(true);
-            }}
-          >
-            <SecondFloor />
-          </Button>
-          <Button
-            className="w-[425px] h-[200px] min-w-[fit-content] min-h-[fit-content]"
-            onClick={() => {
-              setTitle("JVE ITC Third Floor");
-              setOpen(false);
-              setTrigger(true);
-            }}
-          >
-            <ThirdFloor />
-          </Button>
-          <Button
-            className="w-[425px] h-[200px] min-w-[fit-content] min-h-[fit-content]"
-            onClick={() => {
-              setTitle("JVE ITC Fourth Floor");
-              setOpen(false);
-              setTrigger(true);
-            }}
-          >
-            <FourthFloor />
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+    <div
+      className={`absolute disabled:opacity-0 ${className} flex-col flex space-y-2`}
+    >
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(MIC)}
+      >{`Management Information Center (MIC)`}</Button>
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(CASHIER)}
+      >
+        Cashier
+      </Button>
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(COOP)}
+      >
+        COOP
+      </Button>
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(OFFICE_PRESIDENT)}
+      >
+        Office of the President
+      </Button>
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(REGISTRAR)}
+      >
+        Registrar's Office
+      </Button>
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(SCHOLARSHIP_AND_FINANCIAL_ASSISTANCE_UNIT)}
+      >
+        Scholarship and Financial Assistance Unit
+      </Button>
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(STUDENT_AND_ALUMNI_AFFAIRS_SERVICES)}
+      >
+        Student and Alumni Affairs Services Unit
+      </Button>
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(COE)}
+      >{`Cooperative Education Office (COE)`}</Button>
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(CULTURAL_AFFAIRS_OFFICE)}
+      >
+        Cultural Affairs Office
+      </Button>
+    </div>
+  );
+};
+
+const Highlights1 = ({
+  className,
+  getFloor,
+  getFolder,
+  setIsFloorSelected,
+}: HighlightsProps) => {
+  function handleClick(file: any) {
+    setIsFloorSelected(true);
+    getFolder(file.folder);
+    getFloor(file.floor);
+  }
+
+  return (
+    <div
+      className={`absolute disabled:opacity-0 ${className} flex-col flex space-y-2`}
+    >
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(ECE_DEPT)}
+      >
+        Electronics Engineering Department
+      </Button>
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(CEIT_DEAN_OFFICE)}
+      >
+        CEIT Dean's Office
+      </Button>
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(CPE_DEPT)}
+      >
+        Computer Engineering Department
+      </Button>
+    </div>
   );
 };
 

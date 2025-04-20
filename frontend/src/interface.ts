@@ -1,5 +1,75 @@
 import { ColumnDef } from "@tanstack/react-table";
 
+// CONSTANTS
+
+export const ENGR_BLDG = "ENGR_LAB_BUILDING";
+export const WELLNESS = "HEALTH_AND_WELLNESS";
+export const ITB = "ITB";
+export const MAB = "MAB";
+export const OB = "OB";
+export const RND = "R&D";
+export const SNAGAH = "SNAGAH";
+export const JVE = "JVE";
+
+export const MIC = {
+  folder: ITB,
+  floor: "FLOOR1.jpg",
+};
+
+export const CASHIER = {
+  folder: ITB,
+  floor: "FLOOR1.jpg",
+};
+
+export const CPE_DEPT = {
+  folder: JVE,
+  floor: "FLOOR1.jpg",
+};
+
+export const COOP = {
+  folder: OB,
+  floor: "FLOOR1.jpg",
+};
+
+export const OFFICE_PRESIDENT = {
+  folder: ITB,
+  floor: "FLOOR2.jpg",
+};
+
+export const REGISTRAR = {
+  folder: MAB,
+  floor: "FLOOR1.jpg",
+};
+
+export const SCHOLARSHIP_AND_FINANCIAL_ASSISTANCE_UNIT = {
+  folder: MAB,
+  floor: "FLOOR1.jpg",
+};
+export const STUDENT_AND_ALUMNI_AFFAIRS_SERVICES = {
+  folder: MAB,
+  floor: "FLOOR1.jpg",
+};
+
+export const CEIT_DEAN_OFFICE = {
+  folder: JVE,
+  floor: "FLOOR2.jpg",
+};
+
+export const COE = {
+  folder: JVE,
+  floor: "FLOOR3.jpg",
+};
+
+export const CULTURAL_AFFAIRS_OFFICE = {
+  folder: ITB,
+  floor: "FLOOR5.jpg",
+};
+
+export const ECE_DEPT = {
+  folder: JVE,
+  floor: "FLOOR3.jpg",
+};
+
 export interface ImageData {
   filename: string;
   duration: number;
@@ -213,4 +283,25 @@ export interface EditProfileDialogProps {
 export interface VerifyInfoDialogProps {
   data: Appointment | undefined;
   professorName: string;
+}
+
+export interface BuildingComponentProps {
+  folder: string;
+  className: string;
+  getFolder: (folder: string) => void;
+  getFloor: (floor: string) => void;
+  setIsFloorSelected: (e: boolean) => void;
+  disabled?: boolean;
+}
+
+export interface BuildingInfo {
+  building_name: string;
+  image_files: string[];
+}
+
+export interface HighlightsProps {
+  className?: string;
+  getFolder: (folder: string) => void;
+  getFloor: (floor: string) => void;
+  setIsFloorSelected: (e: boolean) => void;
 }
