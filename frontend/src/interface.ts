@@ -65,6 +65,11 @@ export const CULTURAL_AFFAIRS_OFFICE = {
   floor: "FLOOR5.jpg",
 };
 
+export const ECE_DEPT = {
+  folder: JVE,
+  floor: "FLOOR3.jpg",
+};
+
 export interface ImageData {
   filename: string;
   duration: number;

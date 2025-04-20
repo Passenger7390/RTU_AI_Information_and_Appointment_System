@@ -10,6 +10,7 @@ import {
   COOP,
   CPE_DEPT,
   CULTURAL_AFFAIRS_OFFICE,
+  ECE_DEPT,
   ENGR_BLDG,
   HighlightsProps,
   ITB,
@@ -28,6 +29,7 @@ import {
 import BuildingComponent from "@/my_components/BuildingComponent";
 import { getMapImage } from "@/api";
 import RTU_MAP from "/RTU_MAP.jpg";
+import { Divide } from "lucide-react";
 
 const MapPage = () => {
   const [title, setTitle] = useState("Rizal Technological University Map");
@@ -177,12 +179,20 @@ const MapPage = () => {
 
                   {/* Highlights */}
                   {!isFloorSelected && (
-                    <Highlights
-                      className="top-[21%] left-[1%]"
-                      setIsFloorSelected={(e) => setIsFloorSelected(e)}
-                      getFolder={(folder) => setFolder(folder)}
-                      getFloor={(floor) => setFloor(floor)}
-                    />
+                    <>
+                      <Highlights
+                        className="top-[30%] left-[1%]"
+                        setIsFloorSelected={(e) => setIsFloorSelected(e)}
+                        getFolder={(folder) => setFolder(folder)}
+                        getFloor={(floor) => setFloor(floor)}
+                      />
+                      <Highlights1
+                        className="top-[60%] left-[80%]"
+                        setIsFloorSelected={(e) => setIsFloorSelected(e)}
+                        getFolder={(folder) => setFolder(folder)}
+                        getFloor={(floor) => setFloor(floor)}
+                      />
+                    </>
                   )}
                 </div>
               </TransformComponent>
@@ -238,13 +248,6 @@ const Highlights = ({
       <Button
         variant={"outline"}
         className="h-13"
-        onClick={() => handleClick(CPE_DEPT)}
-      >
-        Computer Engineering Department
-      </Button>
-      <Button
-        variant={"outline"}
-        className="h-13"
         onClick={() => handleClick(COOP)}
       >
         COOP
@@ -280,13 +283,6 @@ const Highlights = ({
       <Button
         variant={"outline"}
         className="h-13"
-        onClick={() => handleClick(CEIT_DEAN_OFFICE)}
-      >
-        CEIT Dean's Office
-      </Button>
-      <Button
-        variant={"outline"}
-        className="h-13"
         onClick={() => handleClick(COE)}
       >{`Cooperative Education Office (COE)`}</Button>
       <Button
@@ -295,6 +291,47 @@ const Highlights = ({
         onClick={() => handleClick(CULTURAL_AFFAIRS_OFFICE)}
       >
         Cultural Affairs Office
+      </Button>
+    </div>
+  );
+};
+
+const Highlights1 = ({
+  className,
+  getFloor,
+  getFolder,
+  setIsFloorSelected,
+}: HighlightsProps) => {
+  function handleClick(file: any) {
+    setIsFloorSelected(true);
+    getFolder(file.folder);
+    getFloor(file.floor);
+  }
+
+  return (
+    <div
+      className={`absolute disabled:opacity-0 ${className} flex-col flex space-y-2`}
+    >
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(ECE_DEPT)}
+      >
+        Electronics Engineering Department
+      </Button>
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(CEIT_DEAN_OFFICE)}
+      >
+        CEIT Dean's Office
+      </Button>
+      <Button
+        variant={"outline"}
+        className="h-13"
+        onClick={() => handleClick(CPE_DEPT)}
+      >
+        Computer Engineering Department
       </Button>
     </div>
   );
