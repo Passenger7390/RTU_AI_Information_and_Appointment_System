@@ -63,7 +63,7 @@ const BuildingComponent = ({
     >
       <DialogTrigger asChild>
         <Button
-          className={`absolute ${className} disabled:opacity-0`}
+          className={`absolute ${className} disabled:opacity-0 opacity-0`}
           disabled={disabled}
         />
       </DialogTrigger>

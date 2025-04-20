@@ -5,6 +5,7 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { useState } from "react";
 import {
   ENGR_BLDG,
+  HighlightsProps,
   ITB,
   JVE,
   MAB,
@@ -68,7 +69,7 @@ const MapPage = () => {
 
                   <BuildingComponent
                     folder={JVE}
-                    className="top-[140px] left-[465px] opacity-0 w-[165px] h-[370px]"
+                    className="top-[140px] left-[465px] w-[165px] h-[370px]"
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
@@ -76,7 +77,7 @@ const MapPage = () => {
                   />
                   <BuildingComponent
                     folder={ITB}
-                    className="top-[180px] left-[641px] w-[240px] h-[170px] opacity-0"
+                    className="top-[180px] left-[641px] w-[240px] h-[170px]"
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
@@ -84,7 +85,7 @@ const MapPage = () => {
                   />
                   <BuildingComponent
                     folder={WELLNESS}
-                    className="top-[82.5%] left-[48.5%] w-[180px] h-[100px] opacity-0"
+                    className="top-[82.5%] left-[48.5%] w-[180px] h-[100px]"
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
@@ -92,7 +93,7 @@ const MapPage = () => {
                   />
                   <BuildingComponent
                     folder={SNAGAH}
-                    className="top-[10.5%] left-[78%] w-[147px] h-[225px] opacity-0"
+                    className="top-[10.5%] left-[78%] w-[147px] h-[225px]"
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
@@ -100,7 +101,7 @@ const MapPage = () => {
                   />
                   <BuildingComponent
                     folder={OB}
-                    className="top-[67%] left-[32%] w-[543px] h-[63px] opacity-0"
+                    className="top-[67%] left-[32%] w-[543px] h-[63px]"
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
@@ -108,7 +109,7 @@ const MapPage = () => {
                   />
                   <BuildingComponent
                     folder={OB}
-                    className="top-[45%] left-[68.25%] w-[61px] h-[333px] opacity-0"
+                    className="top-[45%] left-[68.25%] w-[61px] h-[333px]"
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
@@ -116,7 +117,7 @@ const MapPage = () => {
                   />
                   <BuildingComponent
                     folder={OB}
-                    className="top-[16%] left-[67%] w-[79px] h-[252px] opacity-0"
+                    className="top-[16%] left-[67%] w-[79px] h-[252px]"
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
@@ -124,7 +125,7 @@ const MapPage = () => {
                   />
                   <BuildingComponent
                     folder={MAB}
-                    className="top-[75%] left-[47%] w-[315px] h-[58.5px] opacity-0"
+                    className="top-[75%] left-[47%] w-[315px] h-[58.5px]"
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
@@ -132,7 +133,7 @@ const MapPage = () => {
                   />
                   <BuildingComponent
                     folder={MAB}
-                    className="top-[82%] left-[65.1%] w-[47px] h-[138px] opacity-0"
+                    className="top-[82%] left-[65.1%] w-[47px] h-[138px]"
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
@@ -140,7 +141,7 @@ const MapPage = () => {
                   />
                   <BuildingComponent
                     folder={MAB}
-                    className="top-[86%] left-[68.25%] w-[55px] h-[60px] opacity-0"
+                    className="top-[86%] left-[68.25%] w-[55px] h-[60px]"
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
@@ -148,7 +149,7 @@ const MapPage = () => {
                   />
                   <BuildingComponent
                     folder={RND}
-                    className="top-[15.5%] left-[73%] w-[75px] h-[344px] opacity-0"
+                    className="top-[15.5%] left-[73%] w-[75px] h-[344px]"
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
@@ -156,13 +157,17 @@ const MapPage = () => {
                   />
                   <BuildingComponent
                     folder={ENGR_BLDG}
-                    className="top-[4%] left-[34%] w-[125px] h-[90px] opacity-0"
+                    className="top-[4%] left-[34%] w-[125px] h-[90px]"
                     setIsFloorSelected={(e) => setIsFloorSelected(e)}
                     getFolder={(folder) => setFolder(folder)}
                     getFloor={(floor) => setFloor(floor)}
                     disabled={isFloorSelected}
                   />
-                  {/* TODO: Add RND Building */}
+
+                  {/* Highlights */}
+                  {!isFloorSelected && (
+                    <Highlights className="top-[21%] left-[1%]" />
+                  )}
                 </div>
               </TransformComponent>
               <Button
@@ -182,6 +187,50 @@ const MapPage = () => {
         </TransformWrapper>
       </div>
       <div className="flex"></div>
+    </div>
+  );
+};
+
+const Highlights = ({ className }: HighlightsProps) => {
+  return (
+    <div
+      className={`absolute disabled:opacity-0 ${className} flex-col flex space-y-2`}
+    >
+      <Button
+        variant={"outline"}
+        className="h-13"
+      >{`Management Information Center (MIC)`}</Button>
+      <Button variant={"outline"} className="h-13">
+        Cashier
+      </Button>
+      <Button variant={"outline"} className="h-13">
+        Computer Engineering Department
+      </Button>
+      <Button variant={"outline"} className="h-13">
+        COOP
+      </Button>
+      <Button variant={"outline"} className="h-13">
+        Office of the President
+      </Button>
+      <Button variant={"outline"} className="h-13">
+        Registrar's Office
+      </Button>
+      <Button variant={"outline"} className="h-13">
+        Scholarship and Financial Assistance Unit
+      </Button>
+      <Button variant={"outline"} className="h-13">
+        Student and Alumni Affairs Services Unit
+      </Button>
+      <Button variant={"outline"} className="h-13">
+        CEIT Dean's Office
+      </Button>
+      <Button
+        variant={"outline"}
+        className="h-13"
+      >{`Cooperative Education Office (COE)`}</Button>
+      <Button variant={"outline"} className="h-13">
+        Cultural Affairs Office
+      </Button>
     </div>
   );
 };
