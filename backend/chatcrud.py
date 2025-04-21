@@ -10,12 +10,28 @@ from google import genai
 from auth import read_users_me
 from database import get_db
 from models import FAQ
+import random
 from schemas import FAQCreate, FAQOut, FAQUpdate, QueryRequest, QueryResponse, UserBase
 
 router = APIRouter(prefix="/ray", tags=["ray"])
 client = genai.Client(api_key=os.getenv("GEMINI_API"))
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+FALLBACK_RESPONSES = [
+    "Oops! I can only chat about RTU. Got any questions about that? I'd love to help!",
+    "I'm not sure I understand. Could you ask me something about RTU?",
+    "Sorry, I'm specialized in topics about on our university. What would you like to know about that?",
+    "Let's talk about RTU! What specific information are you looking for?",
+    "I might have missed your point. I'm here to help with University-related questions.",
+    "That's outside my knowledge area. I can answer questions about campus information.",
+    "I don't have information about that. How about asking me something about RTU instead?",
+    "I'm Ray, RTU Assistant for You! I can help with questions about campus information.",
+    "Hmm, let's refocus on RTU topics. What would you like to know about our university?",
+    "I'm here specifically to help with RTU-related questions. What can I tell you about our university?"
+]
+
+
 
 @router.post("/chat", response_model=QueryResponse)
 async def chat(query_request: QueryRequest, db: Session = Depends(get_db)):
@@ -36,14 +52,16 @@ async def chat(query_request: QueryRequest, db: Session = Depends(get_db)):
         clarification_text = "I couldn't clearly understand your question. Did you mean one of the following?"
         return QueryResponse(response=clarification_text, suggestions=suggestions)
     
+    return QueryResponse(response=random.choice(FALLBACK_RESPONSES))
+
     # Fallback: Call Gemini API if no suggestions are found.
-    try:
-        logger.info("Calling Google Gemini API for fallback response.")
-        gemini_response = await get_gemini_response(query)
-        return QueryResponse(response=gemini_response)
-    except Exception as e:
-        logger.error("Gemini API error: %s", str(e))
-        raise HTTPException(status_code=500, detail="Gemini API call failed: " + str(e))
+    # try:
+    #     logger.info("Calling Google Gemini API for fallback response.")
+    #     gemini_response = await get_gemini_response(query)
+    #     return QueryResponse(response=gemini_response)
+    # except Exception as e:
+    #     logger.error("Gemini API error: %s", str(e))
+    #     raise HTTPException(status_code=500, detail="Gemini API call failed: " + str(e))
 
 @router.get("/faqs", response_model=List[FAQOut])
 async def read_faqs(db: Session = Depends(get_db)):

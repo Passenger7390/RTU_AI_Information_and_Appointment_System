@@ -8,7 +8,7 @@ import { useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 const UserPage = () => {
-  const [view, setView] = useState("appointment");
+  const [view, setView] = useState("chatbot");
 
   return (
     <div className="flex-col">
