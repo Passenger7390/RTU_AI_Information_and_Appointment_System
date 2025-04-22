@@ -67,7 +67,10 @@ async def create_apointment(appointment: AppointmentCreate, db: Session = Depend
         
         messageForProfessor.set_content(f"Dear {f"{professor.title} {professor.first_name} {professor.last_name}"},\n\n"
                                       f"Good day!\n\n"
-                                      f"{appointment.student_name} made an appointment request to you. Please see the appointment information in the kiosk admin page.\n"
+                                      f"{appointment.student_name} made an appointment request to you. \n\n"
+                                      f"Concern: \n"
+                                      f"{appointment.concern}\n\n"
+                                      f"Please see the appointment information in the kiosk admin page.\n"
                                       f"Confirm the appointment in the admin page once you are okay with it. Confirmation is required to finalize the appointment.\n\n"
                                       f"Thank you!\n\n")
 
