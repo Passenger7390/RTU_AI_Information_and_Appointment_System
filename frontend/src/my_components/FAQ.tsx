@@ -112,7 +112,6 @@ export const FAQCard = ({
         <Label>Question</Label>
         <Textarea
           placeholder="Type your question here."
-          maxLength={350}
           className="w-[34rem] max-h-36 overflow-x-hidden resize-none"
           value={values.question}
           onChange={(e) =>
@@ -124,7 +123,6 @@ export const FAQCard = ({
         <Label>Synonyms</Label>
         <Textarea
           placeholder="Separate synonyms by comma (e.g. 'Hello, Hi')"
-          maxLength={350}
           className="w-[34rem] max-h-36 overflow-x-hidden resize-none"
           value={values.synonyms}
           onChange={(e) =>
@@ -135,7 +133,6 @@ export const FAQCard = ({
         <Label>Answer</Label>
         <Textarea
           placeholder="Type your answer here."
-          maxLength={350}
           className="w-[34rem] max-h-36 overflow-x-hidden resize-none"
           value={values.answer}
           onChange={(e) =>
@@ -223,7 +220,6 @@ export const FAQDialog = ({ onRefresh }: FAQDialogProps) => {
           </Label>
           <Textarea
             placeholder="Type your question here."
-            maxLength={350}
             className="w-[29rem] max-h-36 overflow-x-hidden resize-none"
             value={values.question}
             onChange={(e) =>
@@ -236,7 +232,6 @@ export const FAQDialog = ({ onRefresh }: FAQDialogProps) => {
           <Label className="font-semibold text-lg">Synonyms</Label>
           <Textarea
             placeholder="Separate synonyms by comma (e.g. 'Hello, Hi')"
-            maxLength={350}
             className="w-[29rem] max-h-36 overflow-x-hidden resize-none"
             value={values.synonyms}
             onChange={(e) =>
@@ -250,7 +245,6 @@ export const FAQDialog = ({ onRefresh }: FAQDialogProps) => {
           </Label>
           <Textarea
             placeholder="Type your answer here."
-            maxLength={350}
             className="w-[29rem] max-h-36 overflow-x-hidden resize-none"
             value={values.answer}
             onChange={(e) =>
