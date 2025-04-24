@@ -44,7 +44,9 @@ const UserPage = () => {
 
       <div>
         {view === "chatbot" ? (
-          <Chatbot />
+          <div className="pl-32">
+            <Chatbot />
+          </div>
         ) : view === "appointment" ? (
           <div className="pl-32">
             <AppointmentComponent />

@@ -28,7 +28,7 @@ export const KeyboardProvider = ({ children }: { children: ReactNode }) => {
   const keyboardRef = useRef<HTMLDivElement>(null);
 
   // Calculate keyboard height - adjust these values based on your keyboard size
-  const keyboardHeight = 400; // Approximate height in pixels
+  const keyboardHeight = 600; // Approximate height in pixels
 
   // Store height in state to allow animation
   const [contentPadding, setContentPadding] = useState(0);
@@ -145,6 +145,16 @@ export const KeyboardProvider = ({ children }: { children: ReactNode }) => {
     setMaxLength(maxLen);
     setKeyboardType(type);
     setIsKeyboardVisible(true);
+
+    // Add a slight delay to ensure the DOM has updated before scrolling
+    setTimeout(() => {
+      // Find the active element (input that triggered the keyboard)
+      const activeElement = document.activeElement as HTMLElement;
+      if (activeElement && activeElement.classList.contains("keyboard-input")) {
+        // Scroll the element into view with some extra padding at the top
+        activeElement.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 300);
   };
 
   const hideKeyboard = () => {

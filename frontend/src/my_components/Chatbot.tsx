@@ -13,6 +13,7 @@ import { getChatbotResponse } from "@/api";
 import MarkdownResponse from "@/my_components/MarkdownResponse";
 import { KeyboardInput } from "./KeyboardInput";
 import { Message } from "@/interface";
+import { IoMdHelpCircleOutline } from "react-icons/io";
 
 const Chatbot: React.FC = () => {
   const [query, setQuery] = useState("");
@@ -114,7 +115,12 @@ const Chatbot: React.FC = () => {
             <div className="flex-1 justify-between items-center">
               RAY Chatbot
             </div>
-            <div className="w-24"></div>
+            <div className="w-24">
+
+              <Button className="mx-auto size-18 p-4" variant={"ghost"}>
+                <IoMdHelpCircleOutline className="size-12" />
+              </Button>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent
@@ -160,13 +166,6 @@ const Chatbot: React.FC = () => {
         </CardContent>
         <CardFooter className="p-5">
           <form onSubmit={handleSubmit} className="flex gap-2 w-full">
-            {/* <Input
-              type="text"
-              value={query}
-              onChange={handleInputChange}
-              placeholder="Type your message..."
-              className="flex-1"
-            /> */}
             <KeyboardInput
               type="text"
               value={query}
