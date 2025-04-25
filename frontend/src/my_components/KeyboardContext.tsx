@@ -100,7 +100,7 @@ export const KeyboardProvider = ({ children }: { children: ReactNode }) => {
           default: [
             "` 1 2 3 4 5 6 7 8 9 0 - = {bksp}",
             "q w e r t y u i o p [ ] \\",
-            "a s d f g h j k l ; ' {enter}",
+            "a s d f g h j k l ; '",
             "{shift} z x c v b n m , . / {shift}",
             ".com @ {space}",
           ],
@@ -118,14 +118,14 @@ export const KeyboardProvider = ({ children }: { children: ReactNode }) => {
           default: [
             "` 1 2 3 4 5 6 7 8 9 0 - = {bksp}",
             "{tab} q w e r t y u i o p [ ] \\",
-            "{lock} a s d f g h j k l ; ' {enter}",
+            "{lock} a s d f g h j k l ; '",
             "{shift} z x c v b n m , . / {shift}",
             ".com @ {space}",
           ],
           shift: [
             "~ ! @ # $ % ^ & * ( ) _ + {bksp}",
             "{tab} Q W E R T Y U I O P { } |",
-            '{lock} A S D F G H J K L : " {enter}',
+            '{lock} A S D F G H J K L : "',
             "{shift} Z X C V B N M < > ? {shift}",
             ".com @ {space}",
           ],
@@ -241,9 +241,9 @@ export const KeyboardProvider = ({ children }: { children: ReactNode }) => {
               {
                 attribute: "style",
                 value:
-                  "color: black; font-size: 24px; background-color: #f0f0f0; height: 60px;",
+                  "color: black; font-size: 24px; background-color: #f0f0f0; height: 110px; border-color: black;",
                 buttons:
-                  "a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0 1 2 3 4 5 6 7 8 9 {bksp} {enter} {clear} {space} {shift} {abc} .com ` ~ ! @ # $ % ^ & * ( ) - = _ + [ ] { } \\ | ; : ' \" , < . > / ?", // Add this line to specify which buttons to apply the style to
+                  "a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0 1 2 3 4 5 6 7 8 9 {bksp} {clear} {space} {shift} {abc} .com ` ~ ! @ # $ % ^ & * ( ) - = _ + [ ] { } \\ | ; : ' \" , < . > / ?", // Add this line to specify which buttons to apply the style to
               },
             ]}
           />
