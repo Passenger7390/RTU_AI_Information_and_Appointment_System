@@ -229,7 +229,6 @@ export const KeyboardProvider = ({ children }: { children: ReactNode }) => {
             theme="hg-theme-default"
             display={{
               "{bksp}": "⌫",
-              "{enter}": "✓",
               "{clear}": "Clear",
               "{space}": "␣",
               "{shift}": "⇧",
