@@ -14,6 +14,14 @@ import MarkdownResponse from "@/my_components/MarkdownResponse";
 import { KeyboardInput } from "./KeyboardInput";
 import { Message } from "@/interface";
 import { IoMdHelpCircleOutline } from "react-icons/io";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const Chatbot: React.FC = () => {
   const [query, setQuery] = useState("");
@@ -116,10 +124,7 @@ const Chatbot: React.FC = () => {
               RAY Chatbot
             </div>
             <div className="w-24">
-
-              <Button className="mx-auto size-18 p-4" variant={"ghost"}>
-                <IoMdHelpCircleOutline className="size-12" />
-              </Button>
+              <HelpDialog />
             </div>
           </CardTitle>
         </CardHeader>
@@ -181,6 +186,28 @@ const Chatbot: React.FC = () => {
         </CardFooter>
       </Card>
     </div>
+  );
+};
+
+const HelpDialog = () => {
+  // TODO: Edit this for chatbot help
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button className="mx-auto size-18 p-4" variant={"ghost"}>
+          <IoMdHelpCircleOutline className="size-12" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Are you absolutely sure?</DialogTitle>
+          <DialogDescription>
+            This action cannot be undone. This will permanently delete your
+            account and remove your data from our servers.
+          </DialogDescription>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
   );
 };
 
