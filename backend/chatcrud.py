@@ -14,7 +14,7 @@ import random
 from schemas import FAQCreate, FAQOut, FAQUpdate, QueryRequest, QueryResponse, UserBase
 
 router = APIRouter(prefix="/ray", tags=["ray"])
-client = genai.Client(api_key=os.getenv("GEMINI_API"))
+# client = genai.Client(api_key=os.getenv("GEMINI_API"))
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 

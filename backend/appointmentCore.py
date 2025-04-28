@@ -14,6 +14,7 @@ import base64
 from googleapiclient.errors import HttpError
 from email.message import EmailMessage
 import logging
+import re
 
 session = create_session(db_connect()[0])
 logging.basicConfig(level=logging.INFO)
@@ -26,6 +27,14 @@ router = APIRouter(prefix='/appointment', tags=['appointment'])
 # TODO: Edit the message that a strict compliance to the appointment is required
 
 # ===============================================Appointment Information===================================================
+
+ACCEPTANCE_KEYWORDS = {'accept', 'approve', 'confirm', 'yes', 'agreed', 'agree'}
+REJECTION_KEYWORDS = {'reject', 'decline', 'deny', 'no', 'cannot', "can't", 'disagree'}
+
+
+# Precompiled regex for better word-boundary matching
+ACCEPTANCE_REGEX = re.compile(r'\b(?:' + '|'.join(re.escape(word) for word in ACCEPTANCE_KEYWORDS) + r')\b', re.IGNORECASE)
+REJECTION_REGEX = re.compile(r'\b(?:' + '|'.join(re.escape(word) for word in REJECTION_KEYWORDS) + r')\b', re.IGNORECASE)
 
 @router.post('/create-appointment')
 async def create_apointment(appointment: AppointmentCreate, db: Session = Depends(get_db)):
@@ -199,7 +208,6 @@ async def get_professor_appointments(professor_id: str, date: str, db: Session =
     # Format the date for query comparison (add time bounds for the full day)
     date_start = f"{date} 00:00:00"
     date_end = f"{date} 23:59:59"
-    print("This is executed")
     appointments = db.query(Appointment).filter(
         Appointment.professor_uuid == professor_id,
         Appointment.start_time >= date_start,
@@ -289,95 +297,113 @@ async def check_professor_email_replies(db: Session = Depends(get_db)):
     Check for professor email replies to appointment requests
     and update appointment status accordingly
     """
-    logging.info("This is executed in check_email_replies")
-    try:
-        service = get_gmail_service()
-        
-        # Search for emails with subject containing "has created an appointment"
-        # and that have replies
-        results = service.users().messages().list(
-            userId='me',
-            q='subject:"has created an appointment" has:nouserlabels'
-        ).execute()
-        
-        messages = results.get('messages', [])
-        
-        for message_info in messages:
-            message_id = message_info['id']
-            message = service.users().messages().get(userId='me', id=message_id, format='full').execute()
+    max_retries = 3
+    retry_delay = 2  # Initial delay in seconds
+    for attempt in range(max_retries):
+        try:
+            service = get_gmail_service()
             
-            # Get the thread to check for replies
-            thread_id = message['threadId']
-            thread = service.users().threads().get(userId='me', id=thread_id).execute()
+            # Search for emails with subject containing "has created an appointment"
+            # and that have replies
+            results = service.users().messages().list(
+                userId='me',
+                q='subject:"has created an appointment" is:unread',
+                maxResults=10  # Limit number of results to avoid timeouts
+            ).execute()
             
-            # Skip if there's only one message in the thread (no replies)
-            if len(thread['messages']) <= 1:
-                continue
-                
-            # Process the thread to find professor's response
-            original_message = thread['messages'][0]
-            reply_message = thread['messages'][-1]  # Get the latest message in the thread
-            
-            # Extract the student name from the original email subject
-            subject = get_header_value(original_message['payload']['headers'], 'Subject')
-            student_name = subject.split(' has created an appointment')[0] if subject else ""
-            
-            # Extract reply content
-            reply_content = get_message_body(reply_message)
+            messages = results.get('messages', [])
+            processed = 0
 
-            # Look for appointment reference number in the thread
-            ref_number = extract_reference_number(original_message)
-            
-            if not ref_number:
-                continue
+            for message_info in messages:
+
+                if processed > 0:
+                    await asyncio.sleep(1)  # Avoid hitting API limits
+                message_id = message_info['id']
+
+                try:
+                    message = service.users().messages().get(userId='me', id=message_id, format='full').execute()
+                    
+                    # Get the thread to check for replies
+                    thread_id = message['threadId']
+                    thread = service.users().threads().get(userId='me', id=thread_id).execute()
                 
-            # Check if reply contains accept/approve or reject/decline
-            status = None
-            if contains_acceptance(reply_content):
-                status = "accept"
-            elif contains_rejection(reply_content):
-                status = "reject"
-            
-            print("status:", status)
-            print("ref_number:", ref_number)
-            if status:
-                # Find the appointment in the database using the reference number
-                appointment = db.query(Appointment).filter(
-                    cast(Appointment.uuid, String).like(f"%{ref_number}")
-                ).first()
-                
-                if appointment:
-                    # Update the appointment status
-                    professor = db.query(ProfessorInformation).filter(
-                        ProfessorInformation.professor_id == appointment.professor_uuid
-                    ).first()
+                    # Skip if there's only one message in the thread (no replies)
+                    if len(thread['messages']) <= 1:
+                        continue
                     
-                    appointment_details = {
-                        "student_name": appointment.student_name,
-                        "student_email": appointment.student_email,
-                        "professor_name": f"{professor.title} {professor.first_name} {professor.last_name}",
-                        "uuid": str(appointment.uuid)[-6:],
-                        "date": format_iso_date(appointment.start_time).split(' ')[0],
-                        "start_time": format_iso_date(appointment.start_time).split(' ')[1],
-                        "end_time": format_iso_date(appointment.end_time).split(' ')[1],
-                    }
+                    # Process the thread to find professor's response
+                    original_message = thread['messages'][0]
+                    reply_message = thread['messages'][-1]  # Get the latest message in the thread
                     
-                    # Update status and send confirmation email
-                    appointment.status = 'Accepted' if status == 'accept' else 'Rejected'
-                    db.commit()
+                    # Extract the student name from the original email subject
+                    subject = get_header_value(original_message['payload']['headers'], 'Subject')
+                    student_name = subject.split(' has created an appointment')[0] if subject else ""
                     
-                    await send_email(status, appointment_details)
+                    # Extract reply content
+                    reply_content = get_message_body(reply_message)
+
+                    # Look for appointment reference number in the thread
+                    ref_number = extract_reference_number(original_message)
                     
-                    # Mark the email as processed by marking as read and/or archiving
-                    service.users().messages().modify(
-                        userId='me',
-                        id=message_id,
-                        body={'removeLabelIds': ['UNREAD', 'INBOX']}
-                    ).execute()
-        logging.info("This is executed at the end of check_email_replies")
-        return {"message": "Email replies checked successfully"}
-    except HttpError as error:
-        raise HTTPException(status_code=500, detail=f"Error checking email replies: {str(error)}")
+                    if not ref_number:
+                        continue
+                        
+                    # Check if reply contains accept/approve or reject/decline
+                    status = None
+                    if contains_rejection(reply_content):
+                        status = "reject"
+                    elif contains_acceptance(reply_content):
+                        status = "accept"
+                    logging.info(f"status: {status}, ref_number: {ref_number}, reply_content: {reply_content}")
+                    
+                    if status:
+                        # Find the appointment in the database using the reference number
+                        appointment = db.query(Appointment).filter(
+                            cast(Appointment.uuid, String).like(f"%{ref_number}")
+                        ).first()
+                        
+                        if appointment:
+                            # Update the appointment status
+                            professor = db.query(ProfessorInformation).filter(
+                                ProfessorInformation.professor_id == appointment.professor_uuid
+                            ).first()
+                            
+                            appointment_details = {
+                                "student_name": appointment.student_name,
+                                "student_email": appointment.student_email,
+                                "professor_name": f"{professor.title} {professor.first_name} {professor.last_name}",
+                                "uuid": str(appointment.uuid)[-6:],
+                                "date": format_iso_date(appointment.start_time).split(' ')[0],
+                                "start_time": format_iso_date(appointment.start_time).split(' ')[1],
+                                "end_time": format_iso_date(appointment.end_time).split(' ')[1],
+                            }
+                            
+                            # Update status and send confirmation email
+                            appointment.status = 'Accepted' if status == 'accept' else 'Rejected'
+                            db.commit()
+                            
+                            await send_email(status, appointment_details)
+                            
+                            # Mark the email as processed by marking as read and/or archiving
+                            service.users().messages().modify(
+                                userId='me',
+                                id=message_id,
+                                body={'removeLabelIds': ['UNREAD']}
+                            ).execute()
+
+                            processed += 1
+                except HttpError as e:
+                    logging.error(f"Error processing message {message_id}: {str(e)}")
+
+            return {"message": "Email replies checked successfully"}
+        except (HttpError, TimeoutError) as error:
+            if attempt < max_retries - 1:
+                wait_time = retry_delay * (2 ** attempt)  # Exponential backoff
+                logger.warning(f"Request failed, retrying in {wait_time}s: {str(error)}")
+                await asyncio.sleep(wait_time)
+            else:
+                logger.error(f"Error checking email replies after {max_retries} attempts: {str(error)}")
+                raise HTTPException(status_code=500, detail=f"Error checking email replies: {str(error)}")
 
 # Helper functions for email processing
 
@@ -412,17 +438,21 @@ def extract_reference_number(message):
             return reference
     return None
 
-def contains_acceptance(text):
-    """Check if text contains words indicating acceptance"""
-    acceptance_keywords = ['accept', 'approve', 'confirm', 'yes', 'agreed', 'agree']
-    text_lower = text.lower()
-    return any(keyword in text_lower for keyword in acceptance_keywords)
 
-def contains_rejection(text):
-    """Check if text contains words indicating rejection"""
-    rejection_keywords = ['reject', 'decline', 'deny', 'no', 'cannot', "can't", 'disagree']
-    text_lower = text.lower()
-    return any(keyword in text_lower for keyword in rejection_keywords)
+def contains_rejection(text: str) -> bool:
+    """Check if text contains words indicating rejection."""
+    match = bool(REJECTION_REGEX.search(text))
+    logging.info(f"contains_rejection: {match}, text: {text}")
+    return match
+
+def contains_acceptance(text: str) -> bool:
+    """Check if text contains words indicating acceptance, but not if rejection is found first."""
+    if contains_rejection(text):
+        return False
+    match = bool(ACCEPTANCE_REGEX.search(text))
+    logging.info(f"contains_acceptance: {match}, text: {text}")
+    return match
+
 
 def format_iso_date(date_value):
     """
