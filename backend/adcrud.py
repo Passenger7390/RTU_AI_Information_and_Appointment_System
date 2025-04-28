@@ -96,6 +96,6 @@ async def delete_expired_images(db: Session):   # Delete expired images
 async def periodic_cleanup():
     while True:
         with session as db:
-            logging.info(f"Deleting expired images at {datetime.now()}")
+            # logging.info(f"Deleting expired images at {datetime.now()}")
             await delete_expired_images(db)
-        await asyncio.sleep(30)  # Run every 30 seconds
+        await asyncio.sleep(90)  # Run every 30 seconds

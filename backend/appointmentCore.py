@@ -1,4 +1,4 @@
-
+import asyncio
 from typing import List
 from uuid import UUID, uuid4
 from datetime import datetime
@@ -6,18 +6,24 @@ from fastapi import APIRouter, Depends, HTTPException
 from auth import get_current_user, read_users_me
 from otp import get_gmail_service
 from schemas import AppointmentResponse, AppointmentCreate, AppointmentResponseForTable, AppointmentUpdate, UserBase
-from database import get_db
+from database import create_session, db_connect, get_db
 from models import Appointment, ProfessorInformation
 from sqlalchemy.orm import Session
 from sqlalchemy import cast, String
 import base64
-
 from googleapiclient.errors import HttpError
-
 from email.message import EmailMessage
+import logging
 
+session = create_session(db_connect()[0])
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix='/appointment', tags=['appointment'])
 
+# TODO: Implement a function for professors to approve or reject appointments thru email reply
+# TODO: Implement a function for professors to suggest a time and date for the appointment
+# TODO: Implement a function that auto rejects appointments that are not confirmed after 48 hours
+# TODO: Edit the message that a strict compliance to the appointment is required
 
 # ===============================================Appointment Information===================================================
 
@@ -68,6 +74,7 @@ async def create_apointment(appointment: AppointmentCreate, db: Session = Depend
         messageForProfessor.set_content(f"Dear {f"{professor.title} {professor.first_name} {professor.last_name}"},\n\n"
                                       f"Good day!\n\n"
                                       f"{appointment.student_name} made an appointment request to you. \n\n"
+                                      f"Reference Number: {uuid[-6:]}\n\n"
                                       f"Concern: \n"
                                       f"{appointment.concern}\n\n"
                                       f"Please see the appointment information in the kiosk admin page.\n"
@@ -216,6 +223,11 @@ async def get_professor_appointments(professor_id: str, date: str, db: Session =
     
     return result
 
+@router.get('/check-email')
+async def check_email(db: Session = Depends(get_db), 
+                               current_user: UserBase = Depends(get_current_user)):
+    return await check_professor_email_replies(db)
+
 async def send_email(status: str, appointment_details: dict):
     """Send email to the user"""
     print(f"status: {status}")
@@ -259,7 +271,6 @@ async def send_email(status: str, appointment_details: dict):
         encoded_message = base64.urlsafe_b64encode(confirmationEmail.as_bytes()).decode()
         create_message = {"raw": encoded_message}
         
-
         send_message = (
             service.users()
             .messages()
@@ -270,6 +281,148 @@ async def send_email(status: str, appointment_details: dict):
         return {"message": send_message["id"], "status": status}
     except HttpError as error:
         raise HTTPException(status_code=500, detail=str(error))
+    
+# Add this function to your existing file
+
+async def check_professor_email_replies(db: Session = Depends(get_db)):
+    """
+    Check for professor email replies to appointment requests
+    and update appointment status accordingly
+    """
+    logging.info("This is executed in check_email_replies")
+    try:
+        service = get_gmail_service()
+        
+        # Search for emails with subject containing "has created an appointment"
+        # and that have replies
+        results = service.users().messages().list(
+            userId='me',
+            q='subject:"has created an appointment" has:nouserlabels'
+        ).execute()
+        
+        messages = results.get('messages', [])
+        
+        for message_info in messages:
+            message_id = message_info['id']
+            message = service.users().messages().get(userId='me', id=message_id, format='full').execute()
+            
+            # Get the thread to check for replies
+            thread_id = message['threadId']
+            thread = service.users().threads().get(userId='me', id=thread_id).execute()
+            
+            # Skip if there's only one message in the thread (no replies)
+            if len(thread['messages']) <= 1:
+                continue
+                
+            # Process the thread to find professor's response
+            original_message = thread['messages'][0]
+            reply_message = thread['messages'][-1]  # Get the latest message in the thread
+            
+            # Extract the student name from the original email subject
+            subject = get_header_value(original_message['payload']['headers'], 'Subject')
+            student_name = subject.split(' has created an appointment')[0] if subject else ""
+            
+            # Extract reply content
+            reply_content = get_message_body(reply_message)
+
+            # Look for appointment reference number in the thread
+            ref_number = extract_reference_number(original_message)
+            
+            if not ref_number:
+                continue
+                
+            # Check if reply contains accept/approve or reject/decline
+            status = None
+            if contains_acceptance(reply_content):
+                status = "accept"
+            elif contains_rejection(reply_content):
+                status = "reject"
+            
+            print("status:", status)
+            print("ref_number:", ref_number)
+            if status:
+                # Find the appointment in the database using the reference number
+                appointment = db.query(Appointment).filter(
+                    cast(Appointment.uuid, String).like(f"%{ref_number}")
+                ).first()
+                
+                if appointment:
+                    # Update the appointment status
+                    professor = db.query(ProfessorInformation).filter(
+                        ProfessorInformation.professor_id == appointment.professor_uuid
+                    ).first()
+                    
+                    appointment_details = {
+                        "student_name": appointment.student_name,
+                        "student_email": appointment.student_email,
+                        "professor_name": f"{professor.title} {professor.first_name} {professor.last_name}",
+                        "uuid": str(appointment.uuid)[-6:],
+                        "date": format_iso_date(appointment.start_time).split(' ')[0],
+                        "start_time": format_iso_date(appointment.start_time).split(' ')[1],
+                        "end_time": format_iso_date(appointment.end_time).split(' ')[1],
+                    }
+                    
+                    # Update status and send confirmation email
+                    appointment.status = 'Accepted' if status == 'accept' else 'Rejected'
+                    db.commit()
+                    
+                    await send_email(status, appointment_details)
+                    
+                    # Mark the email as processed by marking as read and/or archiving
+                    service.users().messages().modify(
+                        userId='me',
+                        id=message_id,
+                        body={'removeLabelIds': ['UNREAD', 'INBOX']}
+                    ).execute()
+        logging.info("This is executed at the end of check_email_replies")
+        return {"message": "Email replies checked successfully"}
+    except HttpError as error:
+        raise HTTPException(status_code=500, detail=f"Error checking email replies: {str(error)}")
+
+# Helper functions for email processing
+
+def get_header_value(headers, name):
+    """Extract a header value from email headers"""
+    for header in headers:
+        if header['name'].lower() == name.lower():
+            return header['value']
+    return None
+
+def get_message_body(message):
+    """Extract message body text from a Gmail message"""
+    if 'parts' in message['payload']:
+        for part in message['payload']['parts']:
+            if part['mimeType'] == 'text/plain':
+                body_data = part['body'].get('data', '')
+                if body_data:
+                    return base64.urlsafe_b64decode(body_data).decode('utf-8')
+    elif 'body' in message['payload'] and 'data' in message['payload']['body']:
+        return base64.urlsafe_b64decode(message['payload']['body']['data']).decode('utf-8')
+    return ""
+
+def extract_reference_number(message):
+    """Extract appointment reference number from email body"""
+    body = get_message_body(message)
+    if 'Reference Number:' in body:
+        # Extract 6-character reference number after "Reference Number:"
+        reference_parts = body.split('Reference Number:')
+        if len(reference_parts) > 1:
+            # Extract the reference number (6 characters)
+            reference = reference_parts[1].strip()[:6]
+            return reference
+    return None
+
+def contains_acceptance(text):
+    """Check if text contains words indicating acceptance"""
+    acceptance_keywords = ['accept', 'approve', 'confirm', 'yes', 'agreed', 'agree']
+    text_lower = text.lower()
+    return any(keyword in text_lower for keyword in acceptance_keywords)
+
+def contains_rejection(text):
+    """Check if text contains words indicating rejection"""
+    rejection_keywords = ['reject', 'decline', 'deny', 'no', 'cannot', "can't", 'disagree']
+    text_lower = text.lower()
+    return any(keyword in text_lower for keyword in rejection_keywords)
 
 def format_iso_date(date_value):
     """
@@ -304,3 +457,13 @@ def convert_time_format(datetime_str: str):
     """
  
     return datetime.strptime(datetime_str, '%Y-%m-%d %I:%M %p')
+
+async def check_email_periodically():
+    while True:
+        try:
+            with session as db:
+                logging.info("Checking for email replies...")
+                await check_professor_email_replies(db)
+        except Exception as e:
+            logging.error(f"Error checking email replies: {e}")
+        await asyncio.sleep(180)  # Check every 60 seconds
