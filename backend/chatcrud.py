@@ -52,6 +52,8 @@ async def chat(query_request: QueryRequest, db: Session = Depends(get_db)):
         clarification_text = "I couldn't clearly understand your question. Did you mean one of the following?"
         return QueryResponse(response=clarification_text, suggestions=suggestions)
     
+    # TODO: add the query to the database if it doesn't match any FAQ.
+
     return QueryResponse(response=random.choice(FALLBACK_RESPONSES))
 
     # Fallback: Call Gemini API if no suggestions are found.
@@ -182,25 +184,25 @@ def get_faq_suggestions_by_words(query: str, faqs, threshold: float = 0.3, max_s
     suggestions.sort(key=lambda x: x[1], reverse=True)
     return [sug[0] for sug in suggestions[:max_suggestions]]
 
-async def get_gemini_response(query: str, history: list = None) -> str:
-    """
-    Get an AI-generated response from Google Gemini.
+# async def get_gemini_response(query: str, history: list = None) -> str:
+#     """
+#     Get an AI-generated response from Google Gemini.
 
-    This function starts a chat session with the Gemini model using the provided conversation history,
-    then sends the prompt and returns the response text.
-    """
-    history = history or []
+#     This function starts a chat session with the Gemini model using the provided conversation history,
+#     then sends the prompt and returns the response text.
+#     """
+#     history = history or []
     
-    def sync_get_response():
-        # Create a chat session that remembers conversation history.
-        # Adjust the code below based on the actual genai API:
-        chat_session = client.chats.create(model='gemini-2.0-flash', history=history)
-        response = chat_session.send_message(query)
+#     def sync_get_response():
+#         # Create a chat session that remembers conversation history.
+#         # Adjust the code below based on the actual genai API:
+#         chat_session = client.chats.create(model='gemini-2.0-flash', history=history)
+#         response = chat_session.send_message(query)
 
-        return response.text.strip()
+#         return response.text.strip()
     
-    try:
-        return await anyio.to_thread.run_sync(sync_get_response)
-    except Exception as e:
-        raise Exception("Gemini API error: " + str(e))
+#     try:
+#         return await anyio.to_thread.run_sync(sync_get_response)
+#     except Exception as e:
+#         raise Exception("Gemini API error: " + str(e))
 
