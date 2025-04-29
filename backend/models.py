@@ -89,17 +89,3 @@ class UserFAQ(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     query = Column(String, nullable=False)
-
-class TestTable(Base):
-
-    __tablename__ = "test_table"
-
-    id = Column(Integer, primary_key=True, index=True)
-    query = Column(String, nullable=False)
-
-class TestTable2(Base):
-
-    __tablename__ = "test_table2"
-
-    id = Column(Integer, primary_key=True, index=True)
-    query = Column(String, nullable=False)
