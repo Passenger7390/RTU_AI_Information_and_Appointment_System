@@ -1,7 +1,7 @@
 import asyncio
 from typing import List
 from uuid import UUID, uuid4
-from datetime import datetime
+from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException
 from auth import get_current_user, read_users_me
 from otp import get_gmail_service
@@ -270,6 +270,19 @@ async def send_email(status: str, appointment_details: dict):
                                         f"Best regards,\n"
                                         f"RTU Kiosk Appointment System")
             confirmationEmail["Subject"] = "Appointment Request Update - Reference #" + appointment_details['uuid']
+
+        elif status == "auto_reject":
+            # Auto-rejection email template
+            confirmationEmail.set_content(f"Dear {appointment_details['student_name']},\n\n"
+                                        f"Good day!\n"
+                                        f"We regret to inform you that your appointment request with {appointment_details['professor_name']} has been automatically rejected due to no response after 3 days.\n\n"
+                                        f"Your Reference Number: {appointment_details['uuid']}\n\n"
+                                        f"The professor may be unavailable or experiencing high request volumes. You are welcome to schedule a new appointment at a different time.\n\n"
+                                        f"If you have any urgent matters to discuss, you may email the professor directly or visit during their regular office hours.\n\n"
+                                        f"Thank you for your understanding.\n\n"
+                                        f"Best regards,\n"
+                                        f"RTU Kiosk Appointment System")
+            confirmationEmail["Subject"] = "Appointment Auto-Rejected - Reference #" + appointment_details['uuid']
             
         confirmationEmail["To"] = appointment_details['student_email']
         confirmationEmail["From"] = "2021-101043@rtu.edu.ph"
@@ -288,8 +301,52 @@ async def send_email(status: str, appointment_details: dict):
         return {"message": send_message["id"], "status": status}
     except HttpError as error:
         raise HTTPException(status_code=500, detail=str(error))
-    
-# Add this function to your existing file
+
+async def auto_reject_old_appointments(db: Session):
+    """
+    Automatically reject appointments that have been pending for more than 3 days
+    """
+    try:
+        # Calculate the cutoff date (3 days ago)
+        two_days_ago = datetime.now() - timedelta(days=2)
+        
+        # Find all pending appointments created more than 3 days ago
+        old_appointments = db.query(Appointment).filter(
+            Appointment.status == "Pending",
+            Appointment.created_at <= two_days_ago
+        ).all()
+        
+        processed_count = 0
+        for appointment in old_appointments:
+            # Get professor information for the email
+            professor = db.query(ProfessorInformation).filter(
+                ProfessorInformation.professor_id == appointment.professor_uuid
+            ).first()
+            
+            # Prepare appointment details for the email
+            appointment_details = {
+                "student_name": appointment.student_name,
+                "student_email": appointment.student_email,
+                "professor_name": f"{professor.title} {professor.first_name} {professor.last_name}",
+                "uuid": str(appointment.uuid)[-6:],
+                "date": format_iso_date(appointment.start_time).split(' ')[0],
+                "start_time": format_iso_date(appointment.start_time).split(' ')[1],
+                "end_time": format_iso_date(appointment.end_time).split(' ')[1],
+            }
+            
+            # Update appointment status
+            appointment.status = "Rejected"
+            db.commit()
+            
+            # Send email notification
+            await send_email("auto_reject", appointment_details)
+            processed_count += 1
+            
+        logging.info(f"Auto-rejected {processed_count} appointments older than 3 days")
+        return {"message": f"Auto-rejected {processed_count} old appointments"}
+    except Exception as e:
+        logging.error(f"Error in auto-rejecting appointments: {e}")
+        raise HTTPException(status_code=500, detail=f"Error auto-rejecting appointments: {str(e)}")
 
 async def check_professor_email_replies(db: Session = Depends(get_db)):
     """
@@ -493,6 +550,10 @@ async def check_email_periodically():
             with session as db:
                 logging.info("Checking for email replies...")
                 await check_professor_email_replies(db)
+
+                # Also check for old appointments to auto-reject
+                logging.info("Checking for old pending appointments...")
+                await auto_reject_old_appointments(db)
         except Exception as e:
             logging.error(f"Error checking email replies: {e}")
         await asyncio.sleep(180)  # Check every 60 seconds

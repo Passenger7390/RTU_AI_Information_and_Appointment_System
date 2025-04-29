@@ -60,6 +60,7 @@ class Appointment(Base):
     start_time = Column(DateTime(timezone=True), nullable=False)
     end_time = Column(DateTime(timezone=True), nullable=False)
     status = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True),nullable=True, server_default=func.now())
 
     professor = relationship("ProfessorInformation", back_populates="appointments")
 
