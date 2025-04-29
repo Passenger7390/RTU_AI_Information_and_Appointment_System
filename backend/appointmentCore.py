@@ -21,7 +21,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix='/appointment', tags=['appointment'])
 
-# TODO: Implement a function for professors to approve or reject appointments thru email reply
 # TODO: Implement a function for professors to suggest a time and date for the appointment
 # TODO: Implement a function that auto rejects appointments that are not confirmed after 48 hours
 # TODO: Edit the message that a strict compliance to the appointment is required
