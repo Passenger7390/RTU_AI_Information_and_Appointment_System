@@ -9,7 +9,7 @@ from rapidfuzz import fuzz, process
 from google import genai
 from auth import read_users_me
 from database import get_db
-from models import FAQ
+from models import FAQ, UserFAQ
 import random
 from schemas import FAQCreate, FAQOut, FAQUpdate, QueryRequest, QueryResponse, UserBase
 
@@ -53,7 +53,7 @@ async def chat(query_request: QueryRequest, db: Session = Depends(get_db)):
         return QueryResponse(response=clarification_text, suggestions=suggestions)
     
     # TODO: add the query to the database if it doesn't match any FAQ.
-
+    add_unknown_faq(query, db)
     return QueryResponse(response=random.choice(FALLBACK_RESPONSES))
 
     # Fallback: Call Gemini API if no suggestions are found.
@@ -184,6 +184,11 @@ def get_faq_suggestions_by_words(query: str, faqs, threshold: float = 0.3, max_s
     suggestions.sort(key=lambda x: x[1], reverse=True)
     return [sug[0] for sug in suggestions[:max_suggestions]]
 
+def add_unknown_faq(query: str, db: Session):
+    user_faq = UserFAQ(query=query.strip())
+    db.add(user_faq)
+    db.commit()
+    db.refresh(user_faq)
 # async def get_gemini_response(query: str, history: list = None) -> str:
 #     """
 #     Get an AI-generated response from Google Gemini.

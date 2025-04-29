@@ -83,3 +83,9 @@ class OTPSecret(Base):
         expires_at = datetime.now() + timedelta(minutes=expiry_minutes)
         return cls(email=email, secret=secret, expires_at=expires_at, is_used=False)
     
+class UserFAQ(Base):
+    __tablename__ = "user_faq"
+
+    id = Column(Integer, primary_key=True, index=True)
+    query = Column(String, nullable=False)
+    
