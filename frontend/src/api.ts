@@ -231,6 +231,30 @@ export async function starFAQ(param: FAQid) {
   return res.data;
 }
 
+export async function getUserFAQs() {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  const res = await axios.get(`${chatApi}/user-faqs`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+}
+
+export async function deleteUserFAQ(user_faq: FAQid) {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  const res = await axios.delete(`${chatApi}/delete-user-faq/${user_faq.id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+}
+
 // ======================================================= CHAT API END ========================================================
 // ========================================================= OTP API ========================================================
 export const sendOTP = async (email: string) => {

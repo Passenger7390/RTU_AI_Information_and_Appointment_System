@@ -21,11 +21,12 @@ import {
 } from "@/my_components/table/Columns";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
-import { FAQCard, FAQDialog } from "@/my_components/FAQ";
+import { FAQCard, FAQDialog, UserFAQ } from "@/my_components/FAQ";
 import CreateProfessorDialog from "./CreateProfessorDialog";
 import { FAQ } from "@/interface";
 import EditProfileDialog from "./EditProfileDialog";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 export const AdComponent = () => {
   const [tableData, setTableData] = useState<TableData[]>([]);
@@ -110,8 +111,10 @@ export const FAQComponent = () => {
 
   return (
     <div className="flex-row h-full w-full p-2 space-y-8">
-      <div>
+      <div className="flex justify-start items-center space-x-2">
         <FAQDialog onRefresh={fetchFAQs} />
+
+        <UserFAQ />
       </div>
       {faqs.length == 0 ? (
         <div className="flex flex-col justify-center items-center h-[72vh] w-full rounded-xl space-y-2">

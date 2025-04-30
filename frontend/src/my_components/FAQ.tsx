@@ -5,7 +5,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { FaRegEdit } from "react-icons/fa";
 import toast from "react-hot-toast";
-import { deleteFAQ, updateFAQ, addFAQ, starFAQ } from "@/api";
+import {
+  deleteFAQ,
+  updateFAQ,
+  addFAQ,
+  starFAQ,
+  getUserFAQs,
+  deleteUserFAQ,
+} from "@/api";
 import DeleteDialog from "./DeleteDialog";
 import {
   Dialog,
@@ -17,8 +24,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { IoAddSharp } from "react-icons/io5";
-import { FAQCardProps, FAQDialogProps } from "@/interface";
+import { FAQCardProps, FAQDialogProps, UserFAQType } from "@/interface";
 import { IoStarOutline, IoStar } from "react-icons/io5";
+import CopyButton from "./CopyButton";
 
 export const FAQCard = ({
   idProp,
@@ -296,3 +304,70 @@ export const FAQDialog = ({ onRefresh }: FAQDialogProps) => {
     </Dialog>
   );
 };
+//  <CopyButton text="TEST" className="h-10" />
+export function UserFAQ() {
+  const [userFAQs, setUserFAQs] = useState([]);
+
+  async function fetchUserFAQs() {
+    try {
+      const res = await getUserFAQs();
+      setUserFAQs(res);
+    } catch (error) {
+      console.error("Failed to fetch user FAQs:", error);
+      toast.error("Failed to fetch user FAQs");
+    }
+  }
+
+  async function handleDelete(id: number) {
+    const params = {
+      id: id,
+    };
+    try {
+      await deleteUserFAQ(params);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      fetchUserFAQs();
+    }
+  }
+
+  useEffect(() => {
+    fetchUserFAQs();
+  }, []);
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button className="h-10 w-[fit-content] flex justify-center">
+          User Input FAQ
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>User questions input in kiosk</DialogTitle>
+          <DialogDescription>
+            This are the question that doesn't match any FAQ in the system.
+          </DialogDescription>
+        </DialogHeader>
+        <div>
+          {userFAQs.map((faq: UserFAQType) => (
+            <div
+              className="flex border py-4 mb-2 items-center rounded-2xl"
+              key={faq.id}
+            >
+              <Label className="flex flex-1">{faq.query}</Label>
+              <div className="flex space-x-2 items-center">
+                <CopyButton
+                  text={faq.query}
+                  className="h-10"
+                  variant="outline"
+                />
+                <DeleteDialog onConfirm={() => handleDelete(faq.id)} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

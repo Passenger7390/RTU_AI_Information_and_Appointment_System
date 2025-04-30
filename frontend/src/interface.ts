@@ -311,3 +311,16 @@ export interface HighlightsProps {
 export interface FAQid {
   id: number;
 }
+
+export interface CopyButtonProps {
+  text: string;
+  variant?: "default" | "outline";
+  size?: "sm" | "md" | "lg";
+  className?: string;
+  onCopy?: () => void;
+}
+
+export interface UserFAQType {
+  id: number;
+  query: string;
+}

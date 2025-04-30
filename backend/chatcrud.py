@@ -32,6 +32,11 @@ FALLBACK_RESPONSES = [
     "I'm here specifically to help with RTU-related questions. What can I tell you about our university?"
 ]
 
+@router.delete("/delete-user-faq/{faq_id}")
+async def delete_user_faq(faq_id: int, db: Session = Depends(get_db)):
+    faq = db.query(UserFAQ).filter(UserFAQ.id == faq_id).delete()
+    db.commit()
+    return {"message": "test"}
 
 
 @router.post("/chat", response_model=QueryResponse)
@@ -116,6 +121,11 @@ async def starFAQ(id: StarFAQ, db: Session = Depends(get_db), current_user: User
     db.refresh(faq)
 
     return {"message": f"test"}
+
+@router.get("/user-faqs")
+async def get_all_user_faqs(db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
+    user_faqs = db.query(UserFAQ).all()
+    return [faq for faq in user_faqs]
 
 def get_all_faqs(db: Session):
     return db.query(FAQ).order_by(desc(FAQ.isPinned)).all()
@@ -203,6 +213,8 @@ def add_unknown_faq(query: str, db: Session):
     db.add(user_faq)
     db.commit()
     db.refresh(user_faq)
+
+# def ge
 # async def get_gemini_response(query: str, history: list = None) -> str:
 #     """
 #     Get an AI-generated response from Google Gemini.
