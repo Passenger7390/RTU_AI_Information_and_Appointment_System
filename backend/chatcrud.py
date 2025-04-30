@@ -58,7 +58,6 @@ async def chat(query_request: QueryRequest, db: Session = Depends(get_db)):
         clarification_text = "I couldn't clearly understand your question. Did you mean one of the following?"
         return QueryResponse(response=clarification_text, suggestions=suggestions)
     
-    # TODO: add the query to the database if it doesn't match any FAQ.
     add_unknown_faq(query, db)
     return QueryResponse(response=random.choice(FALLBACK_RESPONSES))
 
