@@ -127,6 +127,7 @@ export const FAQComponent = () => {
               questionProp={faq.question}
               synonymsProp={faq.synonyms}
               answerProp={faq.answer}
+              isPinnedProp={faq.isPinned}
               onRefresh={fetchFAQs}
             />
           ))}

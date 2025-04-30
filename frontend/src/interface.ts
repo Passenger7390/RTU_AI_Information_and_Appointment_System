@@ -170,6 +170,7 @@ export interface FAQCardProps {
   questionProp: string;
   synonymsProp: string[];
   answerProp: string;
+  isPinnedProp: boolean;
   onRefresh?: () => void;
 }
 
@@ -178,6 +179,7 @@ export interface FAQ {
   question: string;
   synonyms: string[];
   answer: string;
+  isPinned: boolean;
 }
 
 export interface FAQDialogProps {
@@ -304,4 +306,8 @@ export interface HighlightsProps {
   getFolder: (folder: string) => void;
   getFloor: (floor: string) => void;
   setIsFloorSelected: (e: boolean) => void;
+}
+
+export interface FAQid {
+  id: number;
 }

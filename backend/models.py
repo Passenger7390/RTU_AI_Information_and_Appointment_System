@@ -1,6 +1,7 @@
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, func, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.sql import expression
 from datetime import datetime, timedelta
 
 Base = declarative_base()
@@ -32,6 +33,7 @@ class FAQ(Base):
     question = Column(String, unique=True, index=True ,nullable=False)
     synonyms = Column(JSONB, nullable=True)
     answer = Column(String, nullable=False)
+    isPinned = Column(Boolean, server_default=expression.false(), nullable=False)
 
 class ProfessorInformation(Base):
     __tablename__ = "professor_information"

@@ -11,7 +11,8 @@ from auth import read_users_me
 from database import get_db
 from models import FAQ, UserFAQ
 import random
-from schemas import FAQCreate, FAQOut, FAQUpdate, QueryRequest, QueryResponse, UserBase
+from schemas import FAQCreate, FAQOut, FAQUpdate, QueryRequest, QueryResponse, StarFAQ, UserBase
+from sqlalchemy import desc
 
 router = APIRouter(prefix="/ray", tags=["ray"])
 # client = genai.Client(api_key=os.getenv("GEMINI_API"))
@@ -74,7 +75,8 @@ async def read_faqs(db: Session = Depends(get_db)):
             id=faq.id,
             synonyms=faq.synonyms if isinstance(faq.synonyms, list) else ([] if faq.synonyms is None else [faq.synonyms]),
             question=faq.question,
-            answer=faq.answer
+            answer=faq.answer,
+            isPinned=faq.isPinned
         ) for faq in result
     ]
 
@@ -104,8 +106,19 @@ async def delete_faq(faq_id: int, db: Session = Depends(get_db), current_user: U
     db.commit()
     return {"message": f"Deleted FAQ with ID {faq_id}"}
 
+@router.put("/start-faq")
+async def starFAQ(id: StarFAQ, db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
+    print(f"id.id: {id.id}")
+    faq = db.query(FAQ).filter(FAQ.id == id.id).first()
+    faq.isPinned = not faq.isPinned
+
+    db.commit()
+    db.refresh(faq)
+
+    return {"message": f"test"}
+
 def get_all_faqs(db: Session):
-    return db.query(FAQ).all()
+    return db.query(FAQ).order_by(desc(FAQ.isPinned)).all()
 
 def get_faq_by_question(db: Session, question: str):
     return db.query(FAQ).filter(FAQ.question.ilike(question)).first()
@@ -114,7 +127,8 @@ def create_faq(db: Session, faq: FAQCreate):
     new_faq = FAQ(
         question=faq.question.strip(),
         synonyms=faq.synonyms,  # synonyms should be a list (stored as JSONB in PostgreSQL)
-        answer=faq.answer.strip()
+        answer=faq.answer.strip(),
+        isPinned=False
     )
     db.add(new_faq)
     db.commit()

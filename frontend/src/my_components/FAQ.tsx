@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { FaRegEdit } from "react-icons/fa";
 import toast from "react-hot-toast";
-import { deleteFAQ, updateFAQ, addFAQ } from "@/api";
+import { deleteFAQ, updateFAQ, addFAQ, starFAQ } from "@/api";
 import DeleteDialog from "./DeleteDialog";
 import {
   Dialog,
@@ -18,12 +18,14 @@ import {
 } from "@/components/ui/dialog";
 import { IoAddSharp } from "react-icons/io5";
 import { FAQCardProps, FAQDialogProps } from "@/interface";
+import { IoStarOutline, IoStar } from "react-icons/io5";
 
 export const FAQCard = ({
   idProp,
   questionProp,
   synonymsProp,
   answerProp,
+  isPinnedProp,
   onRefresh,
 }: FAQCardProps) => {
   // Combined state for current field values.
@@ -31,6 +33,7 @@ export const FAQCard = ({
     question: "",
     synonyms: "",
     answer: "",
+    isPinned: "",
   });
 
   // State to store original values in case we cancel editing.
@@ -38,6 +41,7 @@ export const FAQCard = ({
     question: "",
     synonyms: "",
     answer: "",
+    isPinned: "",
   });
   const [edit, setEdit] = useState(false);
 
@@ -48,11 +52,13 @@ export const FAQCard = ({
       question: questionProp,
       synonyms: synonymsStr,
       answer: answerProp,
+      isPinned: isPinnedProp,
     });
     setSavedValues({
       question: questionProp,
       synonyms: synonymsStr,
       answer: answerProp,
+      isPinned: isPinnedProp,
     });
   }, [questionProp, synonymsProp, answerProp]);
 
@@ -84,6 +90,7 @@ export const FAQCard = ({
       question: values.question,
       synonyms: synonymsList,
       answer: values.answer,
+      isPinned: values.isPinned,
     };
 
     try {
@@ -106,41 +113,68 @@ export const FAQCard = ({
     }
   };
 
+  async function pinFAQ() {
+    const params = {
+      id: idProp,
+    };
+    try {
+      await starFAQ(params);
+      onRefresh?.();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
     <Card className="w-[600px]">
-      <CardContent className="space-y-2 flex-col items-center justify-center pt-6">
-        <Label>Question</Label>
-        <Textarea
-          placeholder="Type your question here."
-          className="w-[34rem] max-h-36 overflow-x-hidden resize-none"
-          value={values.question}
-          onChange={(e) =>
-            setValues((prev) => ({ ...prev, question: e.target.value }))
-          }
-          required
-          disabled={!edit}
-        />
-        <Label>Synonyms</Label>
-        <Textarea
-          placeholder="Separate synonyms by comma (e.g. 'Hello, Hi')"
-          className="w-[34rem] max-h-36 overflow-x-hidden resize-none"
-          value={values.synonyms}
-          onChange={(e) =>
-            setValues((prev) => ({ ...prev, synonyms: e.target.value }))
-          }
-          disabled={!edit}
-        />
-        <Label>Answer</Label>
-        <Textarea
-          placeholder="Type your answer here."
-          className="w-[34rem] max-h-36 overflow-x-hidden resize-none"
-          value={values.answer}
-          onChange={(e) =>
-            setValues((prev) => ({ ...prev, answer: e.target.value }))
-          }
-          required
-          disabled={!edit}
-        />
+      <CardContent className="space-y-2 flex-col justify-end pt-6">
+        <div className="flex items-center justify-end w-full">
+          <Button
+            variant={"ghost"}
+            className="hover:bg-transparent hover:opacity-100"
+            onClick={pinFAQ}
+          >
+            {isPinnedProp ? (
+              <IoStar className="text-yellow-300" />
+            ) : (
+              <IoStarOutline className="text-yellow-300" />
+            )}
+          </Button>
+        </div>
+        <div>
+          <Label>Question</Label>
+          <Textarea
+            placeholder="Type your question here."
+            className="w-[34rem] max-h-36 overflow-x-hidden resize-none"
+            value={values.question}
+            onChange={(e) =>
+              setValues((prev) => ({ ...prev, question: e.target.value }))
+            }
+            required
+            disabled={!edit}
+          />
+          <Label>Synonyms</Label>
+          <Textarea
+            placeholder="Separate synonyms by comma (e.g. 'Hello, Hi')"
+            className="w-[34rem] max-h-36 overflow-x-hidden resize-none"
+            value={values.synonyms}
+            onChange={(e) =>
+              setValues((prev) => ({ ...prev, synonyms: e.target.value }))
+            }
+            disabled={!edit}
+          />
+          <Label>Answer</Label>
+          <Textarea
+            placeholder="Type your answer here."
+            className="w-[34rem] max-h-36 overflow-x-hidden resize-none"
+            value={values.answer}
+            onChange={(e) =>
+              setValues((prev) => ({ ...prev, answer: e.target.value }))
+            }
+            required
+            disabled={!edit}
+          />
+        </div>
       </CardContent>
       <CardFooter className="flex justify-between space-x-2">
         <div className="flex space-x-2">
