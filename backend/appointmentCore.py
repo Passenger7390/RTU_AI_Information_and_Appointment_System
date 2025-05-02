@@ -570,4 +570,4 @@ async def check_email_periodically():
                 await auto_reject_old_appointments(db)
         except Exception as e:
             logging.error(f"Error checking email replies: {e}")
-        await asyncio.sleep(180)  # Check every 60 seconds
+        await asyncio.sleep(180)  # Check every 180 seconds
