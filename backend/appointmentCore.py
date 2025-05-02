@@ -28,30 +28,33 @@ router = APIRouter(prefix='/appointment', tags=['appointment'])
 
 ACCEPTANCE_KEYWORDS = {'accept', 'approve', 'confirm', 'yes', 'agreed', 'agree'}
 REJECTION_KEYWORDS = {'reject', 'decline', 'deny', 'no', 'cannot', "can't", 'disagree'}
+RESCHEDULE_KEYWORDS = {'reschedule', 'change', 'alter', 'modify', 'shift'}
 
 
 # Precompiled regex for better word-boundary matching
 ACCEPTANCE_REGEX = re.compile(r'\b(?:' + '|'.join(re.escape(word) for word in ACCEPTANCE_KEYWORDS) + r')\b', re.IGNORECASE)
 REJECTION_REGEX = re.compile(r'\b(?:' + '|'.join(re.escape(word) for word in REJECTION_KEYWORDS) + r')\b', re.IGNORECASE)
+RESCHEDULE_REGEX = re.compile(r'\b(?:' + '|'.join(re.escape(word) for word in RESCHEDULE_KEYWORDS) + r')\b', re.IGNORECASE)
 
 @router.post('/create-appointment')
 async def create_apointment(appointment: AppointmentCreate, db: Session = Depends(get_db)):
     """Kiosk users Create an appointment"""
     
     # Check if user already has a pending or accepted appointment with this professor
-    existing_appointment = db.query(Appointment).filter(
-        Appointment.student_email == appointment.student_email,
-        Appointment.professor_uuid == appointment.professor_uuid,
-        Appointment.status.in_(["Pending", "Accepted"]),
-        Appointment.end_time > datetime.now()  # Only check future appointments
-    ).first()
+    # existing_appointment = db.query(Appointment).filter(
+    #     Appointment.student_email == appointment.student_email,
+    #     Appointment.professor_uuid == appointment.professor_uuid,
+    #     Appointment.status.in_(["Pending", "Accepted"]),
+    #     Appointment.end_time > datetime.now()  # Only check future appointments
+    # ).first()
     
-    if existing_appointment:
-        raise HTTPException(
-            status_code=400, 
-            detail=f"You already have a {existing_appointment.status.lower()} appointment with this professor. " +
-                   f"Reference: {str(existing_appointment.uuid)[-6:]}"
-        )
+    # if existing_appointment:
+    #     raise HTTPException(
+    #         status_code=400, 
+    #         detail=f"You already have a {existing_appointment.status.lower()} appointment with this professor. " +
+    #                f"Reference: {str(existing_appointment.uuid)[-6:]}"
+    #     )
+    # TODO: Uncomment this after finishing the project
     
     formattedStartTime = convert_time_format(appointment.start_time)
     formattedEndTime = convert_time_format(appointment.end_time)
@@ -297,6 +300,19 @@ async def send_email(status: str, appointment_details: dict):
                                         f"Best regards,\n"
                                         f"RTU Kiosk Appointment System")
             confirmationEmail["Subject"] = "Appointment Auto-Rejected - Reference #" + appointment_details['uuid']
+
+        elif status == "reschedule":
+            confirmationEmail.set_content(f"Dear {appointment_details['student_name']},\n\n"
+                                    f"Good day!\n"
+                                    f"{appointment_details['professor_name']} has suggested a different time for your appointment request.\n\n"
+                                    f"Your Reference Number: {appointment_details['uuid']}\n\n"
+                                    # f"The professor suggested: {suggested_date} {suggested_time}\n\n"
+                                    f"Please log in to the appointment system to confirm or reject this suggested time.\n\n"
+                                    f"Thank you for your understanding.\n\n"
+                                    f"Best regards,\n"
+                                    f"RTU Kiosk Appointment System")
+            confirmationEmail["Subject"] = "Appointment Reschedule Suggestion - Reference #" + appointment_details['uuid']
+            print("this is rescheduled")
             
         confirmationEmail["To"] = appointment_details['student_email']
         confirmationEmail["From"] = "2021-101043@rtu.edu.ph"
@@ -321,7 +337,7 @@ async def auto_reject_old_appointments(db: Session):
     Automatically reject appointments that have been pending for more than 3 days
     """
     try:
-        # Calculate the cutoff date (3 days ago)
+        # Calculate the cutoff date (2 days ago)
         two_days_ago = datetime.now() - timedelta(days=2)
         
         # Find all pending appointments created more than 3 days ago
@@ -420,7 +436,9 @@ async def check_professor_email_replies(db: Session = Depends(get_db)):
                         
                     # Check if reply contains accept/approve or reject/decline
                     status = None
-                    if contains_rejection(reply_content):
+                    if contains_reschedule(reply_content):
+                        status = "reschedule"
+                    elif contains_rejection(reply_content):
                         status = "reject"
                     elif contains_acceptance(reply_content):
                         status = "accept"
@@ -449,7 +467,13 @@ async def check_professor_email_replies(db: Session = Depends(get_db)):
                             }
                             
                             # Update status and send confirmation email
-                            appointment.status = 'Accepted' if status == 'accept' else 'Rejected'
+                            status_map = {
+                                "accept": "Accepted",
+                                "reject": "Rejected",
+                                "reschedule": "Rescheduled"
+                            }
+
+                            appointment.status = status_map.get(status)
                             db.commit()
                             
                             await send_email(status, appointment_details)
@@ -523,6 +547,11 @@ def contains_acceptance(text: str) -> bool:
     logging.info(f"contains_acceptance: {match}, text: {text}")
     return match
 
+def contains_reschedule(text: str) -> bool:
+    """Check if text contains words indicating rejection."""
+    match = bool(RESCHEDULE_REGEX.search(text))
+    logging.info(f"contains_reschedule: {match}, text: {text}")
+    return match
 
 def format_iso_date(date_value):
     """
