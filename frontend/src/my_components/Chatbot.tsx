@@ -38,6 +38,7 @@ const Chatbot: React.FC = () => {
   }
 
   const newChat = () => {
+    fetchFAQs();
     setMessages([]);
   };
 
