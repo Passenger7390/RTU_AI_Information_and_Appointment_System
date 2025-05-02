@@ -37,7 +37,22 @@ REJECTION_REGEX = re.compile(r'\b(?:' + '|'.join(re.escape(word) for word in REJ
 @router.post('/create-appointment')
 async def create_apointment(appointment: AppointmentCreate, db: Session = Depends(get_db)):
     """Kiosk users Create an appointment"""
-
+    
+    # Check if user already has a pending or accepted appointment with this professor
+    existing_appointment = db.query(Appointment).filter(
+        Appointment.student_email == appointment.student_email,
+        Appointment.professor_uuid == appointment.professor_uuid,
+        Appointment.status.in_(["Pending", "Accepted"]),
+        Appointment.end_time > datetime.now()  # Only check future appointments
+    ).first()
+    
+    if existing_appointment:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"You already have a {existing_appointment.status.lower()} appointment with this professor. " +
+                   f"Reference: {str(existing_appointment.uuid)[-6:]}"
+        )
+    
     formattedStartTime = convert_time_format(appointment.start_time)
     formattedEndTime = convert_time_format(appointment.end_time)
     

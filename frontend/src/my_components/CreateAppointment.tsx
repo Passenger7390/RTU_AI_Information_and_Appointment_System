@@ -181,7 +181,10 @@ const CreateAppointmentComponent = ({ onBack }: { onBack: () => void }) => {
         setReferenceNumber(res.reference);
         setIsSuccess(true); // Set success state to true
       } catch (error: any) {
-        toast.error(`${error}`);
+        console.error("Error creating appointment:", error);
+        const errorMessage =
+          error.response?.data?.detail || "Error creating appointment";
+        toast.error(errorMessage);
       }
     }
   }
