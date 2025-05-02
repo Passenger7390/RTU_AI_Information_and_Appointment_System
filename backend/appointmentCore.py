@@ -573,11 +573,23 @@ def determine_intent(text: str):
         return "reject"
     
     # RULE 3: Check for date/time patterns with reschedule keywords
-    date_time_pattern = re.search(r'\b(\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{4}[/-]\d{1,2}[/-]\d{1,2}|\d{1,2}:\d{2}|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2}|\d{1,2} (?:AM|PM))', text)
-    reschedule_words = re.search(r'\b(reschedule|another time|different time|change time|suggest|available|instead)\b', text)
     
-    if date_time_pattern and reschedule_words:
+    # A more comprehensive pattern that handles full date-time ranges
+    date_range_pattern = re.search(
+        r'\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2},? \d{4} \d{1,2}:\d{2} (?:AM|PM) ?[-–] ?(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2},? \d{4} )?\d{1,2}:\d{2} (?:AM|PM)',
+        text,
+        re.IGNORECASE
+    )
+    
+    # Catch individual date/time components as well
+    date_time_pattern = re.search(r'\b(\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{4}[/-]\d{1,2}[/-]\d{1,2}|\d{1,2}:\d{2}|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2}(?:,? \d{4})?|\d{1,2} (?:AM|PM))', text)
+    
+    reschedule_words = re.search(r'\b(reschedule|reschedule to|another time|different time|change time|suggest|available|instead|resched to|resched)\b', text)
+    
+    if date_range_pattern or (date_time_pattern and reschedule_words):
         logging.info(f"RULE 3: Date/time with reschedule words - RESCHEDULE")
+        if date_range_pattern:
+            logging.info(f"Detected date range: {date_range_pattern.group(0)}")
         return "reschedule"
     
     # RULE 4: Check for dominant intent if mixed signals
