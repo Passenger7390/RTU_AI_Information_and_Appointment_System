@@ -254,7 +254,6 @@ async def check_email(db: Session = Depends(get_db),
 
 async def send_email(status: str, appointment_details: dict):
     """Send email to the user"""
-    print(f"status: {status}")
     try:
         service = get_gmail_service()
         confirmationEmail = EmailMessage()
@@ -436,14 +435,10 @@ async def check_professor_email_replies(db: Session = Depends(get_db)):
                         
                     # Check if reply contains accept/approve or reject/decline
                     status = None
-                    if contains_reschedule(reply_content):
-                        status = "reschedule"
-                    elif contains_rejection(reply_content):
-                        status = "reject"
-                    elif contains_acceptance(reply_content):
-                        status = "accept"
-                    logging.info(f"status: {status}, ref_number: {ref_number}, reply_content: {reply_content}")
-                    
+
+                    status = determine_intent(reply_content)
+                    # logging.info(f"Email intent determined: {status} for reply: {reply_content[:50]}...")
+
                     if status:
                         # Find the appointment in the database using the reference number
                         appointment = db.query(Appointment).filter(
@@ -536,7 +531,6 @@ def extract_reference_number(message):
 def contains_rejection(text: str) -> bool:
     """Check if text contains words indicating rejection."""
     match = bool(REJECTION_REGEX.search(text))
-    logging.info(f"contains_rejection: {match}, text: {text}")
     return match
 
 def contains_acceptance(text: str) -> bool:
@@ -544,14 +538,83 @@ def contains_acceptance(text: str) -> bool:
     if contains_rejection(text):
         return False
     match = bool(ACCEPTANCE_REGEX.search(text))
-    logging.info(f"contains_acceptance: {match}, text: {text}")
     return match
 
 def contains_reschedule(text: str) -> bool:
     """Check if text contains words indicating rejection."""
     match = bool(RESCHEDULE_REGEX.search(text))
-    logging.info(f"contains_reschedule: {match}, text: {text}")
     return match
+
+def determine_intent(text: str):
+    """
+    Determine if an email indicates accept, reject, or reschedule
+    Returns "accept", "reject", "reschedule", or None
+    """
+    # Clean and normalize the text
+    text = text.lower().strip()
+    logging.info(f"reply: {text}")
+    
+    # RULE 1: Single-word replies or very simple replies (highest priority)
+    if text == "accept" or text == "accepted" or text == "approve" or text == "approved" or text == "yes":
+        logging.info(f"RULE 1: Exact match - ACCEPT")
+        return "accept"
+        
+    if text == "reject" or text == "rejected" or text == "decline" or text == "declined" or text == "no":
+        logging.info(f"RULE 1: Exact match - REJECT")
+        return "reject"
+    
+    # RULE 2: Check for clear phrases (high priority)
+    if re.search(r'\b(i\s+accept|i\s+approve|i\s+confirm|i\s+agree)\b', text):
+        logging.info(f"RULE 2: Clear phrase - ACCEPT")
+        return "accept"
+        
+    if re.search(r'\b(i\s+reject|i\s+decline|i\s+deny|cannot\s+accept|not\s+available)\b', text):
+        logging.info(f"RULE 2: Clear phrase - REJECT")
+        return "reject"
+    
+    # RULE 3: Check for date/time patterns with reschedule keywords
+    date_time_pattern = re.search(r'\b(\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{4}[/-]\d{1,2}[/-]\d{1,2}|\d{1,2}:\d{2}|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2}|\d{1,2} (?:AM|PM))', text)
+    reschedule_words = re.search(r'\b(reschedule|another time|different time|change time|suggest|available|instead)\b', text)
+    
+    if date_time_pattern and reschedule_words:
+        logging.info(f"RULE 3: Date/time with reschedule words - RESCHEDULE")
+        return "reschedule"
+    
+    # RULE 4: Check for dominant intent if mixed signals
+    accept_count = len([word for word in ["accept", "approve", "confirm", "yes", "agreed", "agree"] 
+                      if re.search(rf'\b{word}\b', text)])
+    reject_count = len([word for word in ["reject", "decline", "deny", "cannot", "not", "disagree"] 
+                      if re.search(rf'\b{word}\b', text)])
+    reschedule_count = len([word for word in ["reschedule", "change", "alter", "modify", "shift"] 
+                          if re.search(rf'\b{word}\b', text)])
+    
+    logging.info(f"Keyword counts - accept: {accept_count}, reject: {reject_count}, reschedule: {reschedule_count}")
+    
+    # If one intent dominates significantly
+    if accept_count > reject_count + reschedule_count:
+        logging.info(f"RULE 4: Dominant intent - ACCEPT")
+        return "accept"
+    if reject_count > accept_count + reschedule_count:
+        logging.info(f"RULE 4: Dominant intent - REJECT")
+        return "reject"
+    if reschedule_count > accept_count + reject_count:
+        logging.info(f"RULE 4: Dominant intent - RESCHEDULE")
+        return "reschedule"
+    
+    # RULE 5: For cases with equal signals, prioritize in order (no hard rejection bias)
+    if accept_count > 0:
+        logging.info(f"RULE 5: Fallback - ACCEPT")
+        return "accept"
+    if reject_count > 0:
+        logging.info(f"RULE 5: Fallback - REJECT")
+        return "reject"
+    if reschedule_count > 0:
+        logging.info(f"RULE 5: Fallback - RESCHEDULE")
+        return "reschedule"
+    
+    # Default to None if no clear intent is found
+    logging.info(f"No clear intent found")
+    return None
 
 def format_iso_date(date_value):
     """
@@ -599,4 +662,4 @@ async def check_email_periodically():
                 await auto_reject_old_appointments(db)
         except Exception as e:
             logging.error(f"Error checking email replies: {e}")
-        await asyncio.sleep(180)  # Check every 180 seconds
+        await asyncio.sleep(90)  # Check every 180 seconds
