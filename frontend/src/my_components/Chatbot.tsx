@@ -9,10 +9,19 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getChatbotResponse } from "@/api";
+import { getChatbotResponse, getFAQs } from "@/api";
 import MarkdownResponse from "@/my_components/MarkdownResponse";
 import { KeyboardInput } from "./KeyboardInput";
-import { Message } from "@/interface";
+import { FAQ, Message } from "@/interface";
+import { IoMdHelpCircleOutline } from "react-icons/io";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const Chatbot: React.FC = () => {
   const [query, setQuery] = useState("");
@@ -21,6 +30,12 @@ const Chatbot: React.FC = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [lastActivity, setLastActivity] = useState(Date.now());
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [faqs, setFaqs] = useState([]);
+
+  async function fetchFAQs() {
+    const res = await getFAQs();
+    setFaqs(res);
+  }
 
   const newChat = () => {
     setMessages([]);
@@ -30,12 +45,7 @@ const Chatbot: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     if (!query.trim()) return;
 
     // Append user message
@@ -74,6 +84,55 @@ const Chatbot: React.FC = () => {
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setQuery(query);
+    setLastActivity(Date.now());
+
+    if (query && !isTyping) {
+      setIsTyping(true);
+    } else if (!query && isTyping) {
+      setIsTyping(false);
+    }
+  };
+
+  async function handleChooseFAQ(question: string) {
+    // No need to set query in the input field first
+    const userMessage: Message = { sender: "user", text: question };
+    setMessages((prev) => [...prev, userMessage]);
+    setLoading(true);
+
+    try {
+      const res = await getChatbotResponse(question);
+
+      if (res.suggestions) {
+        const botMessage: Message = {
+          sender: "bot",
+          text: res.response,
+        };
+        setMessages((prev) => [...prev, botMessage]);
+        const suggestionsMessage: Message = {
+          sender: "bot",
+          text: res.suggestions.join(", "),
+        };
+        setMessages((prev) => [...prev, suggestionsMessage]);
+      } else {
+        const botMessage: Message = {
+          sender: "bot",
+          text: res.response,
+        };
+        setMessages((prev) => [...prev, botMessage]);
+      }
+    } catch (error) {
+      setMessages((prev) => [
+        ...prev,
+        { sender: "bot", text: "Sorry, an error occurred." },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
     // The timer will check for inactivity every two seconds
     const inactivityTimer = setInterval(() => {
@@ -89,17 +148,13 @@ const Chatbot: React.FC = () => {
     return () => clearInterval(inactivityTimer);
   }, [lastActivity, messages, isTyping]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value;
-    setQuery(query);
-    setLastActivity(Date.now());
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
-    if (query && !isTyping) {
-      setIsTyping(true);
-    } else if (!query && isTyping) {
-      setIsTyping(false);
-    }
-  };
+  useEffect(() => {
+    fetchFAQs();
+  }, []);
 
   return (
     <div className="w-3/4 h-full mx-auto my-auto p-2">
@@ -114,7 +169,9 @@ const Chatbot: React.FC = () => {
             <div className="flex-1 justify-between items-center">
               RAY Chatbot
             </div>
-            <div className="w-24"></div>
+            <div className="w-24">
+              <HelpDialog />
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent
@@ -122,7 +179,7 @@ const Chatbot: React.FC = () => {
           onScroll={() => setLastActivity(Date.now())}
         >
           {messages.length === 0 ? ( // This block is a welcome message, this will disappear when the user asks RAY
-            <div className="flex h-[95%] items-center justify-center">
+            <div className="flex h-[95%] items-center justify-center flex-col space-y-10">
               <div className="text-center space-y-2">
                 <h1 className="text-4xl font-bold text-white">
                   Welcome to RAY Chatbot!
@@ -130,6 +187,16 @@ const Chatbot: React.FC = () => {
                 <p className="text-lg text-gray-200">
                   Start a conversation by typing a message below.
                 </p>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                {faqs
+                  .filter((faq: FAQ) => faq.isPinned)
+                  .map((faq: FAQ) => (
+                    <Button onClick={() => handleChooseFAQ(faq.question)}>
+                      {faq.question}
+                    </Button>
+                  ))}
               </div>
             </div>
           ) : (
@@ -159,29 +226,52 @@ const Chatbot: React.FC = () => {
           <div ref={messagesEndRef} />
         </CardContent>
         <CardFooter className="p-5">
-          <form onSubmit={handleSubmit} className="flex gap-2 w-full">
-            {/* <Input
-              type="text"
-              value={query}
-              onChange={handleInputChange}
-              placeholder="Type your message..."
-              className="flex-1"
-            /> */}
-            <KeyboardInput
-              type="text"
-              value={query}
-              onChange={handleInputChange}
-              placeholder="Type your message..."
-              className="flex-1 !text-xl"
-              keyboardType="alphanumeric"
-            />
-            <Button type="submit" disabled={loading}>
-              Send
-            </Button>
-          </form>
+          {/* <form
+            onSubmit={handleSubmit}
+            className="flex gap-2 w-full border border-yellow-500"
+          > */}
+          <KeyboardInput
+            type="text"
+            value={query}
+            onChange={handleInputChange}
+            placeholder="Type your message..."
+            className="flex-1 !text-xl"
+            keyboardType="alphanumeric"
+          />
+          <Button
+            type="submit"
+            disabled={loading}
+            onClick={handleSubmit}
+            className="bg-yellow-500"
+          >
+            Send
+          </Button>
+          {/* </form> */}
         </CardFooter>
       </Card>
     </div>
+  );
+};
+
+const HelpDialog = () => {
+  // TODO: Edit this for chatbot help
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button className="mx-auto size-18 p-4" variant={"ghost"}>
+          <IoMdHelpCircleOutline className="size-12" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Are you absolutely sure?</DialogTitle>
+          <DialogDescription>
+            This action cannot be undone. This will permanently delete your
+            account and remove your data from our servers.
+          </DialogDescription>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
   );
 };
 

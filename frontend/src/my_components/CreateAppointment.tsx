@@ -4,15 +4,6 @@ import OTPDialog from "./OTPDialog";
 import toast from "react-hot-toast";
 import { KeyboardInput } from "./KeyboardInput";
 import { KeyboardTextArea } from "./KeyboardTextArea";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,7 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
 import {
   createAppointment,
   getAppointmentSchedule,
@@ -37,6 +27,20 @@ import {
   ProfessorList,
   VerifyInfoDialogProps,
 } from "@/interface";
+import { Check, ChevronsUpDown } from "lucide-react";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 const CreateAppointmentComponent = ({ onBack }: { onBack: () => void }) => {
   const [currentPage, setCurrentPage] = useState(0);
@@ -252,7 +256,8 @@ const PersonalInfoPage = ({
     setStudentInformation({
       student_name: studentName,
       student_id: studentID,
-      student_email: `${studentID}@rtu.edu.ph`,
+      // student_email: `${studentID}@rtu.edu.ph`,
+      student_email: `${studentID}`,
       concern,
       isEmailVerified: emailVerified,
     });
@@ -288,7 +293,8 @@ const PersonalInfoPage = ({
             <Label className="text-xl">@rtu.edu.ph</Label>
           </div>
           <OTPDialog
-            email={`${studentID}@rtu.edu.ph`}
+            // email={`${studentID}@rtu.edu.ph`}
+            email={`${studentID}`}
             onVerified={onEmailVerified}
             key={studentID}
           />
@@ -326,6 +332,9 @@ const ProfessorInfoPage = ({
   const [date, setDate] = useState("");
   const [hours, setHours] = useState("");
   const [bookedSlots, setBookedSlots] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("");
+  const [searchText, setSearchText] = useState("");
 
   async function fetchProfessors() {
     try {
@@ -461,12 +470,101 @@ const ProfessorInfoPage = ({
     getAppointmentScheduleOfProfessor();
   }, [professor, date]);
 
+  // 1. Add a ref for the keyboard container
+  const keyboardContainerRef = useRef<HTMLDivElement>(null);
+
   return (
     <div className="flex flex-col items-center justify-center min-w-full min-h-full w-[1000px]">
       <div className="w-full px-5 mb-10">
         <Label className="text-2xl font-semibold">Professor Schedule</Label>
         <div className="w-full flex gap-4 item-center justify-center h-20">
-          <DropdownMenu>
+          <Popover
+            open={open}
+            onOpenChange={(isOpen) => {
+              // Only close if it's not a click inside the keyboard
+              if (!isOpen && keyboardContainerRef.current) {
+                // Check if the active element is within the keyboard or our input
+                const keyboardIsActive = document.activeElement?.closest(
+                  ".keyboard-container"
+                );
+                if (keyboardIsActive) {
+                  // Don't close the popover if we're interacting with the keyboard
+                  return;
+                }
+              }
+              setOpen(isOpen);
+            }}
+          >
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={open}
+                className="text-2xl p-5 w-full flex items-center my-auto justify-between"
+              >
+                {value
+                  ? professorList.find((prof) => prof.professor_id === value)
+                      ?.name
+                  : "Select professor..."}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[300px] p-0">
+              <Command>
+                <div
+                  className="px-1 py-2 keyboard-container"
+                  ref={keyboardContainerRef}
+                >
+                  <KeyboardInput
+                    type="text"
+                    placeholder="Search professor..."
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    keyboardType="alphanumeric"
+                    className="h-9 w-full text-base"
+                  />
+                </div>
+                <CommandList>
+                  <CommandEmpty>No professor found.</CommandEmpty>
+                  <CommandGroup>
+                    {professorList
+                      .filter((prof) =>
+                        prof.name
+                          .toLowerCase()
+                          .includes(searchText.toLowerCase())
+                      )
+                      .map((prof) => (
+                        <CommandItem
+                          key={prof.professor_id}
+                          value={prof.name}
+                          onSelect={() => {
+                            setValue(
+                              value === prof.professor_id
+                                ? ""
+                                : prof.professor_id
+                            );
+                            handleSelectorChange(prof.professor_id);
+                            setOpen(false);
+                          }}
+                        >
+                          {prof.name}
+                          <Check
+                            className={cn(
+                              "ml-auto",
+                              value === prof.professor_id
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+          {/*  */}
+          {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant={"outline"}
@@ -492,7 +590,7 @@ const ProfessorInfoPage = ({
                 ))}
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
 
           <Label className="text-2xl min-w-[450px] flex items-center">{`Office Hours: ${
             formatHours() || ""

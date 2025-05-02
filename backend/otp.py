@@ -25,8 +25,10 @@ router = APIRouter(prefix="/otp", tags=["gmail"])
 session = create_session(db_connect()[0])
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+logging.getLogger('googleapiclient.discovery_cache').setLevel(logging.ERROR)
 
-SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
+
+SCOPES = ["https://www.googleapis.com/auth/gmail.send", "https://www.googleapis.com/auth/gmail.modify"]
 
 def get_gmail_service():
     """
@@ -183,7 +185,10 @@ async def delete_expired_and_used_otp(db: Session):   # Delete expired otp
 
 async def cleanup_expired_otp():
     while True:
-        with session as db:
-            # logging.info(f"Deleting expired OTPs at {datetime.now()}")
-            await delete_expired_and_used_otp(db)
+        try:
+            with session as db:
+                # logging.info(f"Deleting expired OTPs at {datetime.now()}")
+                await delete_expired_and_used_otp(db)
+        except Exception as e:
+            logger.error(f"Error deleting expired OTPs: {e}")
         await asyncio.sleep(30)  # Run every 30 seconds

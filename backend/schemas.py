@@ -39,17 +39,20 @@ class FAQCreate(BaseModel):
     synonyms: Optional[List[str]] = []
     answer: str
 
+
 class FAQUpdate(BaseModel):
     id: int
     question: str
     synonyms: Optional[List[str]] = []
     answer: str
+    isPinned: bool
 
 class FAQOut(BaseModel):
     id: int
     question: str
     synonyms: List[str]
     answer: str
+    isPinned: bool
 
     class Config:
         from_attributes = True
@@ -129,3 +132,6 @@ class UpdateProfessor(BaseModel):
 
 class AppointmentUpdate(BaseModel):
     status: str
+
+class StarFAQ(BaseModel):
+    id: int

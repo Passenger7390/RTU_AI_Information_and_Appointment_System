@@ -19,7 +19,7 @@ const App = () => {
             <Route path="/user" element={<UserPage />} />
           </Routes>
         </Router>
-        <Toaster position="top-right"></Toaster>
+        <Toaster position="bottom-right" reverseOrder={false}></Toaster>
       </ThemeProvider>
     </KeyboardProvider>
   );

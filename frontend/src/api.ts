@@ -1,6 +1,12 @@
 import axios from "axios";
 import { TableData } from "./my_components/table/Columns";
-import { Appointment, CreateProfessor, FAQ, Professor } from "./interface";
+import {
+  Appointment,
+  CreateProfessor,
+  FAQ,
+  FAQid,
+  Professor,
+} from "./interface";
 // Environment-aware API configuration
 const env = import.meta.env.VITE_ENV || "production";
 const isDev = env === "development";
@@ -212,6 +218,42 @@ export const deleteFAQ = async (id: number) => {
   });
   return res.data;
 };
+
+export async function starFAQ(param: FAQid) {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  const res = await axios.put(`${chatApi}/start-faq`, param, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+}
+
+export async function getUserFAQs() {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  const res = await axios.get(`${chatApi}/user-faqs`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+}
+
+export async function deleteUserFAQ(user_faq: FAQid) {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  const res = await axios.delete(`${chatApi}/delete-user-faq/${user_faq.id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+}
 
 // ======================================================= CHAT API END ========================================================
 // ========================================================= OTP API ========================================================

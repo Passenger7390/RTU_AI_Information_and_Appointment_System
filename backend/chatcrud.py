@@ -9,12 +9,13 @@ from rapidfuzz import fuzz, process
 from google import genai
 from auth import read_users_me
 from database import get_db
-from models import FAQ
+from models import FAQ, UserFAQ
 import random
-from schemas import FAQCreate, FAQOut, FAQUpdate, QueryRequest, QueryResponse, UserBase
+from schemas import FAQCreate, FAQOut, FAQUpdate, QueryRequest, QueryResponse, StarFAQ, UserBase
+from sqlalchemy import desc
 
 router = APIRouter(prefix="/ray", tags=["ray"])
-client = genai.Client(api_key=os.getenv("GEMINI_API"))
+# client = genai.Client(api_key=os.getenv("GEMINI_API"))
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,11 @@ FALLBACK_RESPONSES = [
     "I'm here specifically to help with RTU-related questions. What can I tell you about our university?"
 ]
 
+@router.delete("/delete-user-faq/{faq_id}")
+async def delete_user_faq(faq_id: int, db: Session = Depends(get_db)):
+    faq = db.query(UserFAQ).filter(UserFAQ.id == faq_id).delete()
+    db.commit()
+    return {"message": "test"}
 
 
 @router.post("/chat", response_model=QueryResponse)
@@ -52,6 +58,7 @@ async def chat(query_request: QueryRequest, db: Session = Depends(get_db)):
         clarification_text = "I couldn't clearly understand your question. Did you mean one of the following?"
         return QueryResponse(response=clarification_text, suggestions=suggestions)
     
+    add_unknown_faq(query, db)
     return QueryResponse(response=random.choice(FALLBACK_RESPONSES))
 
     # Fallback: Call Gemini API if no suggestions are found.
@@ -72,7 +79,8 @@ async def read_faqs(db: Session = Depends(get_db)):
             id=faq.id,
             synonyms=faq.synonyms if isinstance(faq.synonyms, list) else ([] if faq.synonyms is None else [faq.synonyms]),
             question=faq.question,
-            answer=faq.answer
+            answer=faq.answer,
+            isPinned=faq.isPinned
         ) for faq in result
     ]
 
@@ -102,8 +110,24 @@ async def delete_faq(faq_id: int, db: Session = Depends(get_db), current_user: U
     db.commit()
     return {"message": f"Deleted FAQ with ID {faq_id}"}
 
+@router.put("/start-faq")
+async def starFAQ(id: StarFAQ, db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
+    print(f"id.id: {id.id}")
+    faq = db.query(FAQ).filter(FAQ.id == id.id).first()
+    faq.isPinned = not faq.isPinned
+
+    db.commit()
+    db.refresh(faq)
+
+    return {"message": f"test"}
+
+@router.get("/user-faqs")
+async def get_all_user_faqs(db: Session = Depends(get_db), current_user: UserBase = Depends(read_users_me)):
+    user_faqs = db.query(UserFAQ).all()
+    return [faq for faq in user_faqs]
+
 def get_all_faqs(db: Session):
-    return db.query(FAQ).all()
+    return db.query(FAQ).order_by(desc(FAQ.isPinned)).all()
 
 def get_faq_by_question(db: Session, question: str):
     return db.query(FAQ).filter(FAQ.question.ilike(question)).first()
@@ -112,7 +136,8 @@ def create_faq(db: Session, faq: FAQCreate):
     new_faq = FAQ(
         question=faq.question.strip(),
         synonyms=faq.synonyms,  # synonyms should be a list (stored as JSONB in PostgreSQL)
-        answer=faq.answer.strip()
+        answer=faq.answer.strip(),
+        isPinned=False
     )
     db.add(new_faq)
     db.commit()
@@ -182,25 +207,32 @@ def get_faq_suggestions_by_words(query: str, faqs, threshold: float = 0.3, max_s
     suggestions.sort(key=lambda x: x[1], reverse=True)
     return [sug[0] for sug in suggestions[:max_suggestions]]
 
-async def get_gemini_response(query: str, history: list = None) -> str:
-    """
-    Get an AI-generated response from Google Gemini.
+def add_unknown_faq(query: str, db: Session):
+    user_faq = UserFAQ(query=query.strip())
+    db.add(user_faq)
+    db.commit()
+    db.refresh(user_faq)
 
-    This function starts a chat session with the Gemini model using the provided conversation history,
-    then sends the prompt and returns the response text.
-    """
-    history = history or []
-    
-    def sync_get_response():
-        # Create a chat session that remembers conversation history.
-        # Adjust the code below based on the actual genai API:
-        chat_session = client.chats.create(model='gemini-2.0-flash', history=history)
-        response = chat_session.send_message(query)
+# def ge
+# async def get_gemini_response(query: str, history: list = None) -> str:
+#     """
+#     Get an AI-generated response from Google Gemini.
 
-        return response.text.strip()
+#     This function starts a chat session with the Gemini model using the provided conversation history,
+#     then sends the prompt and returns the response text.
+#     """
+#     history = history or []
     
-    try:
-        return await anyio.to_thread.run_sync(sync_get_response)
-    except Exception as e:
-        raise Exception("Gemini API error: " + str(e))
+#     def sync_get_response():
+#         # Create a chat session that remembers conversation history.
+#         # Adjust the code below based on the actual genai API:
+#         chat_session = client.chats.create(model='gemini-2.0-flash', history=history)
+#         response = chat_session.send_message(query)
+
+#         return response.text.strip()
+    
+#     try:
+#         return await anyio.to_thread.run_sync(sync_get_response)
+#     except Exception as e:
+#         raise Exception("Gemini API error: " + str(e))
 
