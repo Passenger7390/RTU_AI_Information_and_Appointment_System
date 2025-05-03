@@ -21,8 +21,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix='/appointment', tags=['appointment'])
 
-# TODO: Implement a function for professors to suggest a time and date for the appointment
-# TODO: Edit the message that a strict compliance to the appointment is required
+# TODO: Get the email response of the student to confirm or reject the suggested time of the professor
+
 
 # ===============================================Appointment Information===================================================
 
