@@ -531,6 +531,107 @@ async def check_professor_email_replies(db: Session = Depends(get_db)):
                 logger.error(f"Error checking email replies after {max_retries} attempts: {str(error)}")
                 raise HTTPException(status_code=500, detail=f"Error checking email replies: {str(error)}")
 
+async def check_student_reschedule_replies(db: Session = Depends(get_db)):
+    """
+    Check for student replies to appointment reschedule suggestions
+    and update appointment status accordingly
+    """
+    max_retries = 3
+    retry_delay = 2  # Initial delay in seconds
+    
+    for attempt in range(max_retries):
+        try:
+            service = get_gmail_service()
+            
+            # Search for emails with subject containing "Appointment Reschedule Suggestion"
+            results = service.users().messages().list(
+                userId='me',
+                q='subject:"Appointment Reschedule Suggestion" is:unread',
+                maxResults=10
+            ).execute()
+            
+            messages = results.get('messages', [])
+            processed = 0
+
+            for message_info in messages:
+                if processed > 0:
+                    await asyncio.sleep(1)  # Avoid hitting API limits
+                    
+                message_id = message_info['id']
+                
+                try:
+                    # Get the thread to check for replies
+                    thread = service.users().threads().get(userId='me', id=message_info['threadId']).execute()
+                    
+                    # Skip if there's only one message in the thread (no replies)
+                    if len(thread['messages']) <= 1:
+                        continue
+                    
+                    # Get the original message and the reply
+                    original_message = thread['messages'][0]
+                    reply_message = thread['messages'][-1]
+                    
+                    # Extract reply content
+                    reply_content = get_message_body(reply_message)
+                    
+                    # Extract reference number from original message
+                    ref_number = extract_reference_number(original_message)
+                    
+                    if not ref_number:
+                        continue
+                        
+                    # Determine if student accepted or rejected the reschedule
+                    status = None
+                    if contains_acceptance(reply_content):
+                        status = "accept"
+                    elif contains_rejection(reply_content):
+                        status = "reject"
+                        
+                    if status:
+                        # Find the appointment in database
+                        appointment = db.query(Appointment).filter(
+                            cast(Appointment.uuid, String).like(f"%{ref_number}")
+                        ).first()
+                        
+                        if appointment and appointment.status == "Rescheduled - Pending":
+                            # Update the appointment based on student response
+                            if status == "accept":
+                                # Update the appointment with the suggested times
+                                appointment.start_time = appointment.suggested_start_time
+                                appointment.end_time = appointment.suggested_end_time
+                                appointment.status = "Accepted"
+                            else:  # reject
+                                appointment.status = "Rejected"
+                                
+                            # Clear the suggested times
+                            appointment.suggested_start_time = None
+                            appointment.suggested_end_time = None
+                            
+                            db.commit()
+                            
+                            # Mark the email as processed
+                            service.users().messages().modify(
+                                userId='me',
+                                id=message_id,
+                                body={'removeLabelIds': ['UNREAD']}
+                            ).execute()
+                            
+                            processed += 1
+                
+                except HttpError as e:
+                    logging.error(f"Error processing message {message_id}: {str(e)}")
+            
+            return {"message": f"Processed {processed} student replies"}
+            
+        except (HttpError, TimeoutError) as error:
+            if attempt < max_retries - 1:
+                wait_time = retry_delay * (2 ** attempt)
+                logger.warning(f"Request failed, retrying in {wait_time}s: {str(error)}")
+                await asyncio.sleep(wait_time)
+            else:
+                logger.error(f"Error checking student replies after {max_retries} attempts: {str(error)}")
+                raise HTTPException(status_code=500, detail=f"Error checking student replies: {str(error)}")
+
 # Helper functions for email processing
 
 def get_header_value(headers, name):
@@ -836,6 +937,9 @@ async def check_email_periodically():
             with session as db:
                 logging.info("Checking for email replies...")
                 await check_professor_email_replies(db)
+
+                logging.info("Checking for student reschedule replies...")
+                await check_student_reschedule_replies(db)
 
                 # Also check for old appointments to auto-reject
                 logging.info("Checking for old pending appointments...")
