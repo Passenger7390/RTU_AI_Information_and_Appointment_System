@@ -305,13 +305,12 @@ async def send_email(status: str, appointment_details: dict):
                                     f"Good day!\n"
                                     f"{appointment_details['professor_name']} has suggested a different time for your appointment request.\n\n"
                                     f"Your Reference Number: {appointment_details['uuid']}\n\n"
-                                    # f"The professor suggested: {suggested_date} {suggested_time}\n\n"
-                                    f"Please log in to the appointment system to confirm or reject this suggested time.\n\n"
+                                    f"The professor suggested: {appointment_details['suggested_date']} {appointment_details['suggested_start_time']} - {appointment_details['suggested_end_time']}\n\n"
+                                    f"Please reply to this email to confirm or reject this suggested time.\n\n"
                                     f"Thank you for your understanding.\n\n"
                                     f"Best regards,\n"
                                     f"RTU Kiosk Appointment System")
             confirmationEmail["Subject"] = "Appointment Reschedule Suggestion - Reference #" + appointment_details['uuid']
-            print("this is rescheduled")
             
         confirmationEmail["To"] = appointment_details['student_email']
         confirmationEmail["From"] = "2021-101043@rtu.edu.ph"
@@ -341,7 +340,7 @@ async def auto_reject_old_appointments(db: Session):
         
         # Find all pending appointments created more than 3 days ago
         old_appointments = db.query(Appointment).filter(
-            Appointment.status == "Pending",
+            Appointment.status.in_(["Pending", "Rescheduled - Pending"]),
             Appointment.created_at <= two_days_ago
         ).all()
         
@@ -489,17 +488,22 @@ async def check_professor_email_replies(db: Session = Depends(get_db)):
 
                                     logging.info(f"suggested start time: {formattedStartTime}")
                                     logging.info(f"suggested end time: {formattedEndTime}")
-                                    # appointment.suggested_start_time = formattedStartTime
-                                    # appointment.suggested_end_time = formattedEndTime
+                                    appointment.suggested_start_time = formattedStartTime
+                                    appointment.suggested_end_time = formattedEndTime
                                     
                                     # Add the professor's message for context
                                     appointment_details["professor_message"] = reply_content
                                     
                                 # Update the appointment status
-                                appointment.status = status_map.get(status)
-                                db.commit()
+                                try: 
+                                    await send_email(status, appointment_details)
+                                    appointment.status = status_map.get(status)
+                                    db.commit()
+
+                                except Exception as e:
+                                    logging.error(e)
                                 
-                                await send_email(status, appointment_details)
+
                             
                             appointment.status = status_map.get(status)
                             db.commit()
