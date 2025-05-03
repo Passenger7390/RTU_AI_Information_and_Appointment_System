@@ -465,9 +465,42 @@ async def check_professor_email_replies(db: Session = Depends(get_db)):
                             status_map = {
                                 "accept": "Accepted",
                                 "reject": "Rejected",
-                                "reschedule": "Rescheduled"
+                                "reschedule": "Rescheduled - Pending"
                             }
 
+                            if status == "reschedule":
+                                # Extract the suggested date and time
+                                suggested_date, suggested_start_time, suggested_end_time = extract_datetime_from_text(reply_content)
+                                
+                                if suggested_date and suggested_start_time:
+                                    # Store the suggested date/time in the appointment details
+                                    appointment_details["suggested_date"] = suggested_date
+                                    appointment_details["suggested_start_time"] = suggested_start_time
+                                    appointment_details["suggested_end_time"] = suggested_end_time if suggested_end_time else "not specified"
+                                    
+                                    # If your Appointment model has these fields, update them:
+                                    # (You'll need to add these columns to your database model)
+                                    standard_date = standardize_date_format(suggested_date)
+                                    standard_start_time = standardize_time_format(suggested_start_time)
+                                    standard_end_time = standardize_time_format(suggested_end_time)
+
+                                    formattedStartTime = convert_time_format(f"{standard_date} {standard_start_time}")
+                                    formattedEndTime = convert_time_format(f"{standard_date} {standard_end_time}")
+
+                                    logging.info(f"suggested start time: {formattedStartTime}")
+                                    logging.info(f"suggested end time: {formattedEndTime}")
+                                    # appointment.suggested_start_time = formattedStartTime
+                                    # appointment.suggested_end_time = formattedEndTime
+                                    
+                                    # Add the professor's message for context
+                                    appointment_details["professor_message"] = reply_content
+                                    
+                                # Update the appointment status
+                                appointment.status = status_map.get(status)
+                                db.commit()
+                                
+                                await send_email(status, appointment_details)
+                            
                             appointment.status = status_map.get(status)
                             db.commit()
                             
@@ -628,6 +661,69 @@ def determine_intent(text: str):
     logging.info(f"No clear intent found")
     return None
 
+def extract_datetime_from_text(text: str):
+    """
+    Extract date and time information from text.
+    Returns a tuple of (suggested_date, suggested_start_time, suggested_end_time) or (None, None, None) if not found
+    """
+    text = text.lower().strip()
+    
+    # Check for full date-time ranges like "May 10, 2025 1:00 PM - 2:00 PM"
+    full_pattern = re.search(
+        r'(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]* \d{1,2},? \d{4} \d{1,2}:\d{2} (?:am|pm) ?[-–] ?(?:\d{1,2}:\d{2} (?:am|pm))',
+        text,
+        re.IGNORECASE
+    )
+    
+    if full_pattern:
+        match = full_pattern.group(0)
+        parts = re.split(r'[-–]', match)
+        
+        if len(parts) == 2:
+            # Pattern like "May 10, 2025 1:00 PM - 2:00 PM"
+            date_time = parts[0].strip()
+            end_time = parts[1].strip()
+            
+            # Extract date, which appears before the last space-separated time segment
+            date_parts = date_time.rsplit(' ', 2)
+            if len(date_parts) >= 2:
+                suggested_date = ' '.join(date_parts[:-2])
+                suggested_start_time = ' '.join(date_parts[-2:])
+                suggested_end_time = end_time
+                
+                logging.info(f"Extracted date: {suggested_date}, start: {suggested_start_time}, end: {suggested_end_time}")
+                return (suggested_date, suggested_start_time, suggested_end_time)
+    
+    # Try other patterns like "May 10, 2025" + "1:00 PM"
+    date_pattern = re.search(
+        r'\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]* \d{1,2}(?:,? \d{4})?|(?:\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{4}[/-]\d{1,2}[/-]\d{1,2})\b',
+        text,
+        re.IGNORECASE
+    )
+    
+    time_patterns = re.findall(
+        r'\b(\d{1,2}:\d{2}\s*(?:am|pm)|\d{1,2}\s*(?:am|pm))',
+        text,
+        re.IGNORECASE
+    )
+    
+    if date_pattern and time_patterns and len(time_patterns) >= 1:
+        suggested_date = date_pattern.group(0)
+        suggested_start_time = time_patterns[0]
+        
+        # If two time patterns found, use second as end time
+        suggested_end_time = time_patterns[1] if len(time_patterns) >= 2 else None
+        
+        # If only one time found, estimate end_time as 1 hour later
+        if not suggested_end_time:
+            # This is simplified - in production you'd need more robust time parsing
+            suggested_end_time = "one hour later"
+        
+        logging.info(f"Extracted date: {suggested_date}, start: {suggested_start_time}, end: {suggested_end_time}")
+        return (suggested_date, suggested_start_time, suggested_end_time)
+    
+    return (None, None, None)
+
 def format_iso_date(date_value):
     """
     Convert ISO format date string to a readable format
@@ -662,6 +758,74 @@ def convert_time_format(datetime_str: str):
  
     return datetime.strptime(datetime_str, '%Y-%m-%d %I:%M %p')
 
+def standardize_time_format(time_str):
+    """
+    Convert time strings like "2:00 pm" to "02:00 PM"
+    """
+    try:
+        # Strip whitespace and make lowercase for consistent handling
+        time_str = time_str.strip().lower()
+        
+        # Try common time formats
+        formats_to_try = [
+            '%I:%M %p',      # 2:00 pm
+            '%I %p',         # 2 pm 
+            '%H:%M',         # 14:00
+        ]
+        
+        for fmt in formats_to_try:
+            try:
+                parsed_time = datetime.strptime(time_str, fmt)
+                return parsed_time.strftime('%I:%M %p')  # Return as "02:00 PM"
+            except ValueError:
+                continue
+                
+        raise ValueError(f"Could not parse time: {time_str}")
+        
+    except Exception as e:
+        logging.error(f"Error standardizing time format for '{time_str}': {str(e)}")
+        return time_str  # Return original if parsing fails
+    
+def standardize_date_format(date_str):
+    """
+    Convert date strings like "May 30, 2025" to ISO format "2025-05-30"
+    """
+    try:
+        # Try to parse various common date formats
+        formats_to_try = [
+            '%b %d, %Y',        # May 30, 2025
+            '%B %d, %Y',        # May 30, 2025
+            '%m/%d/%Y',         # 05/30/2025
+            '%m-%d-%Y',         # 05-30-2025
+            '%Y-%m-%d',         # 2025-05-30 (already in target format)
+            '%Y/%m/%d',         # 2025/05/30
+            '%d %b %Y',         # 30 May 2025
+            '%d %B %Y'          # 30 May 2025
+        ]
+        
+        # Normalize the date string to help with parsing
+        date_str = date_str.strip()
+        # Ensure first letter of month name is capitalized for proper parsing
+        if date_str[0].isalpha():
+            words = date_str.split()
+            words[0] = words[0].capitalize()
+            date_str = ' '.join(words)
+        
+        # Try each format until one works
+        for fmt in formats_to_try:
+            try:
+                parsed_date = datetime.strptime(date_str, fmt)
+                return parsed_date.strftime('%Y-%m-%d')  # Return standardized format
+            except ValueError:
+                continue
+                
+        # If none of the formats match, raise an exception
+        raise ValueError(f"Could not parse date: {date_str}")
+    
+    except Exception as e:
+        logging.error(f"Error standardizing date format for '{date_str}': {str(e)}")
+        return date_str  # Return original if parsing fails
+
 async def check_email_periodically():
     while True:
         try:
@@ -673,5 +837,5 @@ async def check_email_periodically():
                 logging.info("Checking for old pending appointments...")
                 await auto_reject_old_appointments(db)
         except Exception as e:
-            logging.error(f"Error checking email replies: {e}")
+            logging.error(f"Error checking email replies and auto rejecting old appointments: {e}")
         await asyncio.sleep(90)  # Check every 180 seconds
