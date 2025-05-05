@@ -425,7 +425,7 @@ async def check_professor_email_replies(db: Session = Depends(get_db)):
                     
                     # Extract reply content
                     reply_content = get_message_body(reply_message)
-
+                    clean_content = clean_reply_content(reply_content)
                     # Look for appointment reference number in the thread
                     ref_number = extract_reference_number(original_message)
                     
@@ -435,7 +435,7 @@ async def check_professor_email_replies(db: Session = Depends(get_db)):
                     # Check if reply contains accept/approve or reject/decline
                     status = None
 
-                    status = determine_intent(reply_content)
+                    status = determine_intent(clean_content)
                     # logging.info(f"Email intent determined: {status} for reply: {reply_content[:50]}...")
 
                     if status:
@@ -573,7 +573,8 @@ async def check_student_reschedule_replies(db: Session = Depends(get_db)):
                     
                     # Extract reply content
                     reply_content = get_message_body(reply_message)
-                    
+                    clean_content = clean_reply_content(reply_content)
+
                     # Extract reference number from original message
                     ref_number = extract_reference_number(original_message)
                     
@@ -582,11 +583,8 @@ async def check_student_reschedule_replies(db: Session = Depends(get_db)):
                         
                     # Determine if student accepted or rejected the reschedule
                     status = None
-                    if contains_acceptance(reply_content):
-                        status = "accept"
-                    elif contains_rejection(reply_content):
-                        status = "reject"
-                        
+                    status = determine_intent(clean_content)
+                    logging.info(f"Email intent determined: {status}, reply_content: {reply_content}")
                     if status:
                         # Find the appointment in database
                         appointment = db.query(Appointment).filter(
@@ -600,8 +598,10 @@ async def check_student_reschedule_replies(db: Session = Depends(get_db)):
                                 appointment.start_time = appointment.suggested_start_time
                                 appointment.end_time = appointment.suggested_end_time
                                 appointment.status = "Accepted"
+                                logging.info("Accepting Rescheduled Appointment")
                             else:  # reject
                                 appointment.status = "Rejected"
+                                logging.info("Rejecting Rescheduled Appointment")
                                 
                             # Clear the suggested times
                             appointment.suggested_start_time = None
@@ -683,6 +683,32 @@ def contains_reschedule(text: str) -> bool:
     match = bool(RESCHEDULE_REGEX.search(text))
     return match
 
+def clean_reply_content(reply_content):
+    """Extract only the user's reply from an email, removing the quoted original message"""
+    if not reply_content:
+        return ""
+    
+    # Split by the line that typically separates the reply from the quoted message
+    parts = reply_content.split("On ", 1)
+    if len(parts) > 1:
+        # Return just the first part, which should be the user's reply
+        return parts[0].strip()
+        
+    # If we can't split by "On ", try finding lines that start with ">"
+    lines = reply_content.split('\n')
+    reply_lines = []
+    for line in lines:
+        if line.strip().startswith('>'):
+            break
+        reply_lines.append(line)
+    
+    # If we found quoted lines, return everything before them
+    if len(reply_lines) < len(lines):
+        return '\n'.join(reply_lines).strip()
+    
+    # If all else fails, return the original content
+    return reply_content.strip()
+
 def determine_intent(text: str):
     """
     Determine if an email indicates accept, reject, or reschedule
@@ -690,8 +716,7 @@ def determine_intent(text: str):
     """
     # Clean and normalize the text
     text = text.lower().strip()
-    logging.info(f"reply: {text}")
-    
+
     # RULE 1: Single-word replies or very simple replies (highest priority)
     if text == "accept" or text == "accepted" or text == "approve" or text == "approved" or text == "yes":
         logging.info(f"RULE 1: Exact match - ACCEPT")
