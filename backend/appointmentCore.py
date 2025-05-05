@@ -20,7 +20,7 @@ session = create_session(db_connect()[0])
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix='/appointment', tags=['appointment'])
-
+# TODO: Send email to the professor regarding to the response of the student
 # ===============================================Appointment Information===================================================
 
 ACCEPTANCE_KEYWORDS = {'accept', 'approve', 'confirm', 'yes', 'agreed', 'agree'}
