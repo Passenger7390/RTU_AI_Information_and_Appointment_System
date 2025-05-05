@@ -8,11 +8,12 @@ const CopyButton = ({
   text,
   className = "",
   onCopy,
-  size = "icon",
-  variant = "ghost",
+  size,
+  variant,
 }: CopyButtonProps) => {
   const [hasCopied, setHasCopied] = useState(false);
-
+  size = "icon";
+  variant = "ghost";
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(text);

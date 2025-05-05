@@ -13,15 +13,6 @@ import { getChatbotResponse, getFAQs } from "@/api";
 import MarkdownResponse from "@/my_components/MarkdownResponse";
 import { KeyboardInput } from "./KeyboardInput";
 import { FAQ, Message } from "@/interface";
-import { IoMdHelpCircleOutline } from "react-icons/io";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 
 const Chatbot: React.FC = () => {
   const [query, setQuery] = useState("");

@@ -314,8 +314,14 @@ export interface FAQid {
 
 export interface CopyButtonProps {
   text: string;
-  variant?: "default" | "outline";
-  size?: "sm" | "md" | "lg";
+  size?: "default" | "sm" | "lg" | "icon";
+  variant?:
+    | "default"
+    | "destructive"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | "link";
   className?: string;
   onCopy?: () => void;
 }

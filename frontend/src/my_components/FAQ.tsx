@@ -41,7 +41,7 @@ export const FAQCard = ({
     question: "",
     synonyms: "",
     answer: "",
-    isPinned: "",
+    isPinned: false,
   });
 
   // State to store original values in case we cancel editing.
@@ -49,7 +49,7 @@ export const FAQCard = ({
     question: "",
     synonyms: "",
     answer: "",
-    isPinned: "",
+    isPinned: false,
   });
   const [edit, setEdit] = useState(false);
 

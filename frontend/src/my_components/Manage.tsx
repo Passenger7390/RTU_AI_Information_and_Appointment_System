@@ -26,7 +26,6 @@ import CreateProfessorDialog from "./CreateProfessorDialog";
 import { FAQ } from "@/interface";
 import EditProfileDialog from "./EditProfileDialog";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 
 export const AdComponent = () => {
   const [tableData, setTableData] = useState<TableData[]>([]);
