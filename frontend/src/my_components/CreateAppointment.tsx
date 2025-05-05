@@ -181,7 +181,10 @@ const CreateAppointmentComponent = ({ onBack }: { onBack: () => void }) => {
         setReferenceNumber(res.reference);
         setIsSuccess(true); // Set success state to true
       } catch (error: any) {
-        toast.error(`${error}`);
+        console.error("Error creating appointment:", error);
+        const errorMessage =
+          error.response?.data?.detail || "Error creating appointment";
+        toast.error(errorMessage);
       }
     }
   }
@@ -256,8 +259,8 @@ const PersonalInfoPage = ({
     setStudentInformation({
       student_name: studentName,
       student_id: studentID,
-      // student_email: `${studentID}@rtu.edu.ph`,
-      student_email: `${studentID}`,
+      student_email: `${studentID}@rtu.edu.ph`,
+      // student_email: `${studentID}`,
       concern,
       isEmailVerified: emailVerified,
     });
@@ -293,8 +296,8 @@ const PersonalInfoPage = ({
             <Label className="text-xl">@rtu.edu.ph</Label>
           </div>
           <OTPDialog
-            // email={`${studentID}@rtu.edu.ph`}
-            email={`${studentID}`}
+            email={`${studentID}@rtu.edu.ph`}
+            // email={`${studentID}`}
             onVerified={onEmailVerified}
             key={studentID}
           />
