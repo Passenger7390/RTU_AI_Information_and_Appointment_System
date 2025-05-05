@@ -170,9 +170,7 @@ const Chatbot: React.FC = () => {
             <div className="flex-1 justify-between items-center">
               RAY Chatbot
             </div>
-            <div className="w-24">
-              <HelpDialog />
-            </div>
+            <div className="w-24"></div>
           </CardTitle>
         </CardHeader>
         <CardContent
@@ -251,28 +249,6 @@ const Chatbot: React.FC = () => {
         </CardFooter>
       </Card>
     </div>
-  );
-};
-
-const HelpDialog = () => {
-  // TODO: Edit this for chatbot help
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button className="mx-auto size-18 p-4" variant={"ghost"}>
-          <IoMdHelpCircleOutline className="size-12" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Are you absolutely sure?</DialogTitle>
-          <DialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
-          </DialogDescription>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
   );
 };
 
