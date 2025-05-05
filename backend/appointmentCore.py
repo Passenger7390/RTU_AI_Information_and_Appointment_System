@@ -45,12 +45,12 @@ async def create_apointment(appointment: AppointmentCreate, db: Session = Depend
         Appointment.end_time > datetime.now()  # Only check future appointments
     ).first()
     
-    if existing_appointment:
-        raise HTTPException(
-            status_code=400, 
-            detail=f"You already have a {existing_appointment.status.lower()} appointment with this professor. " +
-                   f"Reference: {str(existing_appointment.uuid)[-6:]}"
-        )
+    # if existing_appointment:
+    #     raise HTTPException(
+    #         status_code=400, 
+    #         detail=f"You already have a {existing_appointment.status.lower()} appointment with this professor. " +
+    #                f"Reference: {str(existing_appointment.uuid)[-6:]}"
+    #     )
     
     formattedStartTime = convert_time_format(appointment.start_time)
     formattedEndTime = convert_time_format(appointment.end_time)
