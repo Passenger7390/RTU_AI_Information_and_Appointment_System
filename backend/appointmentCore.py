@@ -21,9 +21,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix='/appointment', tags=['appointment'])
 
-# TODO: Get the email response of the student to confirm or reject the suggested time of the professor
-
-
 # ===============================================Appointment Information===================================================
 
 ACCEPTANCE_KEYWORDS = {'accept', 'approve', 'confirm', 'yes', 'agreed', 'agree'}
@@ -41,20 +38,19 @@ async def create_apointment(appointment: AppointmentCreate, db: Session = Depend
     """Kiosk users Create an appointment"""
     
     # Check if user already has a pending or accepted appointment with this professor
-    # existing_appointment = db.query(Appointment).filter(
-    #     Appointment.student_email == appointment.student_email,
-    #     Appointment.professor_uuid == appointment.professor_uuid,
-    #     Appointment.status.in_(["Pending", "Accepted"]),
-    #     Appointment.end_time > datetime.now()  # Only check future appointments
-    # ).first()
+    existing_appointment = db.query(Appointment).filter(
+        Appointment.student_email == appointment.student_email,
+        Appointment.professor_uuid == appointment.professor_uuid,
+        Appointment.status.in_(["Pending", "Accepted"]),
+        Appointment.end_time > datetime.now()  # Only check future appointments
+    ).first()
     
-    # if existing_appointment:
-    #     raise HTTPException(
-    #         status_code=400, 
-    #         detail=f"You already have a {existing_appointment.status.lower()} appointment with this professor. " +
-    #                f"Reference: {str(existing_appointment.uuid)[-6:]}"
-    #     )
-    # TODO: Uncomment this after finishing the project
+    if existing_appointment:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"You already have a {existing_appointment.status.lower()} appointment with this professor. " +
+                   f"Reference: {str(existing_appointment.uuid)[-6:]}"
+        )
     
     formattedStartTime = convert_time_format(appointment.start_time)
     formattedEndTime = convert_time_format(appointment.end_time)
