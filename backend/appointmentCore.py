@@ -96,6 +96,7 @@ async def create_apointment(appointment: AppointmentCreate, db: Session = Depend
                                       f"Good day!\n\n"
                                       f"{appointment.student_name} made an appointment request to you. \n\n"
                                       f"Reference Number: {uuid[-6:]}\n\n"
+                                      f"Date of appointment: {formattedStartTime} - {formattedEndTime}\n\n"
                                       f"Concern: \n"
                                       f"{appointment.concern}\n\n"
                                       f"Please see the appointment information in the kiosk admin page.\n"
@@ -587,7 +588,7 @@ async def check_student_reschedule_replies(db: Session = Depends(get_db)):
                             cast(Appointment.uuid, String).like(f"%{ref_number}")
                         ).first()
                         
-                        professor = db.query(ProfessorInformation).filter(ProfessorInformation.professor == appointment.professor_uuid).first()
+                        professor = db.query(ProfessorInformation).filter(ProfessorInformation.professor_id == appointment.professor_uuid).first()
                         if appointment and appointment.status == "Rescheduled - Pending":
                             # Update the appointment based on student response
                             appointment_details = {
@@ -597,6 +598,7 @@ async def check_student_reschedule_replies(db: Session = Depends(get_db)):
                                 "reference_number": ref_number,
                                 "appointment_start_time": format_iso_date(appointment.start_time).split(' ')[1],
                                 "appointment_end_time": format_iso_date(appointment.end_time).split(' ')[1],
+                                "date": appointment.start_time.date(),
                             }   
 
                             if status == "accept":
@@ -655,21 +657,21 @@ async def sendEmailReschedule(status: str, appointment_details: dict):
                                           f"Appointment Details:\n"
                                           f"- Date: {appointment_details['date']}\n"
                                           f"- Time: {appointment_details['appointment_start_time']} to {appointment_details['appointment_end_time']}\n"
-                                          f"- Reference Number: {appointment_details['reference']}\n\n"
+                                          f"- Reference Number: {appointment_details['reference_number']}\n\n"
                                           f"Best regards,\n"
                                           f"RTU Kiosk Appointment System")
-            confirmationEmail["Subject"] = "Appointment Reschedule Accepted - Reference #" + appointment_details['reference']
+            confirmationEmail["Subject"] = "Appointment Reschedule Accepted - Reference #" + appointment_details['reference_number']
             
         elif status == "reject":
             # Rejection email template
             confirmationEmail.set_content(f"Dear {appointment_details['professor_name']},\n\n"
                                         f"Good day!\n"
                                         f"We regret to inform you that {appointment_details["student_name"]} is unable to accommodate your appointment reschedule request at your suggested time.\n\n"
-                                        f"Your Reference Number: {appointment_details['uuid']}\n\n"
+                                        f"Reference Number: {appointment_details['reference_number']}\n\n"
                                         f"Thank you for your understanding.\n\n"
                                         f"Best regards,\n"
                                         f"RTU Kiosk Appointment System")
-            confirmationEmail["Subject"] = "Appointment Reschedule Update - Reference #" + appointment_details['reference']
+            confirmationEmail["Subject"] = "Appointment Reschedule Update - Reference #" + appointment_details['reference_number']
         
         confirmationEmail["To"] = appointment_details['professor_email']
         confirmationEmail["From"] = "2021-101043@rtu.edu.ph"
