@@ -6,6 +6,21 @@ import { FaRobot } from "react-icons/fa6";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { MdOutlineHelpOutline } from "react-icons/md";
+import Appointment1 from "/appointment1.png";
+import Appointment2 from "/appointment2.png";
+import ViewAppointment from "/view_appointment.png";
+
+import { MdKeyboardArrowLeft } from "react-icons/md";
+import { MdKeyboardArrowRight } from "react-icons/md";
 
 const UserPage = () => {
   const [view, setView] = useState("chatbot");
@@ -48,8 +63,9 @@ const UserPage = () => {
             <Chatbot />
           </div>
         ) : view === "appointment" ? (
-          <div className="pl-32">
+          <div className="pl-32 flex">
             <AppointmentComponent />
+            <AppointmentHelpDialog />
           </div>
         ) : (
           <div className="pl-32">
@@ -60,5 +76,68 @@ const UserPage = () => {
     </div>
   );
 };
+
+function AppointmentHelpDialog() {
+  const [page, setPage] = useState(0);
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button className="mx-auto size-18 p-4 mt-10 mr-10" variant={"ghost"}>
+          <MdOutlineHelpOutline className="size-12" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="min-w-[fit-content]">
+        <div className="min-w-[fit-content] flex flex-col items-center justify-center">
+          <DialogHeader className="flex flex-col items-center">
+            <DialogTitle>
+              {page == 0
+                ? "How to make an appointment"
+                : "How to view an appointment"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex gap-x-2 items-center justify-center min-w-[fit-content] mt-5">
+            {page === 0 ? (
+              <>
+                <div className="w-[400px] h-[500px]">
+                  <img
+                    src={Appointment1}
+                    alt="dasd"
+                    className="object-contain max-w-full max-h-full"
+                  />
+                </div>
+                <div className="w-[400px] h-[500px]">
+                  <img
+                    src={Appointment2}
+                    alt="serwer"
+                    className="object-contain max-w-full max-h-full"
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="w-[400px] h-[500px]">
+                  <img
+                    src={ViewAppointment}
+                    alt="dasd"
+                    className="object-contain max-w-full max-h-full"
+                  />
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center justify-between mt-5">
+          {/* DIalog Footer */}
+          <Button disabled={page === 0} onClick={() => setPage(page - 1)}>
+            <MdKeyboardArrowLeft />
+          </Button>
+          <Button disabled={page === 1} onClick={() => setPage(page + 1)}>
+            <MdKeyboardArrowRight />
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default UserPage;
