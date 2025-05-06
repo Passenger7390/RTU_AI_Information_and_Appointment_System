@@ -12,62 +12,62 @@ export const SNAGAH = "SNAGAH";
 export const JVE = "JVE";
 
 export const MIC = {
-  folder: ITB,
-  floor: "FLOOR1.jpg",
+  folder: "Highlights",
+  floor: "mic.jpg",
 };
 
 export const CASHIER = {
-  folder: ITB,
-  floor: "FLOOR1.jpg",
+  folder: "Highlights",
+  floor: "cashier.jpg",
 };
 
 export const CPE_DEPT = {
-  folder: JVE,
-  floor: "FLOOR1.jpg",
+  folder: "Highlights",
+  floor: "cpe_dept.jpg",
 };
 
 export const COOP = {
-  folder: OB,
-  floor: "FLOOR1.jpg",
+  folder: "Highlights",
+  floor: "coop.jpg",
 };
 
 export const OFFICE_PRESIDENT = {
-  folder: ITB,
-  floor: "FLOOR2.jpg",
+  folder: "Highlights",
+  floor: "office_president.jpg",
 };
 
 export const REGISTRAR = {
-  folder: MAB,
-  floor: "FLOOR1.jpg",
+  folder: "Highlights",
+  floor: "registrar.jpg",
 };
 
 export const SCHOLARSHIP_AND_FINANCIAL_ASSISTANCE_UNIT = {
-  folder: MAB,
-  floor: "FLOOR1.jpg",
+  folder: "Highlights",
+  floor: "scholarship.jpg",
 };
 export const STUDENT_AND_ALUMNI_AFFAIRS_SERVICES = {
-  folder: MAB,
-  floor: "FLOOR1.jpg",
+  folder: "Highlights",
+  floor: "student_alumni.jpg",
 };
 
 export const CEIT_DEAN_OFFICE = {
-  folder: JVE,
-  floor: "FLOOR2.jpg",
+  folder: "Highlights",
+  floor: "office_ceit_dean.jpg",
 };
 
 export const COE = {
-  folder: JVE,
-  floor: "FLOOR3.jpg",
+  folder: "Highlights",
+  floor: "cooperative_education_office.jpg",
 };
 
 export const CULTURAL_AFFAIRS_OFFICE = {
-  folder: ITB,
-  floor: "FLOOR5.jpg",
+  folder: "Highlights",
+  floor: "cultural_affairs.jpg",
 };
 
 export const ECE_DEPT = {
-  folder: JVE,
-  floor: "FLOOR3.jpg",
+  folder: "Highlights",
+  floor: "ece_dept.jpg",
 };
 
 export interface ImageData {
