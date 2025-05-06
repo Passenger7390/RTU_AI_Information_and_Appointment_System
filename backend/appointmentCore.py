@@ -587,16 +587,28 @@ async def check_student_reschedule_replies(db: Session = Depends(get_db)):
                             cast(Appointment.uuid, String).like(f"%{ref_number}")
                         ).first()
                         
+                        professor = db.query(ProfessorInformation).filter(ProfessorInformation.professor == appointment.professor_uuid).first()
                         if appointment and appointment.status == "Rescheduled - Pending":
                             # Update the appointment based on student response
+                            appointment_details = {
+                                "professor_name": f"{professor.title} {professor.first_name} {professor.last_name}",
+                                "student_name": appointment.student_name,
+                                "professor_email": professor.email,
+                                "reference_number": ref_number,
+                                "appointment_start_time": format_iso_date(appointment.start_time).split(' ')[1],
+                                "appointment_end_time": format_iso_date(appointment.end_time).split(' ')[1],
+                            }   
+
                             if status == "accept":
                                 # Update the appointment with the suggested times
                                 appointment.start_time = appointment.suggested_start_time
                                 appointment.end_time = appointment.suggested_end_time
                                 appointment.status = "Accepted"
+                                await sendEmailReschedule(status, appointment_details)
                                 logging.info("Accepting Rescheduled Appointment")
                             else:  # reject
                                 appointment.status = "Rejected"
+                                await sendEmailReschedule(status, appointment_details)
                                 logging.info("Rejecting Rescheduled Appointment")
                                 
                             # Clear the suggested times
@@ -627,6 +639,55 @@ async def check_student_reschedule_replies(db: Session = Depends(get_db)):
             else:
                 logger.error(f"Error checking student replies after {max_retries} attempts: {str(error)}")
                 raise HTTPException(status_code=500, detail=f"Error checking student replies: {str(error)}")
+
+
+async def sendEmailReschedule(status: str, appointment_details: dict):
+    try:
+        service = get_gmail_service()
+        confirmationEmail = EmailMessage()
+
+        if status == "accept":
+            # Acceptance email template
+        
+            confirmationEmail.set_content(f"Dear {appointment_details['professor_name']},\n\n"
+                                          f"Good day!\n"
+                                          f"We're pleased to inform you that {appointment_details["student_name"]} has accepted your suggested date of appointment.\n\n"
+                                          f"Appointment Details:\n"
+                                          f"- Date: {appointment_details['date']}\n"
+                                          f"- Time: {appointment_details['appointment_start_time']} to {appointment_details['appointment_end_time']}\n"
+                                          f"- Reference Number: {appointment_details['reference']}\n\n"
+                                          f"Best regards,\n"
+                                          f"RTU Kiosk Appointment System")
+            confirmationEmail["Subject"] = "Appointment Reschedule Accepted - Reference #" + appointment_details['reference']
+            
+        elif status == "reject":
+            # Rejection email template
+            confirmationEmail.set_content(f"Dear {appointment_details['professor_name']},\n\n"
+                                        f"Good day!\n"
+                                        f"We regret to inform you that {appointment_details["student_name"]} is unable to accommodate your appointment reschedule request at your suggested time.\n\n"
+                                        f"Your Reference Number: {appointment_details['uuid']}\n\n"
+                                        f"Thank you for your understanding.\n\n"
+                                        f"Best regards,\n"
+                                        f"RTU Kiosk Appointment System")
+            confirmationEmail["Subject"] = "Appointment Reschedule Update - Reference #" + appointment_details['reference']
+        
+        confirmationEmail["To"] = appointment_details['professor_email']
+        confirmationEmail["From"] = "2021-101043@rtu.edu.ph"
+
+        encoded_message = base64.urlsafe_b64encode(confirmationEmail.as_bytes()).decode()
+        create_message = {"raw": encoded_message}
+        
+        send_message = (
+            service.users()
+            .messages()
+            .send(userId="me", body=create_message)
+            .execute()
+        )
+        
+        return {"message": send_message["id"], "status": status}
+    except HttpError as error:
+        raise HTTPException(status_code=500, detail=str(error))
+
 
 # Helper functions for email processing
 
