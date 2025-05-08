@@ -99,7 +99,7 @@ function AppointmentHelpDialog() {
         <div className="min-w-[fit-content] flex flex-col items-center justify-center">
           <DialogHeader className="flex flex-col items-center">
             <DialogTitle className="text-center text-5xl font-semibold">
-              {page == 0
+              {page != 5 && page != 6
                 ? "How to make an appointment"
                 : "How to view an appointment"}
             </DialogTitle>
@@ -107,21 +107,33 @@ function AppointmentHelpDialog() {
           <div className="flex gap-x-2 items-center justify-center min-w-[fit-content] mt-5">
             {page === 0 ? (
               <>
-                <div className="w-[1000px]">
-                  <Step1 />
-                </div>
+                <Step1 />
               </>
-            ) : (
+            ) : page === 1 ? (
               <>
-                <div className="w-[600px] h-[700px]">
-                  {/* <img
-                    src={ViewAppointment}
-                    alt="dasd"
-                    className="object-contain w-full h-full"
-                  /> */}
-                </div>
+                <Step2 />
               </>
-            )}
+            ) : page === 2 ? (
+              <>
+                <Step3 />
+              </>
+            ) : page === 3 ? (
+              <>
+                <Step4 />
+              </>
+            ) : page === 4 ? (
+              <>
+                <Step5 />
+              </>
+            ) : page === 5 ? (
+              <>
+                <Step6 />
+              </>
+            ) : page === 6 ? (
+              <>
+                <Step7 />
+              </>
+            ) : null}
           </div>
         </div>
         <div className="flex items-center justify-between mt-5">
@@ -129,7 +141,7 @@ function AppointmentHelpDialog() {
           <Button disabled={page === 0} onClick={() => setPage(page - 1)}>
             <MdKeyboardArrowLeft />
           </Button>
-          <Button disabled={page === 1} onClick={() => setPage(page + 1)}>
+          <Button disabled={page === 6} onClick={() => setPage(page + 1)}>
             <MdKeyboardArrowRight />
           </Button>
         </div>
