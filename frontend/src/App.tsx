@@ -10,7 +10,7 @@ import { KeyboardProvider } from "./my_components/KeyboardContext";
 const App = () => {
   return (
     <KeyboardProvider>
-      <ThemeProvider defaultTheme="dark">
+      <ThemeProvider defaultTheme="light">
         <Router>
           <Routes>
             <Route path="/" element={<AdPage />} />

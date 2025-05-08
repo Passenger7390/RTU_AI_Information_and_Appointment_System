@@ -150,22 +150,26 @@ const Chatbot: React.FC = () => {
 
   return (
     <div className="w-3/4 h-full mx-auto my-auto p-2">
-      <Card className="h-[95vh] flex flex-col">
+      <Card className="h-[95vh] flex flex-col bg-blue-800">
         <CardHeader className="border-b">
           <CardTitle className="text-center text-xl font-semibold flex justify-center h-10 items-center">
             <div className="w-24">
-              <Button variant="secondary" onClick={newChat}>
+              <Button
+                variant="secondary"
+                onClick={newChat}
+                className="bg-black text-white"
+              >
                 New chat
               </Button>
             </div>
-            <div className="flex-1 justify-between items-center">
+            <div className="flex-1 justify-between items-center text-white">
               RAY Chatbot
             </div>
             <div className="w-24"></div>
           </CardTitle>
         </CardHeader>
         <CardContent
-          className="flex-1 overflow-y-auto p-2 space-y-2 bg-blue-500"
+          className="flex-1 overflow-y-auto p-2 space-y-2 bg-blue-400"
           onScroll={() => setLastActivity(Date.now())}
         >
           {messages.length === 0 ? ( // This block is a welcome message, this will disappear when the user asks RAY
@@ -201,7 +205,7 @@ const Chatbot: React.FC = () => {
                     className={`flex p-3 rounded-lg max-w-[75%] w-[fit-content] my-10 ${
                       msg.sender === "user"
                         ? "bg-yellow-500 text-black self-end justify-end ml-auto"
-                        : "bg-blue-900 self-start justify-center items-center mr-auto"
+                        : "bg-white self-start justify-center items-center mr-auto"
                     }`}
                   >
                     <MarkdownResponse response={msg.text} />
@@ -225,7 +229,7 @@ const Chatbot: React.FC = () => {
             value={query}
             onChange={handleInputChange}
             placeholder="Type your message..."
-            className="flex-1 !text-xl"
+            className="flex-1 !text-lg !text-black !bg-white rounded-md p-2"
             keyboardType="alphanumeric"
           />
           <Button

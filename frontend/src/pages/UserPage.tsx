@@ -38,13 +38,13 @@ const UserPage = () => {
         >
           <ToggleGroupItem
             value="chatbot"
-            className="size-26 rounded-md data-[state=on]:bg-slate-900 data-[state=on]:text-white shadow-sm"
+            className="size-26 rounded-md data-[state=on]:bg-yellow-500 data-[state=on]:text-white shadow-sm"
           >
             <FaRobot className="size-full p-4" />
           </ToggleGroupItem>
           <ToggleGroupItem
             value="appointment"
-            className="size-26 rounded-md data-[state=on]:bg-slate-900 data-[state=on]:text-white shadow-sm"
+            className="size-26 rounded-md data-[state=on]:bg-yellow-500 data-[state=on]:text-white shadow-sm"
           >
             <FaRegCalendarAlt className="size-full p-4" />
           </ToggleGroupItem>

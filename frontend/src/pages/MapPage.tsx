@@ -39,9 +39,9 @@ const MapPage = () => {
     <div className="flex-col justify-center items-center mx-auto p-5 bg-sky-950 container min-h-screen p-y-5">
       {/* <Button>Building A</Button> */}
       <div className="flex justify-center p-5">
-        <h1 className="mx-auto text-4xl font-bold">{title}</h1>
+        <h1 className="mx-auto text-4xl font-bold text-white">{title}</h1>
       </div>
-      <div className="w-full h-[80vh] bg-gray-800 rounded-lg shadow-lg">
+      <div className="w-full h-[80vh] rounded-lg shadow-lg">
         <TransformWrapper
           initialScale={1}
           minScale={0.3}

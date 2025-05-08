@@ -191,7 +191,6 @@ export const ProfessorComponent = () => {
       <DataTable
         columns={columns}
         data={professorData}
-        headerClassName="bg-green-900"
         onRowSelectionChange={setRowSelection}
         rowSelection={rowSelection}
         emptyMessage="No professors found. Add a new professor."
@@ -222,7 +221,7 @@ export const AppointmentComponent = () => {
   const [appointmentData, setAppointmentData] = useState<AppointmentData[]>([]);
   const navigate = useNavigate();
   const columns = createAppointmentColumns(
-    "bg-green-900 text-white flex justify-center",
+    "text-white flex justify-center",
     handleAcceptAppointment,
     handleRejectAppointment
   );
@@ -299,7 +298,6 @@ export const AppointmentComponent = () => {
       <DataTable
         columns={columns}
         data={appointmentData}
-        headerClassName="bg-green-900"
         // onRowSelectionChange={setRowSelection}
         // rowSelection={rowSelection}
         emptyMessage="No appointments found."
