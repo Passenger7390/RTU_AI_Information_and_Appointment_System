@@ -144,7 +144,7 @@ async def create_apointment(appointment: AppointmentCreate, db: Session = Depend
                 <p>{appointment.concern}</p>
             </div>
             
-            <p>Please review this request and <a href="http://localhost:5173/login" class="button">Manage Appointment</a></p>
+            <p>Please review this request and <a href="http://192.168.247.203/login" class="button">Manage Appointment</a></p>
             
             <div class="footer">
                 <p>Thank you for using the RTU Kiosk Appointment System.</p>
