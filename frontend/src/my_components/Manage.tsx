@@ -26,6 +26,7 @@ import CreateProfessorDialog from "./CreateProfessorDialog";
 import { FAQ } from "@/interface";
 import EditProfileDialog from "./EditProfileDialog";
 import { useNavigate } from "react-router-dom";
+import RescheduleDialog from "./RescheduleDIalog";
 
 export const AdComponent = () => {
   const [tableData, setTableData] = useState<TableData[]>([]);
@@ -225,9 +226,12 @@ export const AppointmentComponent = () => {
     handleAcceptAppointment,
     handleRejectAppointment
   );
+  const [rowSelection, setRowSelection] = useState({});
 
   const [role, setRole] = useState("");
   const [profID, setProfID] = useState("");
+  const [uuid, setUUID] = useState("");
+
   async function fetchUser() {
     try {
       const response = await getUser();
@@ -285,6 +289,17 @@ export const AppointmentComponent = () => {
     }
   }
 
+  function handleSelected() {
+    const selectedRows = Object.keys(rowSelection);
+    if (selectedRows.length === 0) return;
+
+    const selectedIds = selectedRows.map(
+      (index) => appointmentData[parseInt(index)].uuid
+    );
+
+    setUUID(selectedIds[0]);
+  }
+
   useEffect(() => {
     fetchUser();
   }, []);
@@ -293,15 +308,31 @@ export const AppointmentComponent = () => {
     fetchAppointmentTableData();
   }, [role]);
 
+  useEffect(() => {
+    handleSelected();
+  }, [rowSelection]);
+
   return (
     <div>
       <DataTable
         columns={columns}
         data={appointmentData}
-        // onRowSelectionChange={setRowSelection}
-        // rowSelection={rowSelection}
+        onRowSelectionChange={setRowSelection}
+        rowSelection={rowSelection}
         emptyMessage="No appointments found."
         enablePagination={false}
+        actions={
+          <>
+            <RescheduleDialog
+              disabled={
+                Object.keys(rowSelection).length === 0 ||
+                Object.keys(rowSelection).length > 1
+              }
+              uuid={uuid}
+              onRefresh={fetchAppointmentTableData}
+            />
+          </>
+        }
       />
     </div>
   );

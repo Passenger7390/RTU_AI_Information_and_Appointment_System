@@ -135,3 +135,8 @@ class AppointmentUpdate(BaseModel):
 
 class StarFAQ(BaseModel):
     id: int
+
+class RescheduleAppointment(BaseModel):
+    reference: str
+    start_time: str
+    end_time: str

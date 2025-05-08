@@ -412,3 +412,24 @@ export const getBuildingFloors = async (building: string) => {
   const res = await axios.get(`${api}/map/list-images/${building}`);
   return res.data;
 };
+
+export function rescheduleAppointment(
+  appointmentId: string,
+  newStartTime: string,
+  newEndTime: string
+) {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  const params = {
+    reference: appointmentId,
+    start_time: newStartTime,
+    end_time: newEndTime,
+  };
+
+  return axios.put(`${appointmentApi}/reschedule-appointment`, params, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}

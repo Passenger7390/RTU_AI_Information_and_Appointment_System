@@ -166,7 +166,7 @@ export function createAppointmentColumns(
     // Add button columns
     createButtonColumn<AppointmentData>(
       "accept",
-      "Actions",
+      "",
       "Accept",
       "default",
       (row) => onAccept?.(row),
@@ -175,7 +175,7 @@ export function createAppointmentColumns(
     ),
     createButtonColumn<AppointmentData>(
       "reject",
-      "", // Empty header for the second action button
+      "Actions", // Empty header for the second action button
       "Reject",
       "destructive",
       (row) => onReject?.(row),

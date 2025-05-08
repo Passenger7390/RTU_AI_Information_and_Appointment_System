@@ -3,9 +3,9 @@ from typing import List
 from uuid import UUID, uuid4
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException
-from auth import get_current_user, read_users_me
+from auth import get_current_user, professor_or_superuser_required, read_users_me
 from otp import get_gmail_service
-from schemas import AppointmentResponse, AppointmentCreate, AppointmentResponseForTable, AppointmentUpdate, UserBase
+from schemas import AppointmentResponse, AppointmentCreate, AppointmentResponseForTable, AppointmentUpdate, RescheduleAppointment, UserBase
 from database import create_session, db_connect, get_db
 from models import Appointment, ProfessorInformation
 from sqlalchemy.orm import Session
@@ -34,6 +34,48 @@ RESCHEDULE_KEYWORDS = {'reschedule', 'change', 'alter', 'modify', 'shift'}
 ACCEPTANCE_REGEX = re.compile(r'\b(?:' + '|'.join(re.escape(word) for word in ACCEPTANCE_KEYWORDS) + r')\b', re.IGNORECASE)
 REJECTION_REGEX = re.compile(r'\b(?:' + '|'.join(re.escape(word) for word in REJECTION_KEYWORDS) + r')\b', re.IGNORECASE)
 RESCHEDULE_REGEX = re.compile(r'\b(?:' + '|'.join(re.escape(word) for word in RESCHEDULE_KEYWORDS) + r')\b', re.IGNORECASE)
+
+@router.put('/reschedule-appointment')
+async def reschedule_appointment(appointment: RescheduleAppointment, db: Session = Depends(get_db), current_user: UserBase = Depends(professor_or_superuser_required)):
+    """Kiosk users Reschedule an appointment"""
+    
+    # Check if the appointment exists
+    existing_appointment = db.query(Appointment).filter(Appointment.uuid == appointment.reference).first()
+    
+    if not existing_appointment:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+    
+    # Check if the appointment is already accepted or rejected
+    if existing_appointment.status in ["Accepted", "Rejected"]:
+        raise HTTPException(status_code=400, detail="Cannot reschedule an accepted or rejected appointment")
+    
+    # Update the appointment details
+    formattedStartTime = datetime.strptime(appointment.start_time, '%Y-%m-%d %H:%M')
+    formattedEndTime = datetime.strptime(appointment.end_time, '%Y-%m-%d %H:%M')
+    
+    existing_appointment.start_time = formattedStartTime
+    existing_appointment.end_time = formattedEndTime
+    existing_appointment.status = 'Rescheduled'
+
+    db.commit()
+    db.refresh(existing_appointment)
+    professor = db.query(ProfessorInformation.first_name,
+                         ProfessorInformation.last_name,
+                         ProfessorInformation.title
+                        ).filter(ProfessorInformation.professor_id == existing_appointment.professor_uuid).first()
+    app = {
+        "student_name": existing_appointment.student_name,
+        "student_email": existing_appointment.student_email,
+        "uuid": str(existing_appointment.uuid)[-6:],
+        "date": format_iso_date(existing_appointment.start_time).split(' ')[0],
+        "start_time": format_iso_date(existing_appointment.start_time).split(' ')[1],
+        "end_time": format_iso_date(existing_appointment.end_time).split(' ')[1],
+        "professor_name": f"{professor.title} {professor.first_name} {professor.last_name}",
+    }
+
+    await send_email_reschedule_student(app)
+    
+    return {'message': 'Appointment rescheduled successfully', 'status': existing_appointment.status}
 
 @router.post('/create-appointment')
 async def create_apointment(appointment: AppointmentCreate, db: Session = Depends(get_db)):
@@ -1066,6 +1108,43 @@ def standardize_date_format(date_str):
     except Exception as e:
         logging.error(f"Error standardizing date format for '{date_str}': {str(e)}")
         return date_str  # Return original if parsing fails
+
+async def send_email_reschedule_student(appointment_details: dict):
+    """
+    Send email to student for reschedule confirmation
+    """
+    try:
+        service = get_gmail_service()
+        confirmationEmail = EmailMessage()
+        
+        # Email content
+        confirmationEmail.set_content(f"Dear {appointment_details['student_name']},\n\n"
+                                      f"Good day!\n"
+                                      f"Your appointment has been rescheduled by your professor.\n\n"
+                                      f"Appointment Details:\n"
+                                      f"- Date: {appointment_details['date']}\n"
+                                      f"- Time: {appointment_details['start_time']} to {appointment_details['end_time']}\n"
+                                      f"- Reference Number: {appointment_details['uuid']}\n\n"
+                                      f"Best regards,\n"
+                                      f"RTU Kiosk Appointment System")
+        confirmationEmail["Subject"] = "Appointment Reschedule Confirmation"
+        confirmationEmail["To"] = appointment_details['student_email']
+        confirmationEmail['From'] = "2021-101043@rtu.edu.ph"
+
+        encoded_message = base64.urlsafe_b64encode(confirmationEmail.as_bytes()).decode()
+        create_message = {"raw": encoded_message}
+        
+        send_message = (
+            service.users()
+            .messages()
+            .send(userId="me", body=create_message)
+            .execute()
+        )
+        
+        return {"message": send_message["id"]}
+    except Exception as e:
+        logging.error(f"Error sending email: {e}")
+        raise HTTPException(status_code=500, detail=f"Error sending email: {str(e)}")
 
 async def check_email_periodically():
     while True:
