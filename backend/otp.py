@@ -92,7 +92,11 @@ async def send_otp(request: OTPRequest, db: Session = Depends(get_db)):
         message = EmailMessage()
 
         # Create email content
-        message.set_content(f"Your verification code is: {otp_code}\n\nThis code will expire in 5 minutes.")
+        message.set_content(f"Your verification code is: {otp_code}\n\nThis code will expire in 5 minutes."
+                            f"\n\nDo not share this code with anyone. If you did not request this code, please ignore this email."
+                            f"\n\nRTU Appointment System\n\n"
+                            f"Thank you for using our service.")
+        
 
         message["To"] = email
         message["From"] = "2021-101043@rtu.edu.ph"

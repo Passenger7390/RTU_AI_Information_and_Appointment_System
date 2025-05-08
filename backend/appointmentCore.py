@@ -15,6 +15,8 @@ from googleapiclient.errors import HttpError
 from email.message import EmailMessage
 import logging
 import re
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 session = create_session(db_connect()[0])
 logging.basicConfig(level=logging.INFO)
@@ -92,16 +94,66 @@ async def create_apointment(appointment: AppointmentCreate, db: Session = Depend
                                       f"Reference Number: {uuid[-6:]}\n\n"
                                       f"We also notified {f"{professor.title} {professor.first_name} {professor.last_name}"} about your appointment.\n\n")
         
-        messageForProfessor.set_content(f"Dear {f"{professor.title} {professor.first_name} {professor.last_name}"},\n\n"
-                                      f"Good day!\n\n"
-                                      f"{appointment.student_name} made an appointment request to you. \n\n"
-                                      f"Reference Number: {uuid[-6:]}\n\n"
-                                      f"Date of appointment: {formattedStartTime} - {formattedEndTime}\n\n"
-                                      f"Concern: \n"
-                                      f"{appointment.concern}\n\n"
-                                      f"Please see the appointment information in the kiosk admin page.\n"
-                                      f"Confirm the appointment in the admin page once you are okay with it. Confirmation is required to finalize the appointment.\n\n"
-                                      f"Thank you!\n\n")
+        # messageForProfessor.set_content(f"Dear {f"{professor.title} {professor.first_name} {professor.last_name}"},\n\n"
+        #                               f"Good day!\n\n"
+        #                               f"{appointment.student_name} made an appointment request to you. \n\n"
+        #                               f"Reference Number: {uuid[-6:]}\n\n"
+        #                               f"Date of appointment: {formattedStartTime} - {formattedEndTime}\n\n"
+        #                               f"Concern: \n"
+        #                               f"{appointment.concern}\n\n"
+        #                               f"Please see the appointment information in the kiosk admin page.\n"
+        #                               f"Confirm the appointment in the admin page once you are okay with it. Confirmation is required to finalize the appointment.\n\n"
+        #                               f"Thank you!\n\n")
+
+        messageForProfessor.set_content(f"New appointment from {appointment.student_name}. Reference: {uuid[-6:]}\n\n")
+
+        # Create a more professional HTML version for the professor
+        html_content = f"""
+        <html>
+        <head>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .header {{ font-size: 18px; color: #003366; }}
+                .appointment-details {{ background-color: #f5f5f5; padding: 15px; margin: 15px 0; }}
+                .concern {{ background-color: #fffaf0; padding: 10px; border-left: 4px solid #e6c07b; }}
+                .footer {{ margin-top: 20px; font-size: 14px; color: #666; }}
+                a {{ bakground-color: transparent; }}  /* General links */
+                .button {{ 
+                    background-color: #003366; 
+                    color: white !important; /* Force transparent text */
+                    padding: 10px 15px; 
+                    text-decoration: none; 
+                    border-radius: 4px; 
+                    display: inline-block; 
+                }}
+            </style>
+        </head>
+        <body>
+            <p>Dear {professor.title} {professor.first_name} {professor.last_name},</p>
+            <p>Good day!</p>
+            <p class="header">{appointment.student_name} has requested an appointment with you.</p>
+            
+            <div class="appointment-details">
+                <p><strong>Reference Number:</strong> {uuid[-6:]}</p>
+                <p><strong>Date and Time:</strong> {formattedStartTime} - {formattedEndTime}</p>
+                <p><strong>Student Email:</strong> <a href="mailto:{appointment.student_email}">{appointment.student_email}</a></p>
+            </div>
+            
+            <p><strong>Student's Concern:</strong></p>
+            <div class="concern">
+                <p>{appointment.concern}</p>
+            </div>
+            
+            <p>Please review this request and <a href="http://localhost:5173/login" class="button">Manage Appointment</a></p>
+            
+            <div class="footer">
+                <p>Thank you for using the RTU Kiosk Appointment System.</p>
+            </div>
+        </body>
+        </html>
+        """
+        messageForProfessor.add_alternative(html_content, subtype='html')
+
 
         messageForStudent["To"] = appointment.student_email
         messageForStudent["From"] = "2021-101043@rtu.edu.ph"
@@ -114,7 +166,7 @@ async def create_apointment(appointment: AppointmentCreate, db: Session = Depend
         # Encode and send message
         encoded_student_message = base64.urlsafe_b64encode(messageForStudent.as_bytes()).decode()
         encoded_professor_message = base64.urlsafe_b64encode(messageForProfessor.as_bytes()).decode()
-
+        part2 = MIMEText(messageForStudent.as_string(), 'html')
         create_message_for_student = {"raw": encoded_student_message}
         create_message_for_professor = {"raw": encoded_professor_message}
 
