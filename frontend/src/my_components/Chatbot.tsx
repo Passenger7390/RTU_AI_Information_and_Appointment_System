@@ -175,7 +175,7 @@ const Chatbot: React.FC = () => {
                   Welcome to RAY Chatbot!
                 </h1>
                 <p className="text-lg text-gray-200">
-                  Start a conversation by typing a message below. TEST ETST TEST
+                  Start a conversation by typing a message below.
                 </p>
               </div>
 
