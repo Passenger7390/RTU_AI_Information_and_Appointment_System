@@ -15,9 +15,16 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { MdOutlineHelpOutline } from "react-icons/md";
-import Appointment1 from "/appointment1.png";
-import Appointment2 from "/appointment2.png";
-import ViewAppointment from "/view_appointment.png";
+
+import {
+  Step1,
+  Step2,
+  Step3,
+  Step4,
+  Step5,
+  Step6,
+  Step7,
+} from "@/my_components/HelpImages";
 
 import { MdKeyboardArrowLeft } from "react-icons/md";
 import { MdKeyboardArrowRight } from "react-icons/md";
@@ -79,6 +86,8 @@ const UserPage = () => {
 
 function AppointmentHelpDialog() {
   const [page, setPage] = useState(0);
+  // const [currentPage, setCurrentPage] = useState(0);
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -89,7 +98,7 @@ function AppointmentHelpDialog() {
       <DialogContent className="min-w-[fit-content]">
         <div className="min-w-[fit-content] flex flex-col items-center justify-center">
           <DialogHeader className="flex flex-col items-center">
-            <DialogTitle className="text-center text-2xl font-semibold">
+            <DialogTitle className="text-center text-5xl font-semibold">
               {page == 0
                 ? "How to make an appointment"
                 : "How to view an appointment"}
@@ -98,19 +107,8 @@ function AppointmentHelpDialog() {
           <div className="flex gap-x-2 items-center justify-center min-w-[fit-content] mt-5">
             {page === 0 ? (
               <>
-                <div className="w-[600px] h-[700px]">
-                  <img
-                    src={Appointment1}
-                    alt="dasd"
-                    className="w-full h-full"
-                  />
-                </div>
-                <div className="w-[600px] h-[700px]">
-                  <img
-                    src={Appointment2}
-                    alt="serwer"
-                    className="w-full h-full"
-                  />
+                <div className="w-[1000px]">
+                  <Step1 />
                 </div>
               </>
             ) : (
