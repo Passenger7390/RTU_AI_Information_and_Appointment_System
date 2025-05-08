@@ -114,11 +114,11 @@ function AppointmentHelpDialog() {
             ) : (
               <>
                 <div className="w-[600px] h-[700px]">
-                  <img
+                  {/* <img
                     src={ViewAppointment}
                     alt="dasd"
                     className="object-contain w-full h-full"
-                  />
+                  /> */}
                 </div>
               </>
             )}
