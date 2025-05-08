@@ -138,10 +138,20 @@ function AppointmentHelpDialog() {
         </div>
         <div className="flex items-center justify-between mt-5">
           {/* DIalog Footer */}
-          <Button disabled={page === 0} onClick={() => setPage(page - 1)}>
+          <Button
+            disabled={page === 0}
+            onClick={() => setPage(page - 1)}
+            className="flex items-center h-16 w-36"
+          >
             <MdKeyboardArrowLeft />
+            Previous
           </Button>
-          <Button disabled={page === 6} onClick={() => setPage(page + 1)}>
+          <Button
+            disabled={page === 6}
+            onClick={() => setPage(page + 1)}
+            className="flex items-center h-16 w-36"
+          >
+            Next
             <MdKeyboardArrowRight />
           </Button>
         </div>
