@@ -837,29 +837,27 @@ def contains_reschedule(text: str) -> bool:
     return match
 
 def clean_reply_content(reply_content):
-    """Extract only the user's reply from an email, removing the quoted original message"""
+    """Extract only the user's reply from an email, removing signatures and disclaimers"""
     if not reply_content:
         return ""
     
-    # Split by the line that typically separates the reply from the quoted message
-    parts = reply_content.split("On ", 1)
-    if len(parts) > 1:
-        # Return just the first part, which should be the user's reply
-        return parts[0].strip()
-        
-    # If we can't split by "On ", try finding lines that start with ">"
+    # First look for a short response before the signature
     lines = reply_content.split('\n')
-    reply_lines = []
-    for line in lines:
-        if line.strip().startswith('>'):
-            break
-        reply_lines.append(line)
+    for i, line in enumerate(lines):
+        # Stop when we hit signature indicators
+        if (not line.strip() and i > 0) or any(sig in line for sig in 
+            ["Professor", "Associate", "Disclaimer:", "Ph.D", "DTE", "Sent from"]):
+            return '\n'.join(lines[:i]).strip()
     
-    # If we found quoted lines, return everything before them
-    if len(reply_lines) < len(lines):
-        return '\n'.join(reply_lines).strip()
+    # Try splitting by common email separators
+    for separator in ["\n\n", "Disclaimer:", "--", "Regards,", "Sincerely,"]:
+        if separator in reply_content:
+            return reply_content.split(separator, 1)[0].strip()
     
-    # If all else fails, return the original content
+    # If we reach here, just take the first few lines
+    if len(lines) > 3:
+        return '\n'.join(lines[:3]).strip()
+    
     return reply_content.strip()
 
 def determine_intent(text: str):
