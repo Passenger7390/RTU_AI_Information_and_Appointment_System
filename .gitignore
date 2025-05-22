@@ -79,3 +79,4 @@ startup.sh
 backend/token.json
 backend/credentials.json
 frontend/src/pages/TestPage.tsx
+.python-version
