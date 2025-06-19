@@ -40,7 +40,7 @@ echo "Running database migrations..."
 alembic upgrade head
 
 echo "Seeding default advertisements..."
-python seed_ads.py
+python seedAd.py
 
 # Start the application
 echo "Starting application..."
