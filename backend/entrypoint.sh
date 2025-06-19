@@ -37,8 +37,10 @@ echo "PostgreSQL is up - continuing"
 # python createDb.py
 
 echo "Running database migrations..."
-
 alembic upgrade head
+
+echo "Seeding default advertisements..."
+python seed_ads.py
 
 # Start the application
 echo "Starting application..."
